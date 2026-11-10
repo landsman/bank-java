@@ -107,6 +107,7 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 |---|---|
 | Personal, CZK | ✅ |
 | Business | ❔ |
+| Fio konto, the savings account, CZK or EUR only | ❔ its money leaves only by transfer to an account at Fio, and interest is credited to it, so expect transfers within Fio and interest |
 | Foreign currency | ❔ per currency, below; [#13](https://github.com/landsman/bank-java/issues/13) |
 | Balance in overdraft | ❔ |
 
