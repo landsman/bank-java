@@ -5,12 +5,15 @@ help: ## show this help
 	@awk 'BEGIN {FS = ":.*##"; print "usage: make <target>\n"} \
 		/^[a-zA-Z0-9_.-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
-.PHONY: build test format publish publish-local
+.PHONY: build test lock format publish publish-local
 build: ## check formatting, compile with error prone and nullaway, test, check declared dependencies; TESTS_JDK=21 tests on that JDK
 	./gradlew build buildHealth $(if $(TESTS_JDK),-PtestsJdk=$(TESTS_JDK))
 
 test: ## run the tests
 	./gradlew test
+
+lock: ## rewrite modules/bank-notifications/gradle.lockfile after a dependency changes, the vulnerability scan reads it
+	./gradlew :modules:bank-notifications:dependencies --configuration runtimeClasspath --write-locks
 
 format: ## reformat java and gradle files in place
 	./gradlew spotlessApply

@@ -25,3 +25,23 @@ java {
 tasks.jar {
     manifest { attributes("Automatic-Module-Name" to "cz.insuit.bank.notification") }
 }
+
+// Trivy reads Gradle only through gradle.lockfile. Only what ships is locked: tooling and tests stay out of the scan,
+// where a finding could not be acted on anyway.
+configurations.named("runtimeClasspath") {
+    resolutionStrategy.activateDependencyLocking()
+}
+
+// Nothing else in the build resolves runtimeClasspath, so a stale lockfile would pass and Trivy would scan versions that
+// do not ship. Resolving it here fails the build on any drift; `make lock` rewrites the file.
+val verifyLocks =
+    tasks.register("verifyLocks") {
+        description = "Fails when gradle.lockfile no longer matches the runtime classpath."
+        group = "verification"
+        inputs.files(configurations.runtimeClasspath)
+        doLast {}
+    }
+
+tasks.check {
+    dependsOn(verifyLocks)
+}
