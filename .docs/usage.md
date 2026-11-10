@@ -1,5 +1,13 @@
 # Using the library
 
+**It reads Air Bank's e-mails, and only those so far.** Air Bank sends one for every payment on an account once the
+account holder [switches it on](setup.md#air-bank); `read` turns it into a `Transaction`. An e-mail from any other bank
+comes back `Unparsed` with the reason `no parser for sender domain <domain>`, until that bank is added.
+
+| Bank | Recognised by | Reads | Details |
+|---|---|---|---|
+| Air Bank | `From: info@airbank.cz`, signed by `airbank.cz` | incoming and outgoing transfers | [how its e-mail behaves](air-bank.md) |
+
 ```java
 BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
 
@@ -30,13 +38,13 @@ Messages over 64 KiB are `Unparsed` without being looked at; a bank's notificati
 | `Transaction` | the bank sent it, and this is what it says | the two checks below, then act on it |
 | `Unverified` | no valid DKIM signature of the bank; `reason()` says why | do not act on it; anyone can send an e-mail that looks real |
 | `TemporaryFailure` | the bank's key could not be looked up | keep the message, read it again later |
-| `Unparsed` | not a bank e-mail the library knows | keep it; if it is from a bank, its template changed |
+| `Unparsed` | not an e-mail the library can read: another bank's, a template that changed, or not a bank's at all | keep it; `reason()` says which |
 
 ## A transaction
 
 | Field | Holds |
 |---|---|
-| `signedBy()` | the domain whose signature verified, e.g. `airbank.cz` |
+| `signedBy()` | the bank's domain whose signature verified: `airbank.cz` |
 | `direction()` | `INCOMING` or `OUTGOING` |
 | `type()` | `TRANSFER`, `CARD`, `DIRECT_DEBIT`, or `GENERAL` when the e-mail does not say |
 | `account()` | the account the e-mail is about, `number/bankCode` |
