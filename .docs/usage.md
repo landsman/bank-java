@@ -80,6 +80,18 @@ from a fake.
 `toString()` leaves out the other side, the message and the balance, so logging a transaction does not log who paid,
 what they wrote or how much the account holds.
 
+**`message()` and `counterName()` are the payer's text, untrusted.** A valid signature proves the bank sent the e-mail,
+not that what the payer typed is harmless: it can hold `'; DROP TABLE`, `<script>` or anything else. The library hands it
+out as it was written, as plain text: an HTML e-mail's markup is gone and its entities decoded, but nothing is escaped
+or removed, because it cannot know where the text will go and a changed message could stop matching an invoice. So
+stop injection where the text is used:
+
+- **SQL**: bind it as a parameter (JDBC `PreparedStatement`, JPA, jOOQ), never concatenate it into a query.
+- **HTML**: let the template escape it (Thymeleaf `th:text`, Vaadin `setText`); never `setHtml` or `th:utext` with it.
+- **Logs and shells**: keep it out of log patterns and command lines; `toString()` already leaves it out.
+
+The same holds for the symbols, which are digits only, and the account numbers, which are checked, only less so.
+
 `BankAccount` is `[prefix-]number/bankCode`, without leading zeros, so the same account is equal however it was written,
 and it checks the Czech National Bank's modulo 11 rule: an account number misread from an e-mail is refused, not handed
 out. `BankAccount.parse("19-2000145399/0800")` reads one, for comparing against yours. `Money` and `PaymentSymbols` have

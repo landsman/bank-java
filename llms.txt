@@ -32,6 +32,8 @@ Mistakes to avoid:
 - Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
 - Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.
 - Do not return a `Transaction` from a controller as JSON: it carries the payer's name, account and message.
+- `message()` and `counterName()` are untrusted text the payer typed, handed out unescaped: bind them as SQL
+  parameters and let templates escape them; never concatenate them into a query, HTML or a command.
 
 ## Docs
 
