@@ -3,6 +3,7 @@ package cz.insuit.bank.notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import cz.insuit.bank.notification.Transaction.Direction;
@@ -106,9 +107,24 @@ class FioCzTest {
     }
 
     @Test
-    void refusesTheShortTemplate() {
+    void refusesTheShortTemplateAsAFormatTheAccountHolderCanChange() {
         // No transaction id to deduplicate on, and no currency.
-        assertThrows(Unparsed.class, () -> read("incoming-short.eml"));
+        Unparsed refused = assertThrows(Unparsed.class, () -> read("incoming-short.eml"));
+
+        assertEquals(Unparsed.Reason.UNSUPPORTED_FORMAT, refused.reason());
+        assertTrue(String.valueOf(refused.getMessage()).contains("Fio banka - příjem na účtu"), refused.getMessage());
+    }
+
+    @Test
+    void refusesASubjectItDoesNotKnowAsNotRead() throws IOException {
+        String changed = text("incoming-instant.eml")
+                .replace(
+                        "Subject: =?UTF-8?Q?Fio_banka_-_p=C5=99=C3=ADjem_na_=C3=BA=C4=8Dtu?=",
+                        "Subject: Fio banka - novinka");
+
+        Unparsed refused = assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+
+        assertEquals(Unparsed.Reason.NOT_READ, refused.reason());
     }
 
     @Test
