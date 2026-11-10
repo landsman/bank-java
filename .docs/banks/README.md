@@ -34,7 +34,7 @@ A bank is in one of three states:
 | Bank | State | Reads | Leaves out | Details |
 |---|---|---|---|---|
 | Fio banka | not yet | | | [#10](https://github.com/landsman/bank-java/issues/10) |
-| ČSOB | not yet | | | [#22](https://github.com/landsman/bank-java/issues/22) |
+| ČSOB | samples only | incoming SEPA credits; IBANs, name, symbols from the payer's reference, message | outgoing payments, transaction id; the 2019 sample was not DKIM-signed and `csob.sk` has no DNSSEC | [csob](sk/csob/README.md) |
 | Slovenská sporiteľňa | not yet | | | [#23](https://github.com/landsman/bank-java/issues/23) |
 | Tatra banka | not yet | | key known, still published | [#24](https://github.com/landsman/bank-java/issues/24) |
 
