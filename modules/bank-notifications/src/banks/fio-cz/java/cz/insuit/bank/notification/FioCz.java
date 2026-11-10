@@ -47,6 +47,12 @@ final class FioCz implements Bank {
 
     @Override
     public Transaction parse(@Nullable String subject, String body) {
+        if (SHORT_FORMAT_SUBJECTS.contains(subject)) {
+            throw new Unparsed(
+                    Unparsed.Reason.UNSUPPORTED_FORMAT,
+                    "Fio's short notification carries no transaction id: choose \"Fio banka - příjem na účtu\" under"
+                            + " Informace v oznámení in the notification's settings");
+        }
         Direction stated = subject == null ? null : SUBJECTS.get(subject);
         if (stated == null) throw new Unparsed("not a template this library knows, subject: " + subject);
 
@@ -130,6 +136,8 @@ final class FioCz implements Bank {
         return new Money(value, Currency.getInstance(matcher.group(3)));
     }
 
+    // Seen on 2026-08-18 for an incoming payment; the outgoing one's subject is not known.
+    private static final Set<String> SHORT_FORMAT_SUBJECTS = Set.of("Fio banka - prijem na konte");
     private static final Map<String, Direction> SUBJECTS = Map.of(
             "Fio banka - příjem na účtu", Direction.INCOMING,
             "Fio banka - výdaj na účtu", Direction.OUTGOING);

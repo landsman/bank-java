@@ -46,6 +46,16 @@ exception is sealed, so a `switch` over its three subtypes is exhaustive:
 | `TemporaryFailure` | the bank's key could not be looked up | keep the message, read it again later |
 | `Unparsed` | not an e-mail the library can read: another bank's, a template that changed, or not a bank's at all | keep it, so a later release can read it again |
 
+`Unparsed.reason()` says why for a program, so the account holder is told only what they can fix:
+
+| `reason()` | Means | Do |
+|---|---|---|
+| `NOT_A_BANK_EMAIL` | not from a bank this release reads | nothing for the account holder; another bank may be added later |
+| `UNSUPPORTED_FORMAT` | a bank's notification in a format the library will not read, e.g. Fio's short one without a transaction id | show the account holder `getMessage()`: it says what to choose in their banking |
+| `NOT_READ` | anything else: a changed template, a misread value, bytes that are no e-mail | keep it; a later release, or a bug report with an anonymised copy, can fix it |
+
+Keep a `default` branch: a reason may be added in a minor version.
+
 `getMessage()` says why, and is safe to log: it never carries the payer's name, the payment's message or the e-mail's
 body, and control characters from the e-mail are replaced. The constructors are public, so your own tests can throw them
 from a fake.

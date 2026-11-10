@@ -117,10 +117,12 @@ class AirBankTest {
     }
 
     @Test
-    void refusesAnotherSender() throws IOException {
+    void refusesAnotherSenderAsNotABankEmail() throws IOException {
         String forged = text("incoming.eml").replace("info@airbank.cz", "info@airbank.cz.example.com");
 
-        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(forged)));
+        Unparsed refused = assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(forged)));
+
+        assertEquals(Unparsed.Reason.NOT_A_BANK_EMAIL, refused.reason());
     }
 
     @Test

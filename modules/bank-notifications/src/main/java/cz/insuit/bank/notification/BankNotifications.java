@@ -107,7 +107,9 @@ public final class BankNotifications {
             Bank bank = BANKS.stream()
                     .filter(candidate -> candidate.domain().equals(domain))
                     .findFirst()
-                    .orElseThrow(() -> new BankNotificationException.Unparsed("no parser for sender domain " + domain));
+                    .orElseThrow(() -> new BankNotificationException.Unparsed(
+                            BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL,
+                            "no parser for sender domain " + domain));
             if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
                 throw new BankNotificationException.Unparsed("not a text/plain message");
             }

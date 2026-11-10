@@ -19,6 +19,8 @@ Mistakes to avoid:
 - Hand `read` the message bytes exactly as they arrived, headers included. A message re-serialised by a mail library
   no longer matches its signature and is `Unverified` every time.
 - Store the raw bytes before reading them: `Unparsed` and `TemporaryFailure` can be read again later.
+- Branch on `Unparsed.reason()`, never on the message text: `UNSUPPORTED_FORMAT` is the one to show the account holder,
+  with `getMessage()` saying what to change in their banking.
 - Never act on `Unverified`: anyone can send an e-mail that looks like the bank's.
 - A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
 - Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice.
