@@ -1,5 +1,6 @@
 package cz.insuit.bank.notification;
 
+import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
@@ -26,4 +27,12 @@ interface Bank {
      * @param body the decoded {@code text/plain} body
      */
     Transaction parse(@Nullable String subject, String body);
+
+    /**
+     * Every transaction the e-mail reports, in its order. One for most banks; a bank whose e-mail can list several
+     * overrides this, and its {@link #parse} refuses more than one.
+     */
+    default List<Transaction> parseAll(@Nullable String subject, String body) {
+        return List.of(parse(subject, body));
+    }
 }

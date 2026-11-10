@@ -38,8 +38,14 @@ import java.util.stream.Collectors;
 public final class BankNotifications {
 
     /** Every bank this release reads; adding one is a class in {@code src/banks/<country>/<bank>/} and a line here. */
-    private static final List<Bank> BANKS =
-            List.of(new AirBank(), new FioCz(), new Moneta(), new Creditas(), new Raiffeisenbank(), new Unicredit());
+    private static final List<Bank> BANKS = List.of(
+            new AirBank(),
+            new FioCz(),
+            new Moneta(),
+            new Creditas(),
+            new Raiffeisenbank(),
+            new Unicredit(),
+            new Csob());
 
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
@@ -80,22 +86,40 @@ public final class BankNotifications {
      * @throws BankNotificationException when there is no transaction to trust, the subtype says why
      */
     public Transaction read(byte[] rawMessage) {
+        List<Transaction> transactions = readAll(rawMessage);
+        if (transactions.size() != 1) {
+            throw new BankNotificationException.Unparsed(
+                    transactions.size() + " transactions in one e-mail: read them with readAll");
+        }
+        return transactions.get(0);
+    }
+
+    /**
+     * Like {@link #read}, for a bank that may report several movements in one e-mail (ČSOB does): every transaction,
+     * in the order the e-mail lists them, once the bank's signature verified. For any other bank, a list of one.
+     *
+     * <p>They share one {@link Transaction#messageId()}; deduplicate on it together with the position in this list,
+     * where the bank gives no transaction id.
+     */
+    public List<Transaction> readAll(byte[] rawMessage) {
         // Before the parser too: anyone can mail the address these come to.
         if (rawMessage.length > DkimVerifier.MAX_MESSAGE_BYTES) {
             throw new BankNotificationException.Unparsed("message of " + rawMessage.length + " bytes is over the "
                     + DkimVerifier.MAX_MESSAGE_BYTES + " byte limit");
         }
-        Transaction transaction = parseUnverified(rawMessage);
+        List<Transaction> transactions = parseAllUnverified(rawMessage);
         DkimResult dkim;
         try {
-            dkim = this.dkim.verify(rawMessage, transaction.signedBy());
+            dkim = this.dkim.verify(rawMessage, transactions.get(0).signedBy());
         } catch (RuntimeException e) {
             throw new BankNotificationException.Unverified("signature could not be checked: " + e);
         }
         return switch (dkim) {
             // Kept only when the signature covers it; anything unsigned in the headers is the sender's to change.
             case DkimResult.Verified verified ->
-                verified.signedHeaders().contains("message-id") ? transaction : transaction.withMessageId(null);
+                verified.signedHeaders().contains("message-id")
+                        ? transactions
+                        : transactions.stream().map(t -> t.withMessageId(null)).toList();
             case DkimResult.Failed failed -> throw new BankNotificationException.Unverified(failed.reason());
             case DkimResult.TemporaryFailure temporary ->
                 throw new BankNotificationException.TemporaryFailure(temporary.reason());
@@ -104,6 +128,15 @@ public final class BankNotifications {
 
     /** The parser alone, for its tests: a {@link Transaction} from here is not known to be genuine. */
     static Transaction parseUnverified(byte[] rawMessage) {
+        List<Transaction> transactions = parseAllUnverified(rawMessage);
+        if (transactions.size() != 1) {
+            throw new BankNotificationException.Unparsed(transactions.size() + " transactions in one e-mail");
+        }
+        return transactions.get(0);
+    }
+
+    /** Every transaction of a message, signature unchecked. */
+    static List<Transaction> parseAllUnverified(byte[] rawMessage) {
         try {
             MimeMessage message = new MimeMessage(SESSION, new ByteArrayInputStream(rawMessage));
             String domain = senderDomain(message);
@@ -113,7 +146,12 @@ public final class BankNotifications {
                     .orElseThrow(() -> new BankNotificationException.Unparsed(
                             BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL,
                             "no parser for sender domain " + domain));
-            return bank.parse(message.getSubject(), MailBody.text(message)).withMessageId(message.getMessageID());
+            String messageId = message.getMessageID();
+            List<Transaction> transactions = bank.parseAll(message.getSubject(), MailBody.text(message)).stream()
+                    .map(t -> t.withMessageId(messageId))
+                    .toList();
+            if (transactions.isEmpty()) throw new BankNotificationException.Unparsed("no transaction in the e-mail");
+            return transactions;
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

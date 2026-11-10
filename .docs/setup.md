@@ -65,6 +65,10 @@ See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not ve
 
 See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: no real UniCredit e-mail has been read.
 
+## ČSOB
+
+See [csob](banks/cz/csob/README.md#setting-it-up). Not verified yet: no real ČSOB e-mail has been read.
+
 ## Another bank
 
 Not supported yet; see [banks](banks/README.md). Adding one starts from one of its real e-mails,
