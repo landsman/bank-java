@@ -26,19 +26,19 @@ It is a balance-change notification: outgoing payments arrive as well, as `Direc
 ## Fio banka CZ
 
 Fio sends an e-mail for every movement, money in and out, card payments and direct debits included. In internet
-banking, the form is **Přidat nové oznámení o pohybu na účtu** (*Add a new account transaction notification* in
+banking, Nastavení → Oznámení → Uživatelská oznámení → Pohyby → Přidat oznámení opens **Přidat nové oznámení o pohybu na účtu** (*Add a new account transaction notification* in
 English); its fields, as both interfaces showed them on 2026-11-10:
 
 1. **Číslo účtu** (*Account number*): the account. One notification per account; a CZK and a EUR account each need
    their own.
 2. **Kam posílat** (*Send to*): **E-mail**, not SMS or push; see [#12](https://github.com/landsman/bank-java/issues/12)
    for why only the e-mail can be trusted.
-3. **Vyberte kontaktní e-mail**: one of the account holder's contact e-mails in Fio. The address has to be added as a
-   contact first; whether Fio confirms it is not known.
+3. **Vyberte kontaktní e-mail**: **Jiný email**, then type your address. Any address is accepted; no confirmation step
+   is described ([Fakturoid's guide](https://www.fakturoid.cz/podpora/parovani/fio), read 2026-11-10).
 4. **Vše / Příchozí / Odchozí**: which direction. **Vše** sends outgoing payments too; **Příchozí** is enough for
    matching payments.
 5. **Částka**, **Platba je z/na účet**, **Kód banky**, **Variabilní symbol**: filters. Leave them empty, so every
-   payment is sent.
+   payment is sent; Fakturoid's guide puts `0,01` in **Částka** to the same end.
 6. **Informace v oznámení** (*Notification format*): three choices, each shown with a preview. **Choose the middle
    one, `Fio banka - příjem na účtu`**, the preview starting `Dobrý den, zůstatek účtu … se … zvýšil o`, with an
    `ID pokynu`. The first, `Nový příjem na účtu` in one line with the counter-party, and the third, one sentence
