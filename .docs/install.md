@@ -6,7 +6,7 @@ One jar, on this repository's [GitHub Packages](https://github.com/landsman?tab=
 |----------|-----|
 | `cz.insuit:bank-notifications` | reading a bank's notification e-mail, its DKIM verification included |
 
-It needs Java 21 or newer and brings Jakarta Mail, Angus Mail, Apache James jDKIM and JSpecify with it.
+It needs Java 21 or newer and brings Jakarta Mail, Angus Mail, Apache James jDKIM, dnsjava, jsoup and JSpecify with it.
 
 **GitHub Packages asks for a token even for a public package.** A personal access token (classic) with the
 `read:packages` scope is enough; keep it out of the build file.

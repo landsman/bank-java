@@ -112,10 +112,7 @@ public final class BankNotifications {
                     .orElseThrow(() -> new BankNotificationException.Unparsed(
                             BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL,
                             "no parser for sender domain " + domain));
-            if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
-                throw new BankNotificationException.Unparsed("not a text/plain message");
-            }
-            return bank.parse(message.getSubject(), body).withMessageId(message.getMessageID());
+            return bank.parse(message.getSubject(), MailBody.text(message)).withMessageId(message.getMessageID());
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

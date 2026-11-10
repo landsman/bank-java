@@ -13,6 +13,9 @@ dependencies {
     implementation("org.apache.james.jdkim:apache-jdkim-library:0.5")
     // DNSSEC validation of the key lookups; jDKIM brings it too, at this version.
     implementation("dnsjava:dnsjava:3.6.3")
+    // HTML-only notifications (Raiffeisenbank, UniCredit) are turned into lines through jsoup's HTML5 parser; 1.23.2 is
+    // the first without CVE-2026-75140. Only the HTML parser is used, never the XML one.
+    implementation("org.jsoup:jsoup:1.23.2")
 
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")

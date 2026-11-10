@@ -31,6 +31,10 @@ Hand `read` the message **exactly as it arrived**: the bytes your SMTP server, C
 provider received, headers included. A message re-serialised by a mail library (headers refolded, CRLF turned into LF,
 a body decoded) no longer matches its signature and is `Unverified`, every time.
 
+The library reads the `text/plain` part when there is one, and the `text/html` part only when there is not: some banks
+send HTML only. That HTML becomes lines at every `<br>`, table cell, row and block, through
+[jsoup](https://jsoup.org/), never at whitespace inside text, so a payer's own line break cannot start a line.
+
 Store those bytes before reading them. A template the library does not know yet is `Unparsed`, and a later
 release can read the stored message again.
 
