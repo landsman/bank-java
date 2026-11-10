@@ -1,64 +1,30 @@
 # bank-java
 
-Java libraries for learning that money moved on a Czech bank account: who paid, how much, with which variable symbol.
+**Know the moment a customer pays you, without a bank API.**
 
-Most Czech banks can e-mail every incoming and outgoing payment. `bank-notifications` reads that e-mail into a
-transaction, and hands it out only once the bank's DKIM signature verified, so an e-mail that merely looks like the
-bank's is never taken for a payment. No API key, no contract with the bank, no PSD2 licence: the account holder points
-the notification at an address you receive. Air Bank first.
+Czech banks can send an e-mail for every payment that moves on an account. This library turns that e-mail into a
+payment your application can act on: who paid, how much, with which variable symbol. Match it to an invoice or an
+order and mark it paid, automatically, about a minute after the money lands.
 
-For Java 21+ and Kotlin, one jar, no framework required. Published on GitHub Packages, not Maven Central.
-
-```java
-try {
-    Transaction t = BankNotifications.withDns().read(rawMessage); // genuine: compare t.account() with yours
-} catch (BankNotificationException e) {                           // Unverified, TemporaryFailure or Unparsed
-    ...
-}
-```
-
-## What it does for you
+- **No contract with the bank, no API key, no PSD2 licence.** The account holder switches the e-mail on in their own
+  internet banking and sends it to an address your application receives.
+- **A forged e-mail is never taken for a payment.** Only an e-mail the bank itself signed gets through; anything else
+  is refused, with no setting to forget. See [how verification works](.docs/verification.md).
+- **Money in and money out.** Incoming payments to match, outgoing ones to see the account move.
+- **Air Bank first**, more banks to follow.
 
 ```mermaid
 flowchart TB
-    bank["Air Bank"] -- "payment e-mail,<br/>DKIM-signed" --> inbox["your inbound address"]
-    inbox -- "raw bytes" --> read
-
-    subgraph lib ["bank-notifications: read(raw)"]
-        direction TB
-        read["read"] --> parse{"Air Bank's template,<br/>every field consistent?"}
-        parse -- "no" --> unparsed(["Unparsed"])
-        parse -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
-        dns -- "DNS down" --> temporary(["TemporaryFailure"])
-        dns -- "forged or unsigned" --> unverified(["Unverified"])
-        dns -- "secure" --> pin{"key pinned<br/>in this release?"}
-        pin -- "no" --> unverified
-        pin -- "yes" --> sig{"signature valid,<br/>d=airbank.cz,<br/>whole body?"}
-        sig -- "no" --> unverified
-        sig -- "yes" --> transaction(["Transaction"])
-    end
-
-    transaction --> you["you: is it my account?<br/>seen this transactionId?"]
+    payer["Customer pays"] --> bank["Bank e-mails<br/>the payment"]
+    bank --> lib["bank-java checks<br/>the bank signed it"]
+    lib --> app["Your app marks<br/>the order paid"]
 ```
 
-Every arrow out of the box but one ends in an exception. A `Transaction` exists only when all four checks passed, with no
-setting to forget: `BankNotifications.withDns().read(raw)`. Two questions stay yours, because only you know the answer.
-
-| Read | For |
-|---|---|
-| [llms.txt](llms.txt) | the setup and the mistakes to avoid, for a coding assistant adding the library to a project |
-| [Installing](.docs/install.md) | the artifact on GitHub Packages, for Gradle and Maven |
-| [Setting up a bank](.docs/setup.md) | how the account holder points the bank's e-mail at your address |
-| [Using the library](.docs/usage.md) | the raw message, the exceptions, a transaction's fields, the two checks left to you |
-| [How verification works](.docs/verification.md) | what makes a signature count, whose key it is (DNSSEC, pinning), what it does not prove, the size limit |
-| [How Air Bank's e-mail behaves](.docs/air-bank.md) | the message, its body, what to watch out for, what has not been seen |
-| [Roadmap](.docs/plan/roadmap.md) | the working plan: what is next, what is not covered |
-| [Development](.docs/development.md) | build, tests, adding a bank |
+For Java 21+ and Kotlin, one jar, no framework required.
 
 ## What it covers
 
-What Air Bank's e-mail carries, seen in its real e-mails, against what this library reads. ❔ means no sample has
-shown it yet. Every field is in [Air Bank's page](.docs/air-bank.md).
+✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. Details in [how Air Bank's e-mail behaves](.docs/air-bank.md).
 
 | Feature | Air Bank e-mail | This library |
 |---|:---:|:---:|
@@ -73,5 +39,18 @@ shown it yet. Every field is in [Air Bank's page](.docs/air-bank.md).
 | Date and transaction id | ✅ | ✅ |
 | Proven to come from the bank | ✅ | ✅ |
 | Other banks | n/a | ⬜ |
+
+## Docs
+
+| Read | For |
+|---|---|
+| [Setting up a bank](.docs/setup.md) | what the account holder clicks in their internet banking |
+| [Installing](.docs/install.md) | adding the library to a Gradle or Maven project |
+| [Using the library](.docs/usage.md) | reading an e-mail, the failures, a payment's fields, the two checks left to you |
+| [How verification works](.docs/verification.md) | why a forged e-mail cannot pass |
+| [How Air Bank's e-mail behaves](.docs/air-bank.md) | what the bank sends and what has not been seen yet |
+| [Roadmap](.docs/plan/roadmap.md) | what is next |
+| [Development](.docs/development.md) | building it, adding a bank |
+| [llms.txt](llms.txt) | for a coding assistant adding the library to a project |
 
 Licence: [Apache 2.0](LICENSE)

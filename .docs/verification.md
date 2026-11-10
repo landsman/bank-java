@@ -4,6 +4,33 @@ Anyone can send an e-mail that says it is from a bank. What makes a bank's e-mai
 [DKIM](https://www.rfc-editor.org/rfc/rfc6376) signature: the bank signs the headers and the body with a key whose public
 half it publishes in DNS. The library verifies it before it hands out a `Transaction`.
 
+## The checks, in order
+
+```mermaid
+flowchart TB
+    bank["Air Bank"] -- "payment e-mail,<br/>DKIM-signed" --> inbox["your inbound address"]
+    inbox -- "raw bytes" --> read
+
+    subgraph lib ["bank-notifications: read(raw)"]
+        direction TB
+        read["read"] --> parse{"Air Bank's template,<br/>every field consistent?"}
+        parse -- "no" --> unparsed(["Unparsed"])
+        parse -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
+        dns -- "DNS down" --> temporary(["TemporaryFailure"])
+        dns -- "forged or unsigned" --> unverified(["Unverified"])
+        dns -- "secure" --> pin{"key pinned<br/>in this release?"}
+        pin -- "no" --> unverified
+        pin -- "yes" --> sig{"signature valid,<br/>d=airbank.cz,<br/>whole body?"}
+        sig -- "no" --> unverified
+        sig -- "yes" --> transaction(["Transaction"])
+    end
+
+    transaction --> you["you: is it my account?<br/>seen this transactionId?"]
+```
+
+Every arrow out of the box but one ends in an exception. A `Transaction` exists only when all four checks passed, with
+no setting to forget. The two questions at the bottom stay with you, see [usage](usage.md#two-checks-stay-with-you).
+
 ## What counts
 
 A signature counts only when all of these hold, besides [whose key it is](#whose-key-it-is):
