@@ -53,5 +53,7 @@ and in `~/.m2/settings.xml` a `<server>` with the same `id`, your GitHub user an
 
 ## Snapshots
 
-None are published, and no release is out yet (2026-11-10). To try it now, `make publish-local` in a checkout installs
-the jar into `~/.m2` as `0.1.0-SNAPSHOT`, where `mavenLocal()` finds it.
+None are published: only tags are, the first `0.1.0` on 2026-11-10
+([release](https://github.com/landsman/bank-java/releases/tag/v0.1.0), a pre-release while it is 0.x). To try `main`
+before its next release, `make publish-local` in a checkout installs the jar into `~/.m2` as the next `-SNAPSHOT`, where
+`mavenLocal()` finds it.
