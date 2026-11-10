@@ -13,7 +13,7 @@ source folder but all in the package `cz.insuit.bank.notification`, so nothing i
 |---|---|---|
 | `src/main/java` | the API: `BankNotifications`, `Transaction` and its values, `BankNotificationException` | yes |
 | `src/main/java/…/dkim` | the signature check: `DkimVerifier`, `KeyLookup`; the DNSSEC lookup stays package-private | the verifier |
-| `src/reading/java` | how any bank's e-mail is read: `Bank`, `MailBody` (the body, HTML as lines), `NotificationLines` | no |
+| `src/parsing/java` | how any bank's e-mail is parsed: `Bank`, `MailBody` (the body, HTML as lines), `NotificationLines` | no |
 | `src/banks/<country>/<bank>` | one bank: its parser, tests and fixtures | no |
 
 A bank's parser knows its template and nothing else: no MIME, no DKIM, no deduplication. Projects that use the library

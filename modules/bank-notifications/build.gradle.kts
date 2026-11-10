@@ -24,7 +24,7 @@ dependencies {
 
 // Three kinds of code, one package, so nothing internal becomes public; a folder is not a package:
 // src/main/java      the public API: BankNotifications, Transaction and its values, and dkim/
-// src/reading/java   how an e-mail is read, shared by every bank: Bank, MailBody, NotificationLines
+// src/parsing/java   how an e-mail is parsed, shared by every bank: Bank, MailBody, NotificationLines
 // src/banks/<country>/<bank>/  one bank: its parser in java/, its tests in test/, its anonymised e-mails in fixtures/
 val banks =
     file("src/banks")
@@ -34,9 +34,9 @@ val banks =
         .sortedBy { it.path }
 
 sourceSets {
-    main { java.srcDirs(listOf(file("src/reading/java")) + banks.map { it.resolve("java") }) }
+    main { java.srcDirs(listOf(file("src/parsing/java")) + banks.map { it.resolve("java") }) }
     test {
-        java.srcDirs(listOf(file("src/reading/test")) + banks.map { it.resolve("test") })
+        java.srcDirs(listOf(file("src/parsing/test")) + banks.map { it.resolve("test") })
         resources.srcDirs(banks.map { it.resolve("fixtures") })
     }
 }
