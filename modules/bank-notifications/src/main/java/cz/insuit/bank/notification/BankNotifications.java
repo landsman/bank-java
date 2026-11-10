@@ -52,7 +52,7 @@ public final class BankNotifications {
      * release trusts, for an audit or a log line at start-up.
      */
     public static Map<String, Set<String>> pinnedKeys() {
-        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS, Fio.DOMAIN, Fio.KEY_FINGERPRINTS);
+        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS, FioCz.DOMAIN, FioCz.KEY_FINGERPRINTS);
     }
 
     /**
@@ -99,13 +99,13 @@ public final class BankNotifications {
         try {
             MimeMessage message = new MimeMessage(SESSION, new ByteArrayInputStream(rawMessage));
             String domain = senderDomain(message);
-            if (!AirBank.DOMAIN.equals(domain) && !Fio.DOMAIN.equals(domain)) {
+            if (!AirBank.DOMAIN.equals(domain) && !FioCz.DOMAIN.equals(domain)) {
                 throw new BankNotificationException.Unparsed("no parser for sender domain " + domain);
             }
             if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
                 throw new BankNotificationException.Unparsed("not a text/plain message");
             }
-            return AirBank.DOMAIN.equals(domain) ? AirBank.parse(body) : Fio.parse(message.getSubject(), body);
+            return AirBank.DOMAIN.equals(domain) ? AirBank.parse(body) : FioCz.parse(message.getSubject(), body);
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

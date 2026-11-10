@@ -23,7 +23,7 @@ No guide mentions a confirmation of the address. Send yourself a small payment a
 
 It is a balance-change notification: outgoing payments arrive as well, as `Direction.OUTGOING`.
 
-## Fio banka
+## Fio banka CZ
 
 Fio sends an e-mail for every movement, money in and out, card payments and direct debits included. Where to switch it
 on in Fio's internet banking, and to which address it may go, is not written down here yet (2026-11-10).

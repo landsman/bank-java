@@ -1,6 +1,6 @@
 name: keys
 
-# The banks' DKIM keys are pinned in the code (KEY_FINGERPRINTS in AirBank and Fio). Once a day this compares them with what DNS
+# The banks' DKIM keys are pinned in the code (KEY_FINGERPRINTS in AirBank and FioCz). Once a day this compares them with what DNS
 # publishes, validated through DNSSEC from the root, and opens an issue when they differ: a bank that rotated its key,
 # a forged key, or a root key rollover the built-in trust anchors miss. Until a release pins the new key, readers on the
 # old one get Unverified, so the issue is the start of a release.

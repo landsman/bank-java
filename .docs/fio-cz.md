@@ -1,4 +1,7 @@
-# How Fio's e-mail behaves
+# How Fio banka's Czech e-mail behaves
+
+Fio banka in Czechia, `fio.cz`. Its Slovak e-mails (`fio.sk`) are not read yet, see
+[#10](https://github.com/landsman/bank-java/issues/10).
 
 From ten real notifications of August to November 2026 on a personal account: incoming transfers (instant, within Fio,
 from another bank), outgoing transfers, card payments in Czechia and abroad, and a direct debit. The test fixtures are
@@ -26,7 +29,7 @@ six of them, anonymised; the card payment keeps its merchant.
 - `DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fio.cz; s=20160512; h=Date:From:To:Subject;`, no `l=`,
   so the whole body and the subject are signed. The key at `20160512._domainkey.fio.cz` is RSA 2048-bit, fingerprint
   `g66SWhDk9AKwpAE7Gli7fGccyAq37YMXhmoTUv5Rx6c=` (the same through 1.1.1.1 and 8.8.8.8, 2026-11-10), pinned in
-  `Fio.KEY_FINGERPRINTS`. `fio.cz` is DNSSEC-signed (RSASHA1) and so is the key record. SPF passes, DMARC is
+  `FioCz.KEY_FINGERPRINTS`. `fio.cz` is DNSSEC-signed (RSASHA1) and so is the key record. SPF passes, DMARC is
   `p=REJECT`.
 - `text/plain; charset=UTF-8`, quoted-printable, CRLF line ends, Czech, one part. Most lines end in a space.
 - Under a minute from the balance changing to the `Date` header (18:29 to 18:29:45), except at night: a card payment

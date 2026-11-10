@@ -1,13 +1,13 @@
 # Using the library
 
-**It reads Air Bank's and Fio's e-mails so far.** Each bank sends one for every payment on an account once the account
+**It reads Air Bank's and Fio banka's Czech e-mails so far.** Each bank sends one for every payment on an account once the account
 holder [switches it on](setup.md); `read` turns it into a `Transaction`. An e-mail from any other bank is `Unparsed`
 with the message `no parser for sender domain <domain>`, until that bank is added.
 
 | Bank | Recognised by | Reads | Details |
 |---|---|---|---|
 | Air Bank | `From: info@airbank.cz`, signed by `airbank.cz` | incoming and outgoing transfers | [how its e-mail behaves](air-bank.md) |
-| Fio banka | `From: automat@fio.cz`, signed by `fio.cz` | transfers in and out, card payments, direct debits | [how its e-mail behaves](fio.md) |
+| Fio banka CZ | `From: automat@fio.cz`, signed by `fio.cz` | transfers in and out, card payments, direct debits | [how its e-mail behaves](fio-cz.md) |
 
 ```java
 BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one

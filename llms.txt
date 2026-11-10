@@ -2,7 +2,7 @@
 
 > Java 21+ and Kotlin library that reads a Czech bank's payment notification e-mail into a `Transaction`, and hands
 > it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC and pinned in the
-> release. Air Bank and Fio banka so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
+> release. Air Bank and Fio banka in Czechia so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
 > GitHub Packages (group `cz.insuit`), not Maven Central. Pre-1.0: read records by accessor, never by record pattern.
 
 Setting it up in a project:
@@ -39,5 +39,5 @@ Mistakes to avoid:
 ## Optional
 
 - [How Air Bank's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/air-bank.md): the message, its body, what has not been seen
-- [How Fio's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/fio.md): the message, its body, the short template it cannot read
+- [How Fio CZ's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/fio-cz.md): the message, its body, the short template it cannot read
 - [Roadmap](https://github.com/landsman/bank-java/blob/main/.docs/plan/roadmap.md): what is next, what is not covered

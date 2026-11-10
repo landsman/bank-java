@@ -11,7 +11,7 @@ order and mark it paid, automatically, about a minute after the money lands.
 - **A forged e-mail is never taken for a payment.** Only an e-mail the bank itself signed gets through; anything else
   is refused, with no setting to forget. See [how verification works](.docs/verification.md).
 - **Money in and money out.** Incoming payments to match, outgoing ones to see the account move.
-- **Air Bank and Fio banka**, more banks to follow.
+- **Air Bank and Fio banka in Czechia**, more banks to follow; [Fio in Slovakia](https://github.com/landsman/bank-java/issues/10) is next.
 
 ```mermaid
 flowchart TB
@@ -25,9 +25,9 @@ For Java 21+ and Kotlin, one jar, no framework required.
 ## What it covers
 
 ✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. Details per bank: [Air Bank](.docs/air-bank.md),
-[Fio](.docs/fio.md).
+[Fio CZ](.docs/fio-cz.md).
 
-| Feature | Air Bank | Fio banka |
+| Feature | Air Bank | Fio banka CZ |
 |---|:---:|:---:|
 | Incoming payment | ✅ | ✅ |
 | Outgoing payment | ✅ | ✅ |
@@ -52,7 +52,7 @@ Other banks: not yet.
 | [Using the library](.docs/usage.md) | reading an e-mail, the failures, a payment's fields, the two checks left to you |
 | [How verification works](.docs/verification.md) | why a forged e-mail cannot pass |
 | [How Air Bank's e-mail behaves](.docs/air-bank.md) | what the bank sends and what has not been seen yet |
-| [How Fio's e-mail behaves](.docs/fio.md) | the same for Fio banka |
+| [How Fio CZ's e-mail behaves](.docs/fio-cz.md) | the same for Fio banka in Czechia |
 | [Roadmap](.docs/plan/roadmap.md) | what is next |
 | [Development](.docs/development.md) | building it, adding a bank |
 | [llms.txt](llms.txt) | for a coding assistant adding the library to a project |

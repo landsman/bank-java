@@ -55,7 +55,7 @@ the bank's, and `BankNotifications.withDns()` does both without being asked:
   root zone's trust anchors (IANA's KSK-2017 and KSK-2024) down, instead of trusting the machine's resolver. An unsigned
   zone, a forged answer, a broken signature chain and a resolver that strips the signatures are all refused.
   `airbank.cz` and `fio.cz` are signed, and so are their key records (2026-11-10).
-- **The key is pinned.** Each bank's key fingerprints are written in the code (`KEY_FINGERPRINTS` in `AirBank` and `Fio`, the SHA-256
+- **The key is pinned.** Each bank's key fingerprints are written in the code (`KEY_FINGERPRINTS` in `AirBank` and `FioCz`, the SHA-256
   of the public key), and only those are accepted, whatever DNS says. Forging a key would take breaking DNSSEC *and*
   holding the bank's private key. `BankNotifications.pinnedKeys()` lists them.
 

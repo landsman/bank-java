@@ -62,7 +62,11 @@ class HostileInputTest {
         inputs.add(invalidUtf8);
 
         for (byte[] fixture : List.of(
-                incoming, outgoing, fixture("incoming-message.eml"), fio("incoming-instant.eml"), fio("card.eml"))) {
+                incoming,
+                outgoing,
+                fixture("incoming-message.eml"),
+                fioCz("incoming-instant.eml"),
+                fioCz("card.eml"))) {
             // Cut short at every 50th byte: a header, the blank line, a field, a number, each broken off.
             for (int length = 0; length < fixture.length; length += 50) {
                 inputs.add(Arrays.copyOf(fixture, length));
@@ -89,8 +93,8 @@ class HostileInputTest {
         return text.length() > 120 ? text.substring(0, 120) + "…" : text;
     }
 
-    private static byte[] fio(String name) throws IOException {
-        return resource("/fio/" + name);
+    private static byte[] fioCz(String name) throws IOException {
+        return resource("/fio-cz/" + name);
     }
 
     private static byte[] fixture(String name) throws IOException {

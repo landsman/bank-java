@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
  * card payment keeps its merchant. The body is quoted-printable as Fio sent it, re-encoded after the replacement with
  * the soft line breaks where Fio put them.
  */
-class FioTest {
+class FioCzTest {
 
     @Test
     void readsAnInstantIncomingPayment() throws IOException {
@@ -150,7 +150,7 @@ class FioTest {
     }
 
     private static byte[] fixture(String name) throws IOException {
-        try (InputStream in = FioTest.class.getResourceAsStream("/fio/" + name)) {
+        try (InputStream in = FioCzTest.class.getResourceAsStream("/fio-cz/" + name)) {
             return Objects.requireNonNull(in, name).readAllBytes();
         }
     }

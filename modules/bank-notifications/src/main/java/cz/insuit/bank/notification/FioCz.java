@@ -17,14 +17,14 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Fio banka's "příjem / výdaj na účtu" e-mail, sent from {@code automat@fio.cz} for every movement on an account.
+ * Fio banka's Czech "příjem / výdaj na účtu" e-mail, sent from {@code automat@fio.cz} for every movement on an account.
  *
  * <p>The direction is stated twice, in the signed subject and in the summary sentence; the two have to agree. Lines are
  * read by their label, because the optional ones appear only when the payment has them. The short template
  * ("prijem na konte", seen in August 2026) carries no transaction id and no currency, so it is {@link Unparsed} rather
  * than read: without an id, the same e-mail arriving twice would count twice.
  */
-final class Fio {
+final class FioCz {
 
     static final String DOMAIN = "fio.cz";
 
@@ -163,5 +163,5 @@ final class Fio {
     private static final String BALANCE = "Aktuální zůstatek";
     private static final Set<String> FREE_TEXT = Set.of("Uživatelský symbol", MESSAGE);
 
-    private Fio() {}
+    private FioCz() {}
 }
