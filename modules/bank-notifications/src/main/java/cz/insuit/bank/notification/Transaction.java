@@ -13,8 +13,9 @@ import org.jspecify.annotations.Nullable;
  * @param type how it was paid, {@link Type#GENERAL} when the e-mail does not say
  * @param account the account the e-mail is about; compare it with the account you expect, so that a genuine
  *     notification about somebody else's account is not taken for yours
- * @param counterAccount the other side: the payer of an incoming payment, the recipient of an outgoing one
- * @param counterName the other side's name, if the bank prints it (Air Bank does for incoming only)
+ * @param counterAccount the other side: the payer of an incoming payment, the recipient of an outgoing one; {@code null}
+ *     when the bank names no account, as for a card payment
+ * @param counterName the other side's name, if the bank prints it (Air Bank for incoming only, Fio when it has one)
  * @param amount signed: positive for money in, negative for money out, so amounts add up as they are
  * @param symbols the variable, constant and specific symbol, each {@code null} when absent
  * @param message the payment's message, if the bank prints it
@@ -27,7 +28,7 @@ public record Transaction(
         Direction direction,
         Type type,
         BankAccount account,
-        BankAccount counterAccount,
+        @Nullable BankAccount counterAccount,
         @Nullable String counterName,
         Money amount,
         PaymentSymbols symbols,

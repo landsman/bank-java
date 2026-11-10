@@ -2,7 +2,7 @@
 
 > Java 21+ and Kotlin library that reads a Czech bank's payment notification e-mail into a `Transaction`, and hands
 > it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC and pinned in the
-> release. Air Bank only so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
+> release. Air Bank and Fio banka so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
 > GitHub Packages (group `cz.insuit`), not Maven Central. Pre-1.0: read records by accessor, never by record pattern.
 
 Setting it up in a project:
@@ -23,6 +23,7 @@ Mistakes to avoid:
 - A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
 - Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice.
 - `balance()` is the balance right after the payment and may be `null`; never take it for the account's current balance.
+- `counterAccount()` is `null` for a card payment.
 - `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.
 - Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
 - Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.
@@ -38,4 +39,5 @@ Mistakes to avoid:
 ## Optional
 
 - [How Air Bank's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/air-bank.md): the message, its body, what has not been seen
+- [How Fio's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/fio.md): the message, its body, the short template it cannot read
 - [Roadmap](https://github.com/landsman/bank-java/blob/main/.docs/plan/roadmap.md): what is next, what is not covered

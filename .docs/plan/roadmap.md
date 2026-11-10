@@ -8,11 +8,13 @@ A working document: what is still unknown and what this library does next.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
   ([air-bank.md](../air-bank.md)).
+- **Reads Fio banka**: transfers in and out, card payments and direct debits, from ten real e-mails of a personal
+  account ([fio.md](../fio.md)); its short template is refused, it has no transaction id.
 - **Verifies DKIM** on Apache James jDKIM 0.5 before a `Transaction` is handed out ([verification](../verification.md));
-  both real e-mails verify against Air Bank's published key and fail once their amount is changed.
-- **38 tests**: the parser on the three fixtures and its refusals, account checksums, the verifier on messages signed
+  every real e-mail verifies against its bank's published key, and the Air Bank ones fail once their amount is changed.
+- **48 tests**: the parsers on nine fixtures and its refusals, account checksums, the verifier on messages signed
   in the test, reading end to end, and hostile input that must end in `BankNotificationException` and nothing else.
-- **Trusts only Air Bank's key**: validated through DNSSEC from the root and pinned in the code, checked daily against
+- **Trusts only the banks' own keys**: validated through DNSSEC from the root and pinned in the code, checked daily against
   DNS by `keys.yml` ([verification](../verification.md#whose-key-it-is)).
 - **Tested as a caller** on Spring Boot 3.5.16 and 4.1.2 and from Kotlin ([testing](../../testing/README.md)).
 - **Scanned**: Semgrep and a dependency scan weekly and on every pull request; Dependabot proposes bumps.

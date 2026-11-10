@@ -30,16 +30,25 @@ class KeyCheckLiveTest {
 
     @Test
     void airBankPublishesOnlyPinnedKeys() throws Exception {
-        Set<String> pinned =
-                Objects.requireNonNull(BankNotifications.pinnedKeys().get("airbank.cz"));
-        List<String> records = dns.getRecords("dns/txt", "ab", "airbank.cz");
+        assertPublishesOnlyPinnedKeys("ab", "airbank.cz");
+    }
 
-        assertFalse(records.isEmpty(), "no key at ab._domainkey.airbank.cz");
+    @Test
+    void fioPublishesOnlyPinnedKeys() throws Exception {
+        assertPublishesOnlyPinnedKeys("20160512", "fio.cz");
+    }
+
+    private void assertPublishesOnlyPinnedKeys(String selector, String domain) throws Exception {
+        Set<String> pinned =
+                Objects.requireNonNull(BankNotifications.pinnedKeys().get(domain), domain);
+        List<String> records = dns.getRecords("dns/txt", selector, domain);
+
+        assertFalse(records.isEmpty(), "no key at " + selector + "._domainkey." + domain);
         for (String record : records) {
             String fingerprint = DkimVerifier.fingerprint(publicKey(record));
             assertTrue(
                     pinned.contains(fingerprint),
-                    "Air Bank publishes a key that is not pinned: " + fingerprint + " (" + record + ")");
+                    domain + " publishes a key that is not pinned: " + fingerprint + " (" + record + ")");
         }
     }
 

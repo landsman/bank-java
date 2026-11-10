@@ -1,12 +1,13 @@
 # Using the library
 
-**It reads Air Bank's e-mails, and only those so far.** Air Bank sends one for every payment on an account once the
-account holder [switches it on](setup.md#air-bank); `read` turns it into a `Transaction`. An e-mail from any other bank
-is `Unparsed` with the message `no parser for sender domain <domain>`, until that bank is added.
+**It reads Air Bank's and Fio's e-mails so far.** Each bank sends one for every payment on an account once the account
+holder [switches it on](setup.md); `read` turns it into a `Transaction`. An e-mail from any other bank is `Unparsed`
+with the message `no parser for sender domain <domain>`, until that bank is added.
 
 | Bank | Recognised by | Reads | Details |
 |---|---|---|---|
 | Air Bank | `From: info@airbank.cz`, signed by `airbank.cz` | incoming and outgoing transfers | [how its e-mail behaves](air-bank.md) |
+| Fio banka | `From: automat@fio.cz`, signed by `fio.cz` | transfers in and out, card payments, direct debits | [how its e-mail behaves](fio.md) |
 
 ```java
 BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
@@ -53,11 +54,11 @@ from a fake.
 
 | Field | Holds |
 |---|---|
-| `signedBy()` | the bank's domain whose signature verified: `airbank.cz` |
+| `signedBy()` | the bank's domain whose signature verified: `airbank.cz`, `fio.cz` |
 | `direction()`, `incoming()` | `INCOMING` or `OUTGOING` |
 | `type()` | `TRANSFER`, `CARD`, `DIRECT_DEBIT`, or `GENERAL` when the e-mail does not say |
 | `account()` | the account the e-mail is about, a `BankAccount` |
-| `counterAccount()` | the payer of an incoming payment, the recipient of an outgoing one |
+| `counterAccount()` | the payer of an incoming payment, the recipient of an outgoing one; `null` for a card payment |
 | `counterName()` | the other side's name, when the bank prints it; `null` otherwise |
 | `amount()` | a `Money`: `BigDecimal` and `Currency`, signed, positive in and negative out |
 | `symbols()` | `PaymentSymbols`: `variable()`, `constant()`, `specific()`, each `null` when absent |

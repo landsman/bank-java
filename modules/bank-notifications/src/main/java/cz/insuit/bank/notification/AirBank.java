@@ -92,9 +92,9 @@ final class AirBank {
         if (booked == null || transactionId == null || !transactionId.matches("\\d+")) {
             throw new Unparsed("booking date or transaction code missing");
         }
-        String variableSymbol = symbol(fields, VARIABLE_SYMBOL);
-        String constantSymbol = symbol(fields, CONSTANT_SYMBOL);
-        String specificSymbol = symbol(fields, SPECIFIC_SYMBOL);
+        String variableSymbol = PaymentSymbols.checked(VARIABLE_SYMBOL, fields.get(VARIABLE_SYMBOL));
+        String constantSymbol = PaymentSymbols.checked(CONSTANT_SYMBOL, fields.get(CONSTANT_SYMBOL));
+        String specificSymbol = PaymentSymbols.checked(SPECIFIC_SYMBOL, fields.get(SPECIFIC_SYMBOL));
         LocalDate bookedOn;
         try {
             bookedOn = LocalDate.parse(booked, DATE);
@@ -156,12 +156,6 @@ final class AirBank {
     private static final String MESSAGE_FOR_PAYER = "Zpráva pro plátce";
     private static final Set<String> MESSAGES = Set.of(MESSAGE_FOR_RECIPIENT, MESSAGE_FOR_PAYER);
     private static final String TRANSACTION_ID = "Kód transakce";
-
-    private static @Nullable String symbol(Map<String, String> fields, String label) {
-        String symbol = fields.get(label);
-        if (symbol != null && !symbol.matches("\\d{1,10}")) throw new Unparsed(label + " is not 1 to 10 digits");
-        return symbol;
-    }
 
     /**
      * The balance in the summary sentence, or {@code null} when it is not in the one format seen so far. How 1 000 and

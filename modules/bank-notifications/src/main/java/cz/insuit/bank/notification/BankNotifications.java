@@ -17,7 +17,7 @@ import java.util.Set;
 
 /**
  * Reads a bank's notification e-mail into what it says about money that moved, once its DKIM signature shows it really
- * comes from the bank. Air Bank's e-mails only, so far; any other is {@link BankNotificationException.Unparsed}.
+ * comes from the bank. Air Bank's and Fio's e-mails so far; any other is {@link BankNotificationException.Unparsed}.
  *
  * <pre>{@code
  * BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
@@ -52,7 +52,7 @@ public final class BankNotifications {
      * release trusts, for an audit or a log line at start-up.
      */
     public static Map<String, Set<String>> pinnedKeys() {
-        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS);
+        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS, Fio.DOMAIN, Fio.KEY_FINGERPRINTS);
     }
 
     /**
@@ -99,13 +99,13 @@ public final class BankNotifications {
         try {
             MimeMessage message = new MimeMessage(SESSION, new ByteArrayInputStream(rawMessage));
             String domain = senderDomain(message);
-            if (!AirBank.DOMAIN.equals(domain)) {
+            if (!AirBank.DOMAIN.equals(domain) && !Fio.DOMAIN.equals(domain)) {
                 throw new BankNotificationException.Unparsed("no parser for sender domain " + domain);
             }
             if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
                 throw new BankNotificationException.Unparsed("not a text/plain message");
             }
-            return AirBank.parse(body);
+            return AirBank.DOMAIN.equals(domain) ? AirBank.parse(body) : Fio.parse(message.getSubject(), body);
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

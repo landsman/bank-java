@@ -37,11 +37,11 @@ A signature counts only when all of these hold, besides [whose key it is](#whose
 
 - it verifies over the **raw bytes**, recomputed here; an `Authentication-Results` header that came with the message
   is never read, because whoever sent the message could have written it;
-- its `d=` is the domain of the bank whose template matched (`airbank.cz` for Air Bank);
+- its `d=` is the domain of the bank whose template matched (`airbank.cz` for Air Bank, `fio.cz` for Fio);
 - it signs the **whole body**: a signature with `l=` covers only the first bytes, and anything could follow them;
 - its key is not in testing mode (`t=y` in the key record);
 - an RSA key has at least 1024 bits, the shortest [RFC 8301](https://www.rfc-editor.org/rfc/rfc8301) lets a verifier
-  accept; Air Bank's is 1024 (2026-11-10). `DkimVerifier.minimumKeyBits` raises it for a direct caller.
+  accept; Air Bank's is 1024, Fio's 2048 (2026-11-10). `DkimVerifier.minimumKeyBits` raises it for a direct caller.
 
 A key lookup that fails (a timeout, a resolver error) throws `TemporaryFailure`, never `Unverified`: the e-mail may be
 perfectly genuine.
@@ -54,8 +54,8 @@ the bank's, and `BankNotifications.withDns()` does both without being asked:
 - **DNSSEC, validated here.** The key's DNS answer has to be DNSSEC-secure, and the library validates it itself, from the
   root zone's trust anchors (IANA's KSK-2017 and KSK-2024) down, instead of trusting the machine's resolver. An unsigned
   zone, a forged answer, a broken signature chain and a resolver that strips the signatures are all refused.
-  `airbank.cz` is signed, and so is its key record (2026-11-10).
-- **The key is pinned.** Each bank's key fingerprints are written in the code (`AirBank.KEY_FINGERPRINTS`, the SHA-256
+  `airbank.cz` and `fio.cz` are signed, and so are their key records (2026-11-10).
+- **The key is pinned.** Each bank's key fingerprints are written in the code (`KEY_FINGERPRINTS` in `AirBank` and `Fio`, the SHA-256
   of the public key), and only those are accepted, whatever DNS says. Forging a key would take breaking DNSSEC *and*
   holding the bank's private key. `BankNotifications.pinnedKeys()` lists them.
 

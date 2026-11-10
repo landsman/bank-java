@@ -17,4 +17,12 @@ public record PaymentSymbols(
 
     /** No symbols at all. */
     public static final PaymentSymbols NONE = new PaymentSymbols(null, null, null);
+
+    /** A symbol as a bank's e-mail printed it: 1 to 10 digits, or absent. Anything else is a misread. */
+    static @Nullable String checked(String label, @Nullable String symbol) {
+        if (symbol != null && !symbol.matches("\\d{1,10}")) {
+            throw new BankNotificationException.Unparsed(label + " is not 1 to 10 digits");
+        }
+        return symbol;
+    }
 }
