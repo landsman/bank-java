@@ -95,10 +95,13 @@ final class AirBank implements Bank {
 
         String counterAccount = incoming != null
                 ? incoming.group(2)
+                : Objects.requireNonNull(outgoing).group(2);
+        @Nullable
+        String counterName = incoming != null
+                ? incoming.group(1)
                 : Objects.requireNonNull(outgoing).group(1);
-        @Nullable String counterName = incoming != null ? incoming.group(1) : null;
         try {
-            BigDecimal value = new BigDecimal(money.group(1) + "." + money.group(2));
+            BigDecimal value = new BigDecimal(money.group(1).replace(" ", "") + "." + money.group(2));
             Money signed = new Money(value, Currency.getInstance(money.group(3)));
             return new Transaction(
                     DOMAIN,
@@ -124,18 +127,21 @@ final class AirBank implements Bank {
     }
 
     // The account nickname is the client's own text and may contain "číslo", hence the greedy ".*" before it.
-    private static final Pattern SUMMARY =
-            Pattern.compile("zůstatek na účtu .* číslo (\\S+/3030) se (zvýšil|snížil) o částku (\\S+ [A-Z]{3})\\. .*");
+    private static final Pattern SUMMARY = Pattern.compile(
+            "zůstatek na účtu .* číslo (\\S+/3030) se (zvýšil|snížil) o částku (\\d[\\d ]*,\\d{2} [A-Z]{3})\\. .*");
     private static final Pattern INCOMING = Pattern.compile("Příchozí úhrada z účtu (.*) číslo (\\S+/\\d{4})");
-    private static final Pattern OUTGOING = Pattern.compile("Odchozí úhrada na účet číslo (\\S+/\\d{4})");
+    // The recipient's name, when the account holder saved one, as in myinvoice's sample; without one, as in a real
+    // e-mail.
+    private static final Pattern OUTGOING = Pattern.compile("Odchozí úhrada na účet (?:(.*) )?číslo (\\S+/\\d{4})");
     private static final Pattern LABELLED = Pattern.compile(
             "(Částka|Datum zaúčtování|Variabilní symbol|Konstantní symbol|Specifický symbol"
                     + "|Zpráva pro příjemce|Zpráva pro plátce|Kód transakce): (.*)",
             // A line holds no CR or LF, so DOTALL only lets a message keep a NEL or U+2028 instead of being dropped.
             Pattern.DOTALL);
     private static final Pattern BALANCE = Pattern.compile(
-            "\\. Dostupný zůstatek k (\\d{1,2}\\.\\d{1,2}\\.\\d{4} v \\d{1,2}:\\d{2}) je (\\d+),(\\d{2}) ([A-Z]{3})\\.");
-    private static final Pattern MONEY = Pattern.compile("(\\d+),(\\d{2}) ([A-Z]{3})");
+            "\\. Dostupný zůstatek k (\\d{1,2}\\.\\d{1,2}\\.\\d{4} v \\d{1,2}:\\d{2}) je (\\d{1,3}(?: \\d{3})*),(\\d{2}) ([A-Z]{3})\\.");
+    // A plain space between thousands, as in myinvoice's samples ("9 500,00 CZK"); no real e-mail of 1 000 or more yet.
+    private static final Pattern MONEY = Pattern.compile("(\\d{1,3}(?: \\d{3})*),(\\d{2}) ([A-Z]{3})");
     private static final String ZERO_WIDTH_NO_BREAK_SPACE = String.valueOf((char) 0xFEFF);
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d.M.uuuu");
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("d.M.uuuu 'v' H:mm");
@@ -161,7 +167,8 @@ final class AirBank implements Bank {
         if (!matcher.find()) return null;
         try {
             Money available = new Money(
-                    new BigDecimal(matcher.group(2) + "." + matcher.group(3)), Currency.getInstance(matcher.group(4)));
+                    new BigDecimal(matcher.group(2).replace(" ", "") + "." + matcher.group(3)),
+                    Currency.getInstance(matcher.group(4)));
             return new Balance(
                     available, LocalDateTime.parse(matcher.group(1), DATE_TIME).atZone(PRAGUE));
         } catch (DateTimeParseException | IllegalArgumentException e) {

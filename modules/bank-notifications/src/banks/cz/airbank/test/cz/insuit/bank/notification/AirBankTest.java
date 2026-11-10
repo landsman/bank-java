@@ -96,7 +96,8 @@ class AirBankTest {
 
     @Test
     void leavesOutABalanceInAFormatNotSeenYet() throws IOException {
-        String changed = text("incoming.eml").replace("je 512,30 CZK.", "je 1 512,30 CZK.");
+        // A no-break space between thousands has not been seen; a plain one has, in public samples.
+        String changed = text("incoming.eml").replace("je 512,30 CZK.", "je 1\u00a0512,30 CZK.");
 
         Transaction parsed = BankNotifications.parseUnverified(bytes(changed));
 
@@ -147,9 +148,42 @@ class AirBankTest {
 
     @Test
     void refusesAnAmountInAFormatNotSeenYet() throws IOException {
-        String changed = text("incoming.eml").replace("1,00 CZK", "1 000,00 CZK");
+        String changed = text("incoming.eml").replace("1,00 CZK", "1\u00a0000,00 CZK");
 
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    /** myinvoice's samples (MIT) show thousands separated by a plain space; no real e-mail of 1 000 or more yet. */
+    @Test
+    void readsThousandsSeparatedByASpace() throws IOException {
+        String changed =
+                text("incoming.eml").replace("1,00 CZK", "1 000,00 CZK").replace("je 512,30 CZK.", "je 9 512,30 CZK.");
+
+        Transaction parsed = BankNotifications.parseUnverified(bytes(changed));
+
+        assertEquals(czk("1000.00"), parsed.amount());
+        assertEquals(czk("9512.30"), Objects.requireNonNull(parsed.balance()).available());
+    }
+
+    @Test
+    void readsAnEurAccount() throws IOException {
+        String changed = text("incoming.eml").replace(" CZK", " EUR");
+
+        assertEquals(
+                Currency.getInstance("EUR"),
+                BankNotifications.parseUnverified(bytes(changed)).amount().currency());
+    }
+
+    /** myinvoice's outgoing sample names the recipient; the real one, without a saved name, does not. */
+    @Test
+    void readsTheRecipientsNameOfAnOutgoingPaymentWhenTheBankPrintsIt() throws IOException {
+        String changed = text("outgoing.eml")
+                .replace("Odchozí úhrada na účet číslo", "Odchozí úhrada na účet Wayne Enterprises s.r.o. číslo");
+
+        Transaction parsed = BankNotifications.parseUnverified(bytes(changed));
+
+        assertEquals("Wayne Enterprises s.r.o.", parsed.counterName());
+        assertEquals(BankAccount.parse("9876543211/2010"), parsed.counterAccount());
     }
 
     @Test

@@ -23,7 +23,17 @@ six of them, anonymised; the card payment keeps its merchant.
   This page is about the long one; the other two carry no transaction id. A fourth shape has arrived too, subject
   `Fio banka - prijem na konte` (2026-08-18): account, amount, symbols, message, balance and counter-account on six
   lines, but **no transaction id and no currency**, and it matches none of the form's previews, so it may be an older
-  setting. All of them are `Unparsed`: without an id, the same e-mail arriving twice would count twice.
+  setting; its outgoing twin is `Fio banka - vydaj na konte`. All of them are `Unparsed`: without an id, the same e-mail
+  arriving twice would count twice.
+- **The same long template also comes in English** and under a subject that states no direction
+  (`Fio banka - zmena zustatku`); both are read, from
+  [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/FioBankEmailNoticeParserTest.php)'s
+  samples (MIT), not yet from a real e-mail. The English sentence is `the balance of account … has increased by CZK 1.00
+  on 10/25/2026 at 10:37.`: the currency before the amount, a comma between thousands, the month before the day. Its
+  labels are `Transaction type`, `Counterparty`, `Instruction ID`, `Variable symbol`, `Constant symbol`,
+  `Message for beneficiary` and `Current balance`. A Fio client reported English notices on some accounts and Czech on
+  others ([myinvoice#291](https://github.com/radekhulan/myinvoice/issues/291)).
+- **The date may be written with spaces and without leading zeros** (`1. 9. 2026 v 8:05`), as myinvoice reads it.
 
 ## The message
 
@@ -60,7 +70,7 @@ Every line under `Další parametry` but `Typ pohybu` and `ID pokynu` appears on
 
 | `Typ pohybu` | `type()` |
 |---|---|
-| `Bezhotovostní příjem`, `Bezhotovostní platba`, `Okamžitá příchozí platba`, `Příjem převodem uvnitř banky` | `TRANSFER` |
+| `Bezhotovostní příjem`, `Bezhotovostní platba`, `Odchozí platba`, `Okamžitá příchozí platba`, `Příjem převodem uvnitř banky` | `TRANSFER` |
 | `Platba kartou` | `CARD` |
 | `Inkaso` | `DIRECT_DEBIT` |
 | anything not seen yet | `GENERAL` |
@@ -98,7 +108,7 @@ The settings form ([setup](../../../setup.md#fio-banka-cz)) decides the shape of
 | | `Fio banka - prijem na konte`, six lines | 🚫 no transaction id, no currency; seen 2026-08-18, it matches none of the three previews |
 | Direction | all, incoming, outgoing | ✅ both directions; it decides which e-mails come, not their shape |
 | Language | Czech | ✅ |
-| | English | 👁 [#11](https://github.com/landsman/bank-java/issues/11) |
+| | English | ❔ read from public samples; a real one still needed, [#11](https://github.com/landsman/bank-java/issues/11) |
 | Online notifications | on | ✅ |
 | | off: held between 00:00 and 8:00 | ✅ same e-mail, sent later |
 | Filters | amount, counter-account, bank code, variable symbol | n/a: they decide which e-mails come, not their shape |
