@@ -198,6 +198,10 @@ public final class DkimVerifier {
                     throw new PermFailException("key " + name + " is in testing mode");
                 }
                 Set<String> pinned = pins.get(domain.toString().toLowerCase(Locale.ROOT));
+                if (pinned != null && pinned.isEmpty()) {
+                    throw new PermFailException("no key is pinned for " + domain + " yet: " + name + " has fingerprint "
+                            + fingerprint(key) + ", to pin once a real e-mail confirms it");
+                }
                 if (pinned != null && !pinned.contains(fingerprint(key))) {
                     throw new PermFailException("key " + name + " is not one of the keys pinned for " + domain
                             + " (fingerprint " + fingerprint(key) + ")");

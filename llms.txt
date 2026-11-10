@@ -26,7 +26,8 @@ Mistakes to avoid:
 - Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice. `messageId()` is set only when the
   bank signs it; never deduplicate on a `Message-ID` header read elsewhere, which a copy of the e-mail can change.
 - `balance()` is the balance right after the payment and may be `null`; never take it for the account's current balance.
-- `counterAccount()` is `null` for a card payment.
+- `counterAccount()` is `null` for a card payment; `account()` and `transactionId()` are `null` for MONETA, which
+  masks the account and prints no id: tell the merchant by the inbound address, deduplicate on a signed `messageId()`.
 - `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.
 - Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
 - Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.

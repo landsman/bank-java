@@ -113,6 +113,19 @@ class DkimVerifierTest {
     }
 
     @Test
+    void refusesEveryKeyOfABankWithNonePinnedYetAndNamesTheOneDnsGave() throws Exception {
+        KeyPair key = rsa(1024);
+        DkimVerifier verifier = verifierFor(key).pinnedKeys("airbank.cz", Set.of());
+
+        DkimResult result = verifier.verify(signed(MESSAGE, key, ""), "airbank.cz");
+
+        assertInstanceOf(DkimResult.Failed.class, result);
+        String reason = ((DkimResult.Failed) result).reason();
+        assertTrue(reason.contains("no key is pinned"), reason);
+        assertTrue(reason.contains(DkimVerifier.fingerprint(key.getPublic())), reason);
+    }
+
+    @Test
     void isTemporaryWhenTheKeyCannotBeLookedUp() throws Exception {
         KeyPair key = rsa(1024);
         DkimVerifier verifier = DkimVerifier.with((s, d) -> {
