@@ -5,6 +5,8 @@ plugins {
     id("com.diffplug.spotless") version "8.11.0"
     id("com.autonomousapps.dependency-analysis") version "3.20.1"
     id("net.ltgt.errorprone") version "5.2.0" apply false
+    id("io.spring.dependency-management") version "1.1.7" apply false
+    kotlin("jvm") version "2.4.21" apply false
 }
 
 // The tests run on the JDK -PtestsJdk names, so CI's matrix checks the jars on each JDK they support.
@@ -22,8 +24,27 @@ allprojects {
     }
 }
 
-// What ships is held to the strictest checks: every warning fails, and JSpecify is enforced by NullAway.
+// Every project's tests run on the JDK -PtestsJdk names, testing/ included.
 subprojects {
+    plugins.withType<JavaPlugin> {
+        val toolchains = extensions.getByType<JavaToolchainService>()
+        tasks.withType<Test>().configureEach {
+            useJUnitPlatform()
+            if (testsJdk.isPresent) {
+                javaLauncher = toolchains.launcherFor { languageVersion = JavaLanguageVersion.of(testsJdk.get()) }
+            }
+        }
+    }
+    tasks.withType<JavaCompile>().configureEach {
+        // Built on any current JDK, usable from Java 21.
+        options.release = 21
+    }
+}
+
+// What ships is held to the strictest checks: every warning fails, and JSpecify is enforced by NullAway. testing/ is
+// callers and stays ordinary.
+subprojects {
+    if (!path.startsWith(":modules:")) return@subprojects
     apply(plugin = "net.ltgt.errorprone")
     apply(plugin = "com.autonomousapps.dependency-analysis")
     dependencies {
@@ -31,8 +52,6 @@ subprojects {
         "errorprone"("com.uber.nullaway:nullaway:0.14.3")
     }
     tasks.withType<JavaCompile>().configureEach {
-        // Built on any current JDK, usable from Java 21.
-        options.release = 21
         options.compilerArgs.addAll(listOf("-Xlint:all,-serial", "-Werror"))
         options.errorprone {
             check("NullAway", CheckSeverity.ERROR)
@@ -43,16 +62,6 @@ subprojects {
     tasks.withType<Javadoc>().configureEach {
         (options as StandardJavadocDocletOptions).addStringOption("Xdoclint:all,-missing", "-quiet")
     }
-    plugins.withType<JavaPlugin> {
-        val toolchains = extensions.getByType<JavaToolchainService>()
-        tasks.withType<Test>().configureEach {
-            useJUnitPlatform()
-            if (testsJdk.isPresent) {
-                javaLauncher = toolchains.launcherFor { languageVersion = JavaLanguageVersion.of(testsJdk.get()) }
-            }
-        }
-    }
-
     // Published to this repository's GitHub Packages.
     apply(plugin = "maven-publish")
     plugins.withType<JavaLibraryPlugin> {
@@ -107,11 +116,15 @@ dependencyAnalysis {
 
 spotless {
     java {
-        target("modules/*/src/**/*.java")
+        target("modules/*/src/**/*.java", "testing/**/src/**/*.java")
         palantirJavaFormat("2.103.0")
     }
+    kotlin {
+        target("testing/**/src/**/*.kt")
+        ktlint()
+    }
     kotlinGradle {
-        target("*.gradle.kts", "modules/*/*.gradle.kts")
+        target("*.gradle.kts", "modules/*/*.gradle.kts", "testing/**/*.gradle.kts")
         ktlint()
     }
 }

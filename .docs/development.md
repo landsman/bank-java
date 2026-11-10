@@ -7,7 +7,11 @@ It also fails when a module declares a dependency it does not use, or uses one i
 change is in `build/reports/dependency-analysis/build-health-report.txt`.
 
 What ships is in [modules/](../modules): `bank-notifications`, with the e-mail parsers in `cz.insuit.bank.notification`
-and the DKIM verification in `cz.insuit.bank.notification.dkim`.
+and the DKIM verification in `cz.insuit.bank.notification.dkim`. Projects that use it the way a caller's build would, on
+Spring Boot 3 and 4 and from Kotlin, are in [testing/](../testing/README.md).
+
+`make lock` rewrites `modules/bank-notifications/gradle.lockfile` after a dependency changes; the weekly vulnerability
+scan in `security.yml` reads it, and the build fails when it drifts from what ships.
 
 ## Adding a bank
 

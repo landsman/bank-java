@@ -11,16 +11,22 @@ A working document: what is still unknown and what this library does next.
   both real e-mails verify against Air Bank's published key and fail once their amount is changed.
 - **32 tests**: the parser on the two fixtures and its refusals, account checksums, the verifier on messages signed
   in the test, reading end to end, and hostile input that must end in `BankNotificationException` and nothing else.
+- **Tested as a caller** on Spring Boot 3.5.16 and 4.1.2 and from Kotlin ([testing](../../testing/README.md)).
+- **Scanned**: Semgrep and a dependency scan weekly and on every pull request; Dependabot proposes bumps.
 - **Typed**: `BankAccount` with the modulo 11 check, `Money` and `PaymentSymbols` as in `moneta-api-java`, one sealed
   `BankNotificationException`.
 
 ## Next
 
 - **Releasing**: a release workflow and `make release` as in `moneta-api-java`, then `0.1.0`.
-- **Dependabot and a vulnerability scan**, so a jDKIM release with the parsing fixes is noticed; then raise the 64 KiB
-  limit.
-- **More Air Bank samples**: a business account, constant and specific symbols, an incoming message, 1 000 CZK and more,
-  a card payment, an instant transfer.
+- **A jDKIM release with the parsing fixes**: Dependabot proposes it; then raise the 64 KiB limit.
+- **More Air Bank samples**, one issue each: [a business account](https://github.com/landsman/bank-java/issues/2),
+  [constant and specific symbols](https://github.com/landsman/bank-java/issues/3),
+  [an incoming message](https://github.com/landsman/bank-java/issues/4),
+  [1 000 CZK and more](https://github.com/landsman/bank-java/issues/5),
+  [a card payment](https://github.com/landsman/bank-java/issues/6),
+  [instant against ordinary](https://github.com/landsman/bank-java/issues/7),
+  [the lowest amount notified](https://github.com/landsman/bank-java/issues/8).
 
 ## Later
 
