@@ -20,6 +20,7 @@ import org.jspecify.annotations.Nullable;
  * @param message the payment's message, if the bank prints it
  * @param bookedOn the booking date the bank states
  * @param transactionId the bank's own id of the transaction, the key to deduplicate on, per bank
+ * @param balance the account's balance right after the payment, if the bank states it in a form this library reads
  */
 public record Transaction(
         String signedBy,
@@ -32,14 +33,18 @@ public record Transaction(
         PaymentSymbols symbols,
         @Nullable String message,
         LocalDate bookedOn,
-        String transactionId) {
+        String transactionId,
+        @Nullable Balance balance) {
 
     /** Whether money arrived on the account. */
     public boolean incoming() {
         return direction == Direction.INCOMING;
     }
 
-    /** Leaves out the other side and the message, so logging a transaction does not log who paid or what they wrote. */
+    /**
+     * Leaves out the other side, the message and the balance, so logging a transaction does not log who paid, what
+     * they wrote or how much the account holds.
+     */
     @Override
     public String toString() {
         return "Transaction[signedBy=%s, direction=%s, type=%s, account=%s, amount=%s, symbols=%s, bookedOn=%s, transactionId=%s]"

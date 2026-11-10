@@ -2,6 +2,7 @@ package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
@@ -11,12 +12,14 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Currency;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 /**
- * The fixtures are two real Air Bank e-mails from 2026-11-10, a personal account, with the accounts, names, balance,
+ * The fixtures are three real Air Bank e-mails from 2026-11-10, a personal account, with the accounts, names, balance,
  * transaction codes and recipient replaced and the transport headers and DKIM signature removed. Everything else,
  * CRLF line ends and the U+FEFF after the outgoing transaction code included, is byte for byte what the bank sent.
  */
@@ -38,7 +41,8 @@ class AirBankTest {
                         new PaymentSymbols("1337", null, null),
                         null,
                         LocalDate.of(2026, 11, 10),
-                        "100000000001"),
+                        "100000000001",
+                        balance("512.30", 14, 39)),
                 parsed);
     }
 
@@ -58,17 +62,51 @@ class AirBankTest {
                         new PaymentSymbols("7331", null, null),
                         "test email airbank",
                         LocalDate.of(2026, 11, 10),
-                        "100000000002"),
+                        "100000000002",
+                        balance("511.30", 14, 41)),
                 parsed);
     }
 
     @Test
-    void keepsThePayerAndTheMessageOutOfToString() throws IOException {
-        String logged =
-                BankNotifications.parseUnverified(fixture("outgoing.eml")).toString();
+    void readsTheMessageAndAllThreeSymbolsOfAnIncomingPayment() throws IOException {
+        Transaction parsed = BankNotifications.parseUnverified(fixture("incoming-message.eml"));
 
-        assertFalse(logged.contains("test email airbank"), logged);
+        assertEquals(
+                new Transaction(
+                        "airbank.cz",
+                        Direction.INCOMING,
+                        Transaction.Type.TRANSFER,
+                        BankAccount.parse("1234567899/3030"),
+                        BankAccount.parse("9876543211/2010"),
+                        "Novák, Jan",
+                        czk("1.00"),
+                        new PaymentSymbols("1337", "1234", "123456789"),
+                        "hello gotham!",
+                        LocalDate.of(2026, 11, 10),
+                        "100000000003",
+                        balance("512.30", 18, 54)),
+                parsed);
+    }
+
+    @Test
+    void leavesOutABalanceInAFormatNotSeenYet() throws IOException {
+        String changed = text("incoming.eml").replace("je 512,30 CZK.", "je 1 512,30 CZK.");
+
+        Transaction parsed = BankNotifications.parseUnverified(bytes(changed));
+
+        assertNull(parsed.balance());
+        assertEquals(czk("1.00"), parsed.amount());
+    }
+
+    @Test
+    void keepsThePayerTheMessageAndTheBalanceOutOfToString() throws IOException {
+        String logged = BankNotifications.parseUnverified(fixture("incoming-message.eml"))
+                .toString();
+
+        assertFalse(logged.contains("hello gotham"), logged);
         assertFalse(logged.contains("9876543211"), logged);
+        assertFalse(logged.contains("Novák"), logged);
+        assertFalse(logged.contains("512.3"), logged);
     }
 
     @Test
@@ -127,8 +165,31 @@ class AirBankTest {
     }
 
     @Test
+    void refusesASymbolThatIsNotDigits() throws IOException {
+        String changed = text("incoming-message.eml").replace("Konstantní symbol: 1234", "Konstantní symbol: 12a4");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
+    void refusesASymbolSmuggledInAfterTheIncomingMessage() throws IOException {
+        String changed = text("incoming-message.eml")
+                .replace("Specifický symbol: 123456789\r\n", "")
+                .replace(
+                        "Zpráva pro příjemce: hello gotham!\r\n",
+                        "Zpráva pro příjemce: x\r\nSpecifický symbol: 42\r\n");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void reportsAMessageThatIsNoEmail() {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(new byte[0]));
+    }
+
+    private static Balance balance(String available, int hour, int minute) {
+        return new Balance(
+                czk(available), ZonedDateTime.of(2026, 11, 10, hour, minute, 0, 0, ZoneId.of("Europe/Prague")));
     }
 
     private static Money czk(String amount) {

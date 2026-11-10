@@ -61,7 +61,7 @@ class HostileInputTest {
         invalidUtf8[incoming.length + 2] = (byte) 0xFF;
         inputs.add(invalidUtf8);
 
-        for (byte[] fixture : List.of(incoming, outgoing)) {
+        for (byte[] fixture : List.of(incoming, outgoing, fixture("incoming-message.eml"))) {
             // Cut short at every 50th byte: a header, the blank line, a field, a number, each broken off.
             for (int length = 0; length < fixture.length; length += 50) {
                 inputs.add(Arrays.copyOf(fixture, length));

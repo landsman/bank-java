@@ -4,6 +4,8 @@ import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import cz.insuit.bank.notification.Transaction.Direction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Currency;
@@ -62,11 +64,11 @@ final class AirBank {
                 String label = labelled.group(1);
                 // The message is the only free text a payer controls. Should the bank ever pass a line break through,
                 // a forged "Variabilní symbol:" after it must not count: past the message only the code may follow.
-                if (afterMessage && !label.equals(TRANSACTION_ID)) {
+                if (afterMessage && !label.equals(TRANSACTION_ID) && !MESSAGES.contains(label)) {
                     throw new Unparsed("'" + label + "' after the message");
                 }
                 if (fields.put(label, labelled.group(2)) != null) throw new Unparsed("two '" + label + "' lines");
-                afterMessage |= label.equals(MESSAGE);
+                afterMessage |= MESSAGES.contains(label);
             }
         }
 
@@ -90,10 +92,9 @@ final class AirBank {
         if (booked == null || transactionId == null || !transactionId.matches("\\d+")) {
             throw new Unparsed("booking date or transaction code missing");
         }
-        String variableSymbol = fields.get(VARIABLE_SYMBOL);
-        if (variableSymbol != null && !variableSymbol.matches("\\d{1,10}")) {
-            throw new Unparsed("variable symbol is not 1 to 10 digits");
-        }
+        String variableSymbol = symbol(fields, VARIABLE_SYMBOL);
+        String constantSymbol = symbol(fields, CONSTANT_SYMBOL);
+        String specificSymbol = symbol(fields, SPECIFIC_SYMBOL);
         LocalDate bookedOn;
         try {
             bookedOn = LocalDate.parse(booked, DATE);
@@ -118,10 +119,12 @@ final class AirBank {
                     BankAccount.parse(counterAccount),
                     counterName,
                     direction == Direction.INCOMING ? signed : signed.negate(),
-                    new PaymentSymbols(variableSymbol, null, null),
-                    fields.get(MESSAGE),
+                    new PaymentSymbols(variableSymbol, constantSymbol, specificSymbol),
+                    // The incoming sample said "pro příjemce", the outgoing one "pro plátce".
+                    fields.getOrDefault(MESSAGE_FOR_RECIPIENT, fields.get(MESSAGE_FOR_PAYER)),
                     bookedOn,
-                    transactionId);
+                    transactionId,
+                    balance(summary.group(0)));
         } catch (IllegalArgumentException e) {
             // An account failing its checksum, or a currency code ISO 4217 does not know: a misread, not a payment.
             throw new Unparsed(e.getMessage() == null ? "invalid value" : e.getMessage(), e);
@@ -134,18 +137,49 @@ final class AirBank {
     private static final Pattern INCOMING = Pattern.compile("Příchozí úhrada z účtu (.*) číslo (\\S+/\\d{4})");
     private static final Pattern OUTGOING = Pattern.compile("Odchozí úhrada na účet číslo (\\S+/\\d{4})");
     private static final Pattern LABELLED =
-            Pattern.compile("(Částka|Datum zaúčtování|Variabilní symbol|Zpráva pro plátce|Kód transakce): (.*)");
+            Pattern.compile("(Částka|Datum zaúčtování|Variabilní symbol|Konstantní symbol|Specifický symbol"
+                    + "|Zpráva pro příjemce|Zpráva pro plátce|Kód transakce): (.*)");
+    private static final Pattern BALANCE = Pattern.compile(
+            "\\. Dostupný zůstatek k (\\d{1,2}\\.\\d{1,2}\\.\\d{4} v \\d{1,2}:\\d{2}) je (\\d+),(\\d{2}) ([A-Z]{3})\\.");
     private static final Pattern MONEY = Pattern.compile("(\\d+),(\\d{2}) ([A-Z]{3})");
     private static final String ZERO_WIDTH_NO_BREAK_SPACE = String.valueOf((char) 0xFEFF);
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d.M.uuuu");
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("d.M.uuuu 'v' H:mm");
+    private static final ZoneId PRAGUE = ZoneId.of("Europe/Prague");
 
     private static final String AMOUNT = "Částka";
     private static final String BOOKED_ON = "Datum zaúčtování";
     private static final String VARIABLE_SYMBOL = "Variabilní symbol";
-    // Seen on an outgoing payment. The incoming label, and KS and SS, are not known yet; until a sample shows them
-    // they are not read.
-    private static final String MESSAGE = "Zpráva pro plátce";
+    private static final String CONSTANT_SYMBOL = "Konstantní symbol";
+    private static final String SPECIFIC_SYMBOL = "Specifický symbol";
+    private static final String MESSAGE_FOR_RECIPIENT = "Zpráva pro příjemce";
+    private static final String MESSAGE_FOR_PAYER = "Zpráva pro plátce";
+    private static final Set<String> MESSAGES = Set.of(MESSAGE_FOR_RECIPIENT, MESSAGE_FOR_PAYER);
     private static final String TRANSACTION_ID = "Kód transakce";
+
+    private static @Nullable String symbol(Map<String, String> fields, String label) {
+        String symbol = fields.get(label);
+        if (symbol != null && !symbol.matches("\\d{1,10}")) throw new Unparsed(label + " is not 1 to 10 digits");
+        return symbol;
+    }
+
+    /**
+     * The balance in the summary sentence, or {@code null} when it is not in the one format seen so far. How 1 000 and
+     * more, or an overdraft, is written has not been seen; a balance is extra information and never a reason to refuse
+     * the payment, so an unknown format leaves it out instead of making the message {@link Unparsed}.
+     */
+    private static @Nullable Balance balance(String summary) {
+        Matcher matcher = BALANCE.matcher(summary);
+        if (!matcher.find()) return null;
+        try {
+            Money available = new Money(
+                    new BigDecimal(matcher.group(2) + "." + matcher.group(3)), Currency.getInstance(matcher.group(4)));
+            return new Balance(
+                    available, LocalDateTime.parse(matcher.group(1), DATE_TIME).atZone(PRAGUE));
+        } catch (DateTimeParseException | IllegalArgumentException e) {
+            return null;
+        }
+    }
 
     private AirBank() {}
 }

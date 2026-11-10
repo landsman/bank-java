@@ -64,9 +64,10 @@ from a fake.
 | `message()` | the payment's message, when the bank prints it; `null` otherwise |
 | `bookedOn()` | the booking date the bank states |
 | `transactionId()` | the bank's own id of the transaction |
+| `balance()` | a `Balance`: the `available()` money right after the payment and `asOf()`, the bank's time to the minute; `null` when the bank does not state it in a form the library reads |
 
-`toString()` leaves out the other side and the message, so logging a transaction does not log who paid or what they
-wrote.
+`toString()` leaves out the other side, the message and the balance, so logging a transaction does not log who paid,
+what they wrote or how much the account holds.
 
 `BankAccount` is `[prefix-]number/bankCode`, without leading zeros, so the same account is equal however it was written,
 and it checks the Czech National Bank's modulo 11 rule: an account number misread from an e-mail is refused, not handed

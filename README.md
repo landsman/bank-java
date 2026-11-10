@@ -35,8 +35,9 @@ For Java 21+ and Kotlin, one jar, no framework required.
 | Amount | ✅ | ✅ below 1 000 so far |
 | Who paid: name and account | ✅ | ✅ |
 | Variable symbol | ✅ | ✅ |
-| Message for the recipient | ✅ outgoing | ✅ |
+| Message for the recipient | ✅ | ✅ |
 | Date and transaction id | ✅ | ✅ |
+| Balance after the payment | ✅ | ✅ below 1 000 so far |
 | Proven to come from the bank | ✅ | ✅ |
 | Other banks | n/a | ⬜ |
 

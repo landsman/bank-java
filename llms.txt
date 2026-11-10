@@ -22,6 +22,7 @@ Mistakes to avoid:
 - Never act on `Unverified`: anyone can send an e-mail that looks like the bank's.
 - A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
 - Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice.
+- `balance()` is the balance right after the payment and may be `null`; never take it for the account's current balance.
 - `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.
 - Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
 - Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.
