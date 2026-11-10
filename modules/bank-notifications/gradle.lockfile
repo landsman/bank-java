@@ -11,6 +11,7 @@ org.apache.james:apache-mime4j-core:0.8.12=runtimeClasspath
 org.apache.james:apache-mime4j-dom:0.8.12=runtimeClasspath
 org.eclipse.angus:angus-activation:2.0.3=runtimeClasspath
 org.eclipse.angus:angus-mail:2.0.5=runtimeClasspath
+org.jsoup:jsoup:1.23.2=runtimeClasspath
 org.jspecify:jspecify:1.0.1=runtimeClasspath
 org.slf4j:slf4j-api:1.7.36=runtimeClasspath
 empty=
