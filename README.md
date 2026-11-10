@@ -57,33 +57,21 @@ setting to forget: `BankNotifications.withDns().read(raw)`. Two questions stay y
 
 ## What it covers
 
-What a bank's notification e-mail carries, seen in its real e-mails, against what this library reads. ❔ means no
-sample has shown it yet, so the bank may well send it.
+What Air Bank's e-mail carries, seen in its real e-mails, against what this library reads. ❔ means no sample has
+shown it yet. Every field is in [Air Bank's page](.docs/air-bank.md).
 
 | Feature | Air Bank e-mail | This library |
 |---|:---:|:---:|
-| Incoming transfer | ✅ | ✅ |
-| Outgoing transfer | ✅ | ✅ |
+| Incoming payment | ✅ | ✅ |
+| Outgoing payment | ✅ | ✅ |
 | Card payment | ❔ | ⬜ |
 | Direct debit | ❔ | ⬜ |
-| The account it is about | ✅ | ✅ |
-| Counter-account | ✅ | ✅ |
-| Counter-party name | ✅ incoming only | ✅ |
-| Amount and currency, under 1 000 | ✅ | ✅ |
-| Amount of 1 000 and more | ❔ | ⬜ |
+| Amount | ✅ | ✅ below 1 000 so far |
+| Who paid: name and account | ✅ | ✅ |
 | Variable symbol | ✅ | ✅ |
-| Constant and specific symbol | ❔ | ⬜ |
-| Message, outgoing | ✅ | ✅ |
-| Message, incoming | ❔ | ⬜ |
-| Booking date | ✅ | ✅ |
-| Transaction id | ✅ | ✅ |
-| Balance after the payment | ✅ | ⬜ |
-| Business account | ❔ | ⬜ |
-| DKIM signature over the whole body | ✅ | ✅ verified |
-| DNSSEC-signed key | ✅ | ✅ validated from the root |
-| Key pinned in the release | n/a | ✅ checked daily against DNS |
-| Sent straight to any address, no mailbox forward | ✅ | n/a |
+| Message for the recipient | ✅ outgoing | ✅ |
+| Date and transaction id | ✅ | ✅ |
+| Proven to come from the bank | ✅ | ✅ |
 | Other banks | n/a | ⬜ |
-| Spring Boot auto-configuration | n/a | ⬜ |
 
 Licence: [Apache 2.0](LICENSE)
