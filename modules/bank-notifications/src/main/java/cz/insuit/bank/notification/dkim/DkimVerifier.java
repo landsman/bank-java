@@ -9,6 +9,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -138,7 +139,11 @@ public final class DkimVerifier {
             if (!signer.equals(expected)) {
                 reasons.add("d=" + signer + " is not " + expected);
             } else if (result.isSuccess() && signature.getBodyHashLimit() == WHOLE_BODY) {
-                return new DkimResult.Verified(signer, signature.getSelector().toString());
+                Set<String> headers = new HashSet<>();
+                for (CharSequence header : signature.getHeaders()) {
+                    headers.add(header.toString().toLowerCase(Locale.ROOT));
+                }
+                return new DkimResult.Verified(signer, signature.getSelector().toString(), headers);
             } else if (result.isSuccess()) {
                 reasons.add("d=" + signer + " signs only the first " + signature.getBodyHashLimit() + " body bytes");
             } else if (result.getResultType() == Result.Type.TEMPERROR) {

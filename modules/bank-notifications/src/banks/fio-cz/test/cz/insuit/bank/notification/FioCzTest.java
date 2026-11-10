@@ -43,7 +43,8 @@ class FioCzTest {
                         "batmobil / nahradni dily",
                         LocalDate.of(2026, 10, 11),
                         "10000000001",
-                        balance("12345.67", 2026, 10, 11, 18, 29)),
+                        balance("12345.67", 2026, 10, 11, 18, 29),
+                        "<0000.0.0.JavaMail.ums@sap.private.fio.cz>"),
                 read("incoming-instant.eml"));
     }
 
@@ -72,7 +73,8 @@ class FioCzTest {
                         "Ošetření psa Ace",
                         LocalDate.of(2026, 11, 6),
                         "10000000003",
-                        balance("51577.67", 2026, 11, 6, 14, 8)),
+                        balance("51577.67", 2026, 11, 6, 14, 8),
+                        "<0000.0.0.JavaMail.ums@sap.private.fio.cz>"),
                 read("outgoing-transfer.eml"));
     }
 

@@ -108,7 +108,8 @@ final class FioCz implements Bank {
                     at.toLocalDate(),
                     transactionId,
                     // A balance in a format not seen yet, an overdraft perhaps, is left out; the payment still counts.
-                    available == null ? null : new Balance(available, at));
+                    available == null ? null : new Balance(available, at),
+                    null);
         } catch (IllegalArgumentException e) {
             // An account failing its checksum, or a currency code ISO 4217 does not know: a misread, not a payment.
             throw new Unparsed(e.getMessage() == null ? "invalid value" : e.getMessage(), e);

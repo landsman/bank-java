@@ -30,7 +30,7 @@ class DkimVerifierTest {
 
         DkimResult result = verifierFor(key).verify(signed(MESSAGE, key, ""), "airbank.cz");
 
-        assertEquals(new DkimResult.Verified("airbank.cz", "ab"), result);
+        assertEquals(new DkimResult.Verified("airbank.cz", "ab", Set.of("date", "to", "from", "subject")), result);
     }
 
     @Test
@@ -95,7 +95,8 @@ class DkimVerifierTest {
                 verifierFor(key).pinnedKeys("airbank.cz", Set.of(DkimVerifier.fingerprint(key.getPublic())));
 
         assertEquals(
-                new DkimResult.Verified("airbank.cz", "ab"), verifier.verify(signed(MESSAGE, key, ""), "airbank.cz"));
+                new DkimResult.Verified("airbank.cz", "ab", Set.of("date", "to", "from", "subject")),
+                verifier.verify(signed(MESSAGE, key, ""), "airbank.cz"));
     }
 
     @Test

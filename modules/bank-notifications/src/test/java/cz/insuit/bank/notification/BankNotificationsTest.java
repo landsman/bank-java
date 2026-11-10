@@ -1,6 +1,7 @@
 package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cz.insuit.bank.notification.BankNotificationException.TemporaryFailure;
@@ -84,10 +85,25 @@ class BankNotificationsTest {
                 selector.equals("ab") && domain.equals("airbank.cz") ? List.of(record) : List.of());
     }
 
+    @Test
+    void keepsTheMessageIdOnlyWhenTheSignatureCoversIt() throws Exception {
+        // Air Bank signs Date, To, From and Subject: an unsigned Message-ID could be changed on a copy of the e-mail.
+        assertNull(notifications().read(signed("incoming.eml")).messageId());
+        assertEquals(
+                "<0000@localhost.localdomain>",
+                notifications()
+                        .read(signed("incoming.eml", "Date:To:From:Subject:Message-ID"))
+                        .messageId());
+    }
+
     private static byte[] signed(String name) throws Exception {
+        return signed(name, "Date:To:From:Subject");
+    }
+
+    private static byte[] signed(String name, String headers) throws Exception {
         byte[] message = fixture(name);
         String header = new DKIMSigner(
-                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=Date:To:From:Subject; bh=; b=;",
+                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=" + headers + "; bh=; b=;",
                         key.getPrivate())
                 .sign(new ByteArrayInputStream(message));
         byte[] prefix = (header + "\r\n").getBytes(StandardCharsets.UTF_8);

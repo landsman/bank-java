@@ -75,6 +75,7 @@ from a fake.
 | `message()` | the payment's message, when the bank prints it; `null` otherwise |
 | `bookedOn()` | the booking date the bank states |
 | `transactionId()` | the bank's own id of the transaction |
+| `messageId()` | the e-mail's `Message-ID`, only when the bank's DKIM signature covers it; `null` otherwise (Air Bank and Fio do not sign it) |
 | `balance()` | a `Balance`: the `available()` money right after the payment and `asOf()`, the bank's time to the minute; `null` when the bank does not state it in a form the library reads |
 
 `toString()` leaves out the other side, the message and the balance, so logging a transaction does not log who paid,
@@ -91,7 +92,9 @@ the same shape as in `moneta-api-java`.
 about *your* account: a genuine notification of somebody else's account, sent to your address, verifies just as well.
 If each customer has their own address, compare against that customer's account.
 
-**Deduplicate on `transactionId()`**, per bank. The same e-mail can arrive twice, and two real payments can share an
+**Deduplicate on `transactionId()`**, per bank, or on a signed `messageId()` where a bank gives no transaction id.
+Never on an unsigned `Message-ID` from your mail server: anyone holding a copy of the e-mail can change it while the
+signature stays valid, and the same payment counts twice. The same e-mail can arrive twice, and two real payments can share an
 amount, a variable symbol and a date.
 
 ## Keys
