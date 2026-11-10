@@ -19,6 +19,8 @@ import org.jspecify.annotations.Nullable;
  */
 final class NotificationLines {
 
+    private static final Pattern ITEM_SEPARATOR = Pattern.compile(" - ");
+
     private final List<String> lines;
 
     /** Splits the body into stripped lines, after the bank's own clean-up of each one (an invisible character, say). */
@@ -87,6 +89,26 @@ final class NotificationLines {
             pairs.add(Map.entry(label, isValue ? next : ""));
         }
         return fields(pairs, freeText, allowedAfterFreeText);
+    }
+
+    /**
+     * Like {@link #labelled}, for a list of {@code - label: value} items, one or several to a line
+     * ({@code - účet protistrany: 1234567899 - banka protistrany: 0800}). Only lines starting with {@code - } are read,
+     * and only labels in {@code labels}; a value is cut at the next {@code " - label:"}, so a value must never hold
+     * {@code " - "} followed by a known label.
+     */
+    Map<String, String> listed(Set<String> labels) {
+        List<Map.Entry<String, String>> pairs = new ArrayList<>();
+        for (String line : lines) {
+            if (!line.startsWith("- ")) continue;
+            for (String item : ITEM_SEPARATOR.splitAsStream(" " + line).toList()) {
+                int colon = item.indexOf(':');
+                if (colon < 0) continue;
+                String label = item.substring(0, colon).strip();
+                if (labels.contains(label)) pairs.add(Map.entry(label, item.substring(colon + 1)));
+            }
+        }
+        return fields(pairs, Set.of(), Set.of());
     }
 
     /**

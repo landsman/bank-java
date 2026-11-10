@@ -24,22 +24,22 @@ For Java 21+ and Kotlin, one jar, no framework required.
 
 ## What it covers
 
-✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. MONETA is read from public samples only. Details per bank:
-[Air Bank](.docs/air-bank.md), [Fio CZ](.docs/fio-cz.md), [MONETA](.docs/moneta.md).
+✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. MONETA and Creditas are read from public samples only. Details per bank:
+[Air Bank](.docs/air-bank.md), [Fio CZ](.docs/fio-cz.md), [MONETA](.docs/moneta.md), [Creditas](.docs/creditas.md).
 
-| Feature | Air Bank | Fio banka CZ | MONETA |
-|---|:---:|:---:|:---:|
-| Incoming payment | ✅ | ✅ | ❔ |
-| Outgoing payment | ✅ | ✅ | ❔ |
-| Card payment | ❔ | ✅ | ❔ |
-| Direct debit | ❔ | ✅ | ❔ |
-| Amount | ✅ below 1 000 so far | ✅ | ❔ |
-| Who paid: name and account | ✅ | ✅ | ❔ account only |
-| Variable symbol | ✅ | ✅ | ❔ from Popis |
-| Message for the recipient | ✅ | ✅ | ❔ |
-| Date and transaction id | ✅ | ✅ | ❔ date only |
-| Balance after the payment | ✅ below 1 000 so far | ✅ | ⬜ |
-| Proven to come from the bank | ✅ | ✅ | ⬜ no key yet |
+| Feature | Air Bank | Fio banka CZ | MONETA | Creditas |
+|---|:---:|:---:|:---:|:---:|
+| Incoming payment | ✅ | ✅ | ❔ | ❔ |
+| Outgoing payment | ✅ | ✅ | ❔ | ❔ |
+| Card payment | ❔ | ✅ | ❔ | ⬜ holds refused |
+| Direct debit | ❔ | ✅ | ❔ | ❔ |
+| Amount | ✅ below 1 000 so far | ✅ | ❔ | ❔ |
+| Who paid: name and account | ✅ | ✅ | ❔ account only | ❔ account only |
+| Variable symbol | ✅ | ✅ | ❔ from Popis | ❔ |
+| Message for the recipient | ✅ | ✅ | ❔ | ⬜ |
+| Date and transaction id | ✅ | ✅ | ❔ date only | ❔ date only |
+| Balance after the payment | ✅ below 1 000 so far | ✅ | ⬜ | ❔ |
+| Proven to come from the bank | ✅ | ✅ | ⬜ no key yet | ⬜ no key yet |
 
 Other banks: not yet.
 
@@ -54,6 +54,7 @@ Other banks: not yet.
 | [How Air Bank's e-mail behaves](.docs/air-bank.md) | what the bank sends and what has not been seen yet |
 | [How Fio CZ's e-mail behaves](.docs/fio-cz.md) | the same for Fio banka in Czechia |
 | [How MONETA's e-mail behaves](.docs/moneta.md) | the same for MONETA, from public samples |
+| [How Creditas's e-mail behaves](.docs/creditas.md) | the same for Creditas, from public samples |
 | [Roadmap](.docs/plan/roadmap.md) | what is next |
 | [Development](.docs/development.md) | building it, adding a bank |
 | [llms.txt](llms.txt) | for a coding assistant adding the library to a project |
