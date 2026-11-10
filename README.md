@@ -24,22 +24,22 @@ For Java 21+ and Kotlin, one jar, no framework required.
 
 ## What it covers
 
-✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. Details per bank: [Air Bank](.docs/air-bank.md),
-[Fio CZ](.docs/fio-cz.md).
+✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. MONETA is read from public samples only. Details per bank:
+[Air Bank](.docs/air-bank.md), [Fio CZ](.docs/fio-cz.md), [MONETA](.docs/moneta.md).
 
-| Feature | Air Bank | Fio banka CZ |
-|---|:---:|:---:|
-| Incoming payment | ✅ | ✅ |
-| Outgoing payment | ✅ | ✅ |
-| Card payment | ❔ | ✅ |
-| Direct debit | ❔ | ✅ |
-| Amount | ✅ below 1 000 so far | ✅ |
-| Who paid: name and account | ✅ | ✅ |
-| Variable symbol | ✅ | ✅ |
-| Message for the recipient | ✅ | ✅ |
-| Date and transaction id | ✅ | ✅ |
-| Balance after the payment | ✅ below 1 000 so far | ✅ |
-| Proven to come from the bank | ✅ | ✅ |
+| Feature | Air Bank | Fio banka CZ | MONETA |
+|---|:---:|:---:|:---:|
+| Incoming payment | ✅ | ✅ | ❔ |
+| Outgoing payment | ✅ | ✅ | ❔ |
+| Card payment | ❔ | ✅ | ❔ |
+| Direct debit | ❔ | ✅ | ❔ |
+| Amount | ✅ below 1 000 so far | ✅ | ❔ |
+| Who paid: name and account | ✅ | ✅ | ❔ account only |
+| Variable symbol | ✅ | ✅ | ❔ from Popis |
+| Message for the recipient | ✅ | ✅ | ❔ |
+| Date and transaction id | ✅ | ✅ | ❔ date only |
+| Balance after the payment | ✅ below 1 000 so far | ✅ | ⬜ |
+| Proven to come from the bank | ✅ | ✅ | ⬜ no key yet |
 
 Other banks: not yet.
 
@@ -53,6 +53,7 @@ Other banks: not yet.
 | [How verification works](.docs/verification.md) | why a forged e-mail cannot pass |
 | [How Air Bank's e-mail behaves](.docs/air-bank.md) | what the bank sends and what has not been seen yet |
 | [How Fio CZ's e-mail behaves](.docs/fio-cz.md) | the same for Fio banka in Czechia |
+| [How MONETA's e-mail behaves](.docs/moneta.md) | the same for MONETA, from public samples |
 | [Roadmap](.docs/plan/roadmap.md) | what is next |
 | [Development](.docs/development.md) | building it, adding a bank |
 | [llms.txt](llms.txt) | for a coding assistant adding the library to a project |
