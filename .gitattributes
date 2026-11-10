@@ -1,0 +1,3 @@
+# Bank e-mails are test fixtures byte for byte, CRLF and all.
+*.eml -text
+*.bat text eol=crlf
