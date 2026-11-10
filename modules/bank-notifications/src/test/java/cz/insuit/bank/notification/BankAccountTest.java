@@ -13,7 +13,7 @@ class BankAccountTest {
     @Test
     void readsAnAccountWithAPrefix() {
         // The Czech National Bank's sample account in its own guidance.
-        BankAccount account = BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ);
+        BankAccount account = BankAccount.parse("19-2000145399/0800", Country.CZ);
 
         assertEquals("19", account.prefix());
         assertEquals("2000145399", account.number());
@@ -23,7 +23,7 @@ class BankAccountTest {
 
     @Test
     void readsAnAccountWithoutAPrefix() {
-        BankAccount account = BankAccount.parse("1234567899/3030", BankAccount.Country.CZ);
+        BankAccount account = BankAccount.parse("1234567899/3030", Country.CZ);
 
         assertNull(account.prefix());
         assertEquals("1234567899/3030", account.toString());
@@ -32,39 +32,35 @@ class BankAccountTest {
     @Test
     void dropsLeadingZerosSoTheSameAccountIsEqual() {
         assertEquals(
-                BankAccount.parse("000019-2000145399/0800", BankAccount.Country.CZ),
-                BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ));
+                BankAccount.parse("000019-2000145399/0800", Country.CZ),
+                BankAccount.parse("19-2000145399/0800", Country.CZ));
         assertEquals(
-                BankAccount.parse("000000-1234567899/3030", BankAccount.Country.CZ),
-                BankAccount.parse("1234567899/3030", BankAccount.Country.CZ));
+                BankAccount.parse("000000-1234567899/3030", Country.CZ),
+                BankAccount.parse("1234567899/3030", Country.CZ));
     }
 
     @Test
     void refusesANumberThatFailsTheChecksum() {
-        assertThrows(
-                IllegalArgumentException.class, () -> BankAccount.parse("1234567890/3030", BankAccount.Country.CZ));
+        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("1234567890/3030", Country.CZ));
     }
 
     @Test
     void refusesAPrefixThatFailsTheChecksum() {
-        assertThrows(
-                IllegalArgumentException.class, () -> BankAccount.parse("18-2000145399/0800", BankAccount.Country.CZ));
+        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("18-2000145399/0800", Country.CZ));
     }
 
     @Test
     void refusesAnythingElse() {
-        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("1234567899", BankAccount.Country.CZ));
-        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("1234567899/30", BankAccount.Country.CZ));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> BankAccount.parse("CZ6508000000192000145399", BankAccount.Country.CZ));
+        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("1234567899", Country.CZ));
+        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("1234567899/30", Country.CZ));
+        assertThrows(IllegalArgumentException.class, () -> BankAccount.parse("CZ6508000000192000145399", Country.CZ));
     }
 
     @Test
     void readsTheLocalFormOfAnotherCountry() {
-        BankAccount account = BankAccount.parse("4019425381/7500", BankAccount.Country.SK);
+        BankAccount account = BankAccount.parse("4019425381/7500", Country.SK);
 
-        assertEquals(BankAccount.Country.SK, account.country());
+        assertEquals(Country.SK, account.country());
         assertEquals("4019425381/7500", account.toString());
     }
 
@@ -73,7 +69,7 @@ class BankAccountTest {
         // The Czech National Bank's sample account, as an IBAN.
         BankAccount spaced = BankAccount.parseIban("CZ65 0800 0000 1920 0014 5399");
 
-        assertEquals(BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ), spaced);
+        assertEquals(BankAccount.parse("19-2000145399/0800", Country.CZ), spaced);
         assertEquals(spaced, BankAccount.parseIban("cz6508000000192000145399"));
     }
 
@@ -82,7 +78,7 @@ class BankAccountTest {
         // A real company's account, printed in a public ČSOB SK sample.
         BankAccount account = BankAccount.parseIban("SK13 7500 0000 0040 1942 5381");
 
-        assertEquals(BankAccount.Country.SK, account.country());
+        assertEquals(Country.SK, account.country());
         assertNull(account.prefix());
         assertEquals("4019425381", account.number());
         assertEquals("7500", account.bankCode());
@@ -92,15 +88,15 @@ class BankAccountTest {
     void writesTheIban() {
         assertEquals(
                 "CZ6508000000192000145399",
-                BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ).iban());
+                BankAccount.parse("19-2000145399/0800", Country.CZ).iban());
         assertEquals(
                 "SK1375000000004019425381",
-                BankAccount.parse("4019425381/7500", BankAccount.Country.SK).iban());
+                BankAccount.parse("4019425381/7500", Country.SK).iban());
     }
 
     @Test
     void writesAnIbanThatReadsBackAsTheSameAccount() {
-        BankAccount account = BankAccount.parse("1234567899/3030", BankAccount.Country.CZ);
+        BankAccount account = BankAccount.parse("1234567899/3030", Country.CZ);
 
         assertEquals(account, BankAccount.parseIban(account.iban()));
     }
@@ -108,8 +104,7 @@ class BankAccountTest {
     @Test
     void keepsTheSameDigitsInTwoCountriesApart() {
         assertNotEquals(
-                BankAccount.parse("4019425381/7500", BankAccount.Country.CZ),
-                BankAccount.parse("4019425381/7500", BankAccount.Country.SK));
+                BankAccount.parse("4019425381/7500", Country.CZ), BankAccount.parse("4019425381/7500", Country.SK));
     }
 
     @Test

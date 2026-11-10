@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import cz.insuit.bank.notification.BankAccount;
 import cz.insuit.bank.notification.BankNotificationException;
 import cz.insuit.bank.notification.BankNotifications;
+import cz.insuit.bank.notification.Country;
 import cz.insuit.bank.notification.Transaction;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ class ReadsOnSpringBootTest {
 
         Transaction t = notifications.read(signed(key));
 
-        assertEquals(BankAccount.parse("1234567899/3030", BankAccount.Country.CZ), t.account());
+        assertEquals(BankAccount.parse("1234567899/3030", Country.CZ), t.account());
         assertEquals(new BigDecimal("1.00"), t.amount().amount());
         assertEquals("1337", t.symbols().variable());
     }

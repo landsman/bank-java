@@ -31,8 +31,8 @@ class RaiffeisenbankTest {
                         "rb.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/5500", BankAccount.Country.CZ),
-                        BankAccount.parse("9876543211/0100", BankAccount.Country.CZ),
+                        BankAccount.parse("1234567899/5500", Country.CZ),
+                        BankAccount.parse("9876543211/0100", Country.CZ),
                         "Pennyworth Alfred",
                         czk("1234.56"),
                         new PaymentSymbols("2606001", "308", null),
@@ -53,7 +53,7 @@ class RaiffeisenbankTest {
         assertEquals(Transaction.Type.CARD, card.type());
         assertEquals(Direction.OUTGOING, card.direction());
         assertEquals(czk("-1234.56"), card.amount());
-        assertEquals(BankAccount.parse("1234567899/5500", BankAccount.Country.CZ), card.account());
+        assertEquals(BankAccount.parse("1234567899/5500", Country.CZ), card.account());
         assertNull(card.counterAccount());
         assertEquals("DEMO SOFTWARE; PRAHA; CZE", card.message());
     }

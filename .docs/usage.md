@@ -102,8 +102,8 @@ handed out. To compare against yours:
 
 | You have | Read it with |
 |---|---|
-| `19-2000145399/0800`, Czech | `BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ)` |
-| `4019425381/7500`, Slovak | `BankAccount.parse("4019425381/7500", BankAccount.Country.SK)` |
+| `19-2000145399/0800`, Czech | `BankAccount.parse("19-2000145399/0800", Country.CZ)` |
+| `4019425381/7500`, Slovak | `BankAccount.parse("4019425381/7500", Country.SK)` |
 | `CZ65 0800 0000 1920 0014 5399` | `BankAccount.parseIban("CZ65 0800 0000 1920 0014 5399")`, with or without spaces; the IBAN says the country |
 
 A local form does not say its country, so `parse` takes it: there is no default. `iban()` writes the IBAN back,

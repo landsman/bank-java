@@ -109,8 +109,8 @@ final class AirBank implements Bank {
                     // Both lines this parser reads say "úhrada", a transfer. A card payment or a direct debit, once
                     // seen, is a line of its own.
                     Transaction.Type.TRANSFER,
-                    BankAccount.parse(summary.group(1), BankAccount.Country.CZ),
-                    BankAccount.parse(counterAccount, BankAccount.Country.CZ),
+                    BankAccount.parse(summary.group(1), Country.CZ),
+                    BankAccount.parse(counterAccount, Country.CZ),
                     counterName,
                     direction == Direction.INCOMING ? signed : signed.negate(),
                     new PaymentSymbols(variableSymbol, constantSymbol, specificSymbol),

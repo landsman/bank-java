@@ -23,12 +23,6 @@ import org.jspecify.annotations.Nullable;
  */
 public record BankAccount(Country country, @Nullable String prefix, String number, String bankCode) {
 
-    /** The countries whose accounts this reads; both number accounts the same way. */
-    public enum Country {
-        CZ,
-        SK
-    }
-
     public BankAccount {
         if (prefix != null && (!prefix.matches("\\d{1,6}") || !checksumHolds(prefix, PREFIX_WEIGHTS))) {
             throw new IllegalArgumentException("not a valid account prefix: " + prefix);

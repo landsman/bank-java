@@ -29,7 +29,7 @@ class MonetaTest {
                         Direction.INCOMING,
                         Transaction.Type.GENERAL,
                         null,
-                        BankAccount.parse("9876543211/0300", BankAccount.Country.CZ),
+                        BankAccount.parse("9876543211/0300", Country.CZ),
                         null,
                         czk("35000.00"),
                         new PaymentSymbols("202600009", null, null),

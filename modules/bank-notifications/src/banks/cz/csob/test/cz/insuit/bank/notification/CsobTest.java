@@ -29,8 +29,8 @@ class CsobTest {
                         "csob.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/0300", BankAccount.Country.CZ),
-                        BankAccount.parse("9876543211/0800", BankAccount.Country.CZ),
+                        BankAccount.parse("1234567899/0300", Country.CZ),
+                        BankAccount.parse("9876543211/0800", Country.CZ),
                         "Pennyworth Alfred",
                         czk("1234.56"),
                         new PaymentSymbols("23456789", "3456", null),
@@ -60,8 +60,7 @@ class CsobTest {
         assertEquals(czk("1234.56"), all.get(0).amount());
         assertEquals(czk("987.65"), all.get(1).amount());
         assertEquals(
-                BankAccount.parse("5555555002/0100", BankAccount.Country.CZ),
-                all.get(1).counterAccount());
+                BankAccount.parse("5555555002/0100", Country.CZ), all.get(1).counterAccount());
         assertEquals(all.get(0).messageId(), all.get(1).messageId());
     }
 
@@ -143,8 +142,8 @@ class CsobTest {
                         "csob.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/0300", BankAccount.Country.CZ),
-                        BankAccount.parse("9876543211/2700", BankAccount.Country.CZ),
+                        BankAccount.parse("1234567899/0300", Country.CZ),
+                        BankAccount.parse("9876543211/2700", Country.CZ),
                         "WAYNE ENTERPRISES",
                         czk("10000.00"),
                         PaymentSymbols.NONE,

@@ -102,7 +102,7 @@ final class FioCz implements Bank {
             if (counterParty != null) {
                 Matcher counter = COUNTER.matcher(counterParty);
                 if (!counter.matches()) throw new Unparsed("counter-party not in the known format");
-                counterAccount = BankAccount.parse(counter.group(1), BankAccount.Country.CZ);
+                counterAccount = BankAccount.parse(counter.group(1), Country.CZ);
                 counterName = counter.group(2);
             }
             String balance = fields.get(BALANCE);
@@ -111,7 +111,7 @@ final class FioCz implements Bank {
                     DOMAIN,
                     direction,
                     type(fields.get(TYPE)),
-                    BankAccount.parse(summary.group("account") + "/" + BANK_CODE, BankAccount.Country.CZ),
+                    BankAccount.parse(summary.group("account") + "/" + BANK_CODE, Country.CZ),
                     counterAccount,
                     counterName,
                     direction == Direction.INCOMING ? amount : amount.negate(),

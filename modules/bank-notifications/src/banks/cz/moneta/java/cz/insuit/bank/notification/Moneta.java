@@ -90,7 +90,7 @@ final class Moneta implements Bank {
                     stated,
                     Transaction.Type.GENERAL,
                     null,
-                    counter == null ? null : BankAccount.parse(counter, BankAccount.Country.CZ),
+                    counter == null ? null : BankAccount.parse(counter, Country.CZ),
                     null,
                     stated == Direction.INCOMING ? value : value.negate(),
                     new PaymentSymbols(variableSymbol, null, null),
