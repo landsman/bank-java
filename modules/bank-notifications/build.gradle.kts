@@ -19,6 +19,18 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// One folder per bank, src/banks/<bank>/: its parser in java/, its tests in test/, its anonymised e-mails in fixtures/.
+// Every folder is in the same package as the rest, so a parser stays package-private; a folder is not a package.
+val banks = file("src/banks").listFiles { file -> file.isDirectory }.orEmpty().sortedBy { it.name }
+
+sourceSets {
+    main { java.srcDirs(banks.map { it.resolve("java") }) }
+    test {
+        java.srcDirs(banks.map { it.resolve("test") })
+        resources.srcDirs(banks.map { it.resolve("fixtures") })
+    }
+}
+
 java {
     withSourcesJar()
     withJavadocJar()
