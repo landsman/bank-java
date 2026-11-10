@@ -53,6 +53,10 @@ Check that `read` returns a `Transaction` for a small payment.
 See [moneta.md](moneta.md#setting-it-up): Upozornění - Info Servis, e-mail for incoming and outgoing payments, only
 from 100 Kč. Not verified yet: no real MONETA e-mail has been read.
 
+## Creditas
+
+See [creditas.md](creditas.md#setting-it-up). Not verified yet: no real Creditas e-mail has been read.
+
 ## Another bank
 
 Not supported yet; see [what it covers](../README.md#what-it-covers). Adding one starts from one of its real e-mails,
