@@ -39,7 +39,7 @@ public final class BankNotifications {
 
     /** Every bank this release reads; adding one is a class in {@code src/banks/<country>/<bank>/} and a line here. */
     private static final List<Bank> BANKS =
-            List.of(new AirBank(), new FioCz(), new Moneta(), new Creditas(), new Raiffeisenbank());
+            List.of(new AirBank(), new FioCz(), new Moneta(), new Creditas(), new Raiffeisenbank(), new Unicredit());
 
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
