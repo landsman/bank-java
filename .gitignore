@@ -13,7 +13,6 @@ out/
 .classpath
 .project
 .settings/
-bin/
 .vscode/
 
 # macOS
