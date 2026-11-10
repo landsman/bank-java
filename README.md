@@ -24,7 +24,7 @@ For Java 21+ and Kotlin, one jar, no framework required.
 
 ## Which banks
 
-Air Bank and Fio banka CZ from real e-mails; MONETA, Creditas, Raiffeisenbank, UniCredit and ČSOB, and ČSOB Slovakia, from public samples, until a real
+Air Bank and Fio banka CZ from real e-mails; MONETA, Creditas, Raiffeisenbank, UniCredit and ČSOB, and ČSOB Slovakia and Tatra banka, from public samples, until a real
 e-mail confirms them. Each bank, and what it reads: [banks](.docs/banks/README.md).
 
 ## Docs
