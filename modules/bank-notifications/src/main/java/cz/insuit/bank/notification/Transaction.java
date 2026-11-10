@@ -22,6 +22,9 @@ import org.jspecify.annotations.Nullable;
  * @param bookedOn the booking date the bank states
  * @param transactionId the bank's own id of the transaction, the key to deduplicate on, per bank
  * @param balance the account's balance right after the payment, if the bank states it in a form this library reads
+ * @param messageId the e-mail's {@code Message-ID}, only when the bank's DKIM signature covers it; unsigned, anyone
+ *     holding a copy of the e-mail could change it, so it is {@code null} then. Where the bank gives no transaction
+ *     id of its own, this is what tells a second delivery of the same e-mail apart
  */
 public record Transaction(
         String signedBy,
@@ -35,7 +38,26 @@ public record Transaction(
         @Nullable String message,
         LocalDate bookedOn,
         String transactionId,
-        @Nullable Balance balance) {
+        @Nullable Balance balance,
+        @Nullable String messageId) {
+
+    /** The same transaction with another {@link #messageId()}; the library sets it once the signature is known. */
+    Transaction withMessageId(@Nullable String messageId) {
+        return new Transaction(
+                signedBy,
+                direction,
+                type,
+                account,
+                counterAccount,
+                counterName,
+                amount,
+                symbols,
+                message,
+                bookedOn,
+                transactionId,
+                balance,
+                messageId);
+    }
 
     /** Whether money arrived on the account. */
     public boolean incoming() {

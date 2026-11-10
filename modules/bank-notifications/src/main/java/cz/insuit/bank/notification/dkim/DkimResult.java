@@ -1,5 +1,7 @@
 package cz.insuit.bank.notification.dkim;
 
+import java.util.Set;
+
 /** Whether an e-mail carries a valid DKIM signature of the expected domain. */
 public sealed interface DkimResult {
 
@@ -8,8 +10,13 @@ public sealed interface DkimResult {
      *
      * @param domain the signing domain, {@code d=}
      * @param selector the key's selector, {@code s=}
+     * @param signedHeaders the headers the signature covers, {@code h=}, in lower case: only these are proven
      */
-    record Verified(String domain, String selector) implements DkimResult {}
+    record Verified(String domain, String selector, Set<String> signedHeaders) implements DkimResult {
+        public Verified {
+            signedHeaders = Set.copyOf(signedHeaders);
+        }
+    }
 
     /**
      * No valid signature of the expected domain. Do not trust the message.

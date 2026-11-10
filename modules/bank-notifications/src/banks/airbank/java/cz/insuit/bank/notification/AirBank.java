@@ -115,7 +115,8 @@ final class AirBank implements Bank {
                     fields.getOrDefault(MESSAGE_FOR_RECIPIENT, fields.get(MESSAGE_FOR_PAYER)),
                     bookedOn,
                     transactionId,
-                    balance(summary.group(0)));
+                    balance(summary.group(0)),
+                    null);
         } catch (IllegalArgumentException e) {
             // An account failing its checksum, or a currency code ISO 4217 does not know: a misread, not a payment.
             throw new Unparsed(e.getMessage() == null ? "invalid value" : e.getMessage(), e);

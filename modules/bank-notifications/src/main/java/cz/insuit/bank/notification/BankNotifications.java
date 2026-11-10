@@ -92,7 +92,9 @@ public final class BankNotifications {
             throw new BankNotificationException.Unverified("signature could not be checked: " + e);
         }
         return switch (dkim) {
-            case DkimResult.Verified verified -> transaction;
+            // Kept only when the signature covers it; anything unsigned in the headers is the sender's to change.
+            case DkimResult.Verified verified ->
+                verified.signedHeaders().contains("message-id") ? transaction : transaction.withMessageId(null);
             case DkimResult.Failed failed -> throw new BankNotificationException.Unverified(failed.reason());
             case DkimResult.TemporaryFailure temporary ->
                 throw new BankNotificationException.TemporaryFailure(temporary.reason());
@@ -113,7 +115,7 @@ public final class BankNotifications {
             if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
                 throw new BankNotificationException.Unparsed("not a text/plain message");
             }
-            return bank.parse(message.getSubject(), body);
+            return bank.parse(message.getSubject(), body).withMessageId(message.getMessageID());
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

@@ -23,7 +23,8 @@ Mistakes to avoid:
   with `getMessage()` saying what to change in their banking.
 - Never act on `Unverified`: anyone can send an e-mail that looks like the bank's.
 - A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
-- Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice.
+- Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice. `messageId()` is set only when the
+  bank signs it; never deduplicate on a `Message-ID` header read elsewhere, which a copy of the e-mail can change.
 - `balance()` is the balance right after the payment and may be `null`; never take it for the account's current balance.
 - `counterAccount()` is `null` for a card payment.
 - `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.

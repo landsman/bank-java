@@ -45,7 +45,8 @@ class AirBankTest {
                         null,
                         LocalDate.of(2026, 11, 10),
                         "100000000001",
-                        balance("512.30", 14, 39)),
+                        balance("512.30", 14, 39),
+                        "<0000@localhost.localdomain>"),
                 parsed);
     }
 
@@ -66,7 +67,8 @@ class AirBankTest {
                         "test email airbank",
                         LocalDate.of(2026, 11, 10),
                         "100000000002",
-                        balance("511.30", 14, 41)),
+                        balance("511.30", 14, 41),
+                        "<0000@localhost.localdomain>"),
                 parsed);
     }
 
@@ -87,7 +89,8 @@ class AirBankTest {
                         "hello gotham!",
                         LocalDate.of(2026, 11, 10),
                         "100000000003",
-                        balance("512.30", 18, 54)),
+                        balance("512.30", 18, 54),
+                        "<0000@localhost.localdomain>"),
                 parsed);
     }
 
