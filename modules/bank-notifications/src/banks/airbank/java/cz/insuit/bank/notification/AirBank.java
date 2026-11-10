@@ -9,7 +9,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -25,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * to agree, or the template changed and the message is {@link Unparsed} rather than guessed at. Lines are read by their
  * label, because the optional ones appear only when the payment has them.
  */
-final class AirBank {
+final class AirBank implements Bank {
 
     static final String DOMAIN = "airbank.cz";
 
@@ -39,41 +38,30 @@ final class AirBank {
      */
     static final Set<String> KEY_FINGERPRINTS = Set.of("M1mJ01eTgtt/3Jw9syH2YdwTWzPzYeST8Hfk/dfZg6E=");
 
-    static Transaction parse(String body) {
-        Matcher summary = null;
-        Matcher incoming = null;
-        Matcher outgoing = null;
-        Map<String, String> fields = new HashMap<>();
-        boolean afterMessage = false;
+    @Override
+    public String domain() {
+        return DOMAIN;
+    }
 
-        for (String raw : body.lines().toList()) {
-            // The outgoing template ends the transaction code with a U+FEFF.
-            String line = raw.replace(ZERO_WIDTH_NO_BREAK_SPACE, "").strip();
-            Matcher summaryLine = SUMMARY.matcher(line);
-            Matcher incomingLine = INCOMING.matcher(line);
-            Matcher outgoingLine = OUTGOING.matcher(line);
-            Matcher labelled = LABELLED.matcher(line);
-            if (summaryLine.matches()) {
-                if (summary != null) throw new Unparsed("two summary lines");
-                summary = summaryLine;
-            } else if (incomingLine.matches() || outgoingLine.matches()) {
-                if (incoming != null || outgoing != null) throw new Unparsed("two counter-party lines");
-                if (incomingLine.matches()) incoming = incomingLine;
-                else outgoing = outgoingLine;
-            } else if (labelled.matches()) {
-                String label = labelled.group(1);
-                // The message is the only free text a payer controls. Should the bank ever pass a line break through,
-                // a forged "Variabilní symbol:" after it must not count: past the message only the code may follow.
-                if (afterMessage && !label.equals(TRANSACTION_ID) && !MESSAGES.contains(label)) {
-                    throw new Unparsed("'" + label + "' after the message");
-                }
-                if (fields.put(label, labelled.group(2)) != null) throw new Unparsed("two '" + label + "' lines");
-                afterMessage |= MESSAGES.contains(label);
-            }
-        }
+    @Override
+    public Set<String> keyFingerprints() {
+        return KEY_FINGERPRINTS;
+    }
+
+    /** The subject carries the account's nickname, the client's own text, so only the body is read. */
+    @Override
+    public Transaction parse(@Nullable String subject, String body) {
+        // The outgoing template ends the transaction code with a U+FEFF.
+        NotificationLines lines = new NotificationLines(body, line -> line.replace(ZERO_WIDTH_NO_BREAK_SPACE, ""));
+        Matcher summary = lines.single(SUMMARY, "summary");
+        Matcher incoming = lines.single(INCOMING, "counter-party");
+        Matcher outgoing = lines.single(OUTGOING, "counter-party");
+        // Past the message only the transaction code follows.
+        Map<String, String> fields = lines.labelled(LABELLED, MESSAGES, Set.of(TRANSACTION_ID));
 
         if (summary == null) throw new Unparsed("no balance-change sentence");
         if (incoming == null && outgoing == null) throw new Unparsed("no counter-party line");
+        if (incoming != null && outgoing != null) throw new Unparsed("two counter-party lines");
         Direction direction = summary.group(2).equals("zvýšil") ? Direction.INCOMING : Direction.OUTGOING;
         if ((direction == Direction.INCOMING) != (incoming != null)) {
             throw new Unparsed("summary and counter-party line disagree on the direction");
@@ -174,6 +162,4 @@ final class AirBank {
             return null;
         }
     }
-
-    private AirBank() {}
 }

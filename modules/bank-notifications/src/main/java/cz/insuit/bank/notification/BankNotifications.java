@@ -10,10 +10,12 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Reads a bank's notification e-mail into what it says about money that moved, once its DKIM signature shows it really
@@ -35,6 +37,9 @@ import java.util.Set;
  */
 public final class BankNotifications {
 
+    /** Every bank this release reads; adding one is a class in {@code src/banks/<bank>/} and a line here. */
+    private static final List<Bank> BANKS = List.of(new AirBank(), new FioCz());
+
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
      * here from the root's trust anchors, and only when it is one of the keys this release pins for that bank.
@@ -52,7 +57,7 @@ public final class BankNotifications {
      * release trusts, for an audit or a log line at start-up.
      */
     public static Map<String, Set<String>> pinnedKeys() {
-        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS, FioCz.DOMAIN, FioCz.KEY_FINGERPRINTS);
+        return BANKS.stream().collect(Collectors.toUnmodifiableMap(Bank::domain, Bank::keyFingerprints));
     }
 
     /**
@@ -99,13 +104,14 @@ public final class BankNotifications {
         try {
             MimeMessage message = new MimeMessage(SESSION, new ByteArrayInputStream(rawMessage));
             String domain = senderDomain(message);
-            if (!AirBank.DOMAIN.equals(domain) && !FioCz.DOMAIN.equals(domain)) {
-                throw new BankNotificationException.Unparsed("no parser for sender domain " + domain);
-            }
+            Bank bank = BANKS.stream()
+                    .filter(candidate -> candidate.domain().equals(domain))
+                    .findFirst()
+                    .orElseThrow(() -> new BankNotificationException.Unparsed("no parser for sender domain " + domain));
             if (!message.isMimeType("text/plain") || !(message.getContent() instanceof String body)) {
                 throw new BankNotificationException.Unparsed("not a text/plain message");
             }
-            return AirBank.DOMAIN.equals(domain) ? AirBank.parse(body) : FioCz.parse(message.getSubject(), body);
+            return bank.parse(message.getSubject(), body);
         } catch (BankNotificationException e) {
             throw e;
         } catch (MessagingException | IOException | RuntimeException e) {

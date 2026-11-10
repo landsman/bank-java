@@ -9,7 +9,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -24,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * ("prijem na konte", seen in August 2026) carries no transaction id and no currency, so it is {@link Unparsed} rather
  * than read: without an id, the same e-mail arriving twice would count twice.
  */
-final class FioCz {
+final class FioCz implements Bank {
 
     static final String DOMAIN = "fio.cz";
 
@@ -36,33 +35,25 @@ final class FioCz {
      */
     static final Set<String> KEY_FINGERPRINTS = Set.of("g66SWhDk9AKwpAE7Gli7fGccyAq37YMXhmoTUv5Rx6c=");
 
-    static Transaction parse(@Nullable String subject, String body) {
+    @Override
+    public String domain() {
+        return DOMAIN;
+    }
+
+    @Override
+    public Set<String> keyFingerprints() {
+        return KEY_FINGERPRINTS;
+    }
+
+    @Override
+    public Transaction parse(@Nullable String subject, String body) {
         Direction stated = subject == null ? null : SUBJECTS.get(subject);
         if (stated == null) throw new Unparsed("not a template this library knows, subject: " + subject);
 
-        Matcher summary = null;
-        Map<String, String> fields = new HashMap<>();
-        boolean afterFreeText = false;
-        for (String raw : body.lines().toList()) {
-            String line = raw.strip();
-            Matcher summaryLine = SUMMARY.matcher(line);
-            Matcher labelled = LABELLED.matcher(line);
-            if (summaryLine.matches()) {
-                if (summary != null) throw new Unparsed("two summary lines");
-                summary = summaryLine;
-            } else if (labelled.matches()) {
-                String label = labelled.group(1);
-                // The user symbol and the message are text a payer controls. Should the bank ever pass a line break
-                // through, a forged "Variabilní symbol:" after them must not count: past them only the balance follows.
-                if (afterFreeText && !FREE_TEXT.contains(label) && !label.equals(BALANCE)) {
-                    throw new Unparsed("'" + label + "' after the message");
-                }
-                if (fields.put(label, labelled.group(2).strip()) != null) {
-                    throw new Unparsed("two '" + label + "' lines");
-                }
-                afterFreeText |= FREE_TEXT.contains(label);
-            }
-        }
+        NotificationLines lines = new NotificationLines(body);
+        Matcher summary = lines.single(SUMMARY, "summary");
+        // Past the user symbol and the message only the balance follows.
+        Map<String, String> fields = lines.labelled(LABELLED, FREE_TEXT, Set.of(BALANCE));
 
         if (summary == null) throw new Unparsed("no balance-change sentence");
         Direction direction = summary.group(4).equals("zvýšil") ? Direction.INCOMING : Direction.OUTGOING;
@@ -162,6 +153,4 @@ final class FioCz {
     private static final String MESSAGE = "Zpráva pro příjemce";
     private static final String BALANCE = "Aktuální zůstatek";
     private static final Set<String> FREE_TEXT = Set.of("Uživatelský symbol", MESSAGE);
-
-    private FioCz() {}
 }

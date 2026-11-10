@@ -36,10 +36,14 @@ rest, so the parser stays package-private and out of the public API: a folder is
    `Date:` on, drop the transport headers and the signature, replace accounts, names, balance, transaction codes and
    the recipient (`bruce.wayne@gothba.org`), and keep everything else byte for byte, line ends and invisible characters
    included. `.gitattributes` keeps git from touching `*.eml`.
-4. **Write the parser** in `src/banks/<bank>/java/`, with its test in `src/banks/<bank>/test/`, as `AirBank` and `FioCz` are: lines read by label, the direction stated twice and required to agree,
+4. **Write the parser** in `src/banks/<bank>/java/`, with its test in `src/banks/<bank>/test/`, as `AirBank` and `FioCz` are:
+   a class implementing `Bank`, listed in `BankNotifications.BANKS`, reading the body through `NotificationLines`
+   (one-off lines, labelled lines, the guard against a forged line after a payer's message). What stays the bank's
+   own: its patterns, the amount format, the movement types; lines read by label, the direction stated twice and required to agree,
    nothing guessed. A test per refusal, not only per success.
 5. **Pin its key**: the fingerprint `DkimVerifier.fingerprint` gives for the key in DNS, read through two resolvers, in
-   the bank's `KEY_FINGERPRINTS`, its domain in `BankNotifications.pinnedKeys()`, and a check in `KeyCheckLiveTest`.
+   the bank's `KEY_FINGERPRINTS` (returned by `keyFingerprints()`, which `pinnedKeys()` lists), and a check in
+   `KeyCheckLiveTest`.
    Its domain has to be DNSSEC-signed, or `withDns()` refuses every e-mail from it.
 6. **Document it** in [setup](setup.md), a page like [air-bank.md](air-bank.md), and the table in the README.
 
