@@ -44,17 +44,8 @@ public record BankAccount(Country country, @Nullable String prefix, String numbe
     }
 
     /**
-     * Reads a Czech account in its local form, {@code 19-2000145399/0800} or {@code 2000145399/0800}.
-     *
-     * @param text the account as written
-     * @throws IllegalArgumentException when it is not a valid account number
-     */
-    public static BankAccount parse(String text) {
-        return parse(text, Country.CZ);
-    }
-
-    /**
-     * Reads an account in the local form of its country, {@code [prefix-]number/bankCode}.
+     * Reads an account in the local form of its country, {@code [prefix-]number/bankCode}. The form does not say the
+     * country, so the caller does: the same digits under a Czech and a Slovak bank code are two accounts.
      *
      * @param text the account as written
      * @param country the country whose bank keeps it

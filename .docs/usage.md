@@ -102,11 +102,12 @@ handed out. To compare against yours:
 
 | You have | Read it with |
 |---|---|
-| `19-2000145399/0800`, Czech | `BankAccount.parse("19-2000145399/0800")` |
+| `19-2000145399/0800`, Czech | `BankAccount.parse("19-2000145399/0800", BankAccount.Country.CZ)` |
 | `4019425381/7500`, Slovak | `BankAccount.parse("4019425381/7500", BankAccount.Country.SK)` |
-| `CZ65 0800 0000 1920 0014 5399` | `BankAccount.parseIban("CZ65 0800 0000 1920 0014 5399")`, with or without spaces |
+| `CZ65 0800 0000 1920 0014 5399` | `BankAccount.parseIban("CZ65 0800 0000 1920 0014 5399")`, with or without spaces; the IBAN says the country |
 
-`iban()` writes the IBAN back, `toString()` the local form. The same digits under a Czech and a Slovak bank code are two
+A local form does not say its country, so `parse` takes it: there is no default. `iban()` writes the IBAN back,
+`toString()` the local form. The same digits under a Czech and a Slovak bank code are two
 accounts. `Money` and `PaymentSymbols` have the same shape as in `moneta-api-java`.
 
 ## Two checks stay with you

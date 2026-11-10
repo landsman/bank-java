@@ -37,8 +37,8 @@ class AirBankTest {
                         "airbank.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/3030"),
-                        BankAccount.parse("9876543211/2010"),
+                        BankAccount.parse("1234567899/3030", BankAccount.Country.CZ),
+                        BankAccount.parse("9876543211/2010", BankAccount.Country.CZ),
                         "Novák, Jan",
                         czk("1.00"),
                         new PaymentSymbols("1337", null, null),
@@ -59,8 +59,8 @@ class AirBankTest {
                         "airbank.cz",
                         Direction.OUTGOING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/3030"),
-                        BankAccount.parse("9876543211/2010"),
+                        BankAccount.parse("1234567899/3030", BankAccount.Country.CZ),
+                        BankAccount.parse("9876543211/2010", BankAccount.Country.CZ),
                         null,
                         czk("-1.00"),
                         new PaymentSymbols("7331", null, null),
@@ -81,8 +81,8 @@ class AirBankTest {
                         "airbank.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/3030"),
-                        BankAccount.parse("9876543211/2010"),
+                        BankAccount.parse("1234567899/3030", BankAccount.Country.CZ),
+                        BankAccount.parse("9876543211/2010", BankAccount.Country.CZ),
                         "Novák, Jan",
                         czk("1.00"),
                         new PaymentSymbols("1337", "1234", "123456789"),
@@ -183,7 +183,7 @@ class AirBankTest {
         Transaction parsed = BankNotifications.parseUnverified(bytes(changed));
 
         assertEquals("Wayne Enterprises s.r.o.", parsed.counterName());
-        assertEquals(BankAccount.parse("9876543211/2010"), parsed.counterAccount());
+        assertEquals(BankAccount.parse("9876543211/2010", BankAccount.Country.CZ), parsed.counterAccount());
     }
 
     @Test

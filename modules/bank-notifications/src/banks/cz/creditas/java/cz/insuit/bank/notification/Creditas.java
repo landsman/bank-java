@@ -77,10 +77,10 @@ final class Creditas implements Bank {
                     DOMAIN,
                     direction,
                     kind.equals("Příchozí úhrada") ? Transaction.Type.TRANSFER : Transaction.Type.GENERAL,
-                    BankAccount.parse(summary.group(1)),
+                    BankAccount.parse(summary.group(1), BankAccount.Country.CZ),
                     counterNumber == null || counterBank == null
                             ? null
-                            : BankAccount.parse(counterNumber + "/" + counterBank),
+                            : BankAccount.parse(counterNumber + "/" + counterBank, BankAccount.Country.CZ),
                     null,
                     direction == Direction.INCOMING ? amount : amount.negate(),
                     new PaymentSymbols(

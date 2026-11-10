@@ -31,7 +31,7 @@ class ReadsOnSpringBootTest {
 
         Transaction t = notifications.read(signed(key));
 
-        assertEquals(BankAccount.parse("1234567899/3030"), t.account());
+        assertEquals(BankAccount.parse("1234567899/3030", BankAccount.Country.CZ), t.account());
         assertEquals(new BigDecimal("1.00"), t.amount().amount());
         assertEquals("1337", t.symbols().variable());
     }

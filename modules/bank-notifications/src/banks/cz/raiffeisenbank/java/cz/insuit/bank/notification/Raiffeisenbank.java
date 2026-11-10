@@ -82,8 +82,8 @@ final class Raiffeisenbank implements Bank {
                     DOMAIN,
                     direction,
                     card ? Transaction.Type.CARD : Transaction.Type.TRANSFER,
-                    BankAccount.parse(own.group(1)),
-                    counter == null ? null : BankAccount.parse(counter.group(1)),
+                    BankAccount.parse(own.group(1), BankAccount.Country.CZ),
+                    counter == null ? null : BankAccount.parse(counter.group(1), BankAccount.Country.CZ),
                     counter == null || counter.group(2).isBlank()
                             ? null
                             : counter.group(2).strip(),
