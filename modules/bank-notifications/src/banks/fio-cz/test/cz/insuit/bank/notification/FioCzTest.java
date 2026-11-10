@@ -180,6 +180,28 @@ class FioCzTest {
     }
 
     @Test
+    void takesAnEmptyLabelForAnAbsentField() throws IOException {
+        // Fio's short template prints "SS: " with nothing after it; a symbol line left empty means no symbol.
+        String changed = text("incoming-transfer.eml")
+                .replace(
+                        "Konstantn=C3=AD symbol: 0\r\n", "Konstantn=C3=AD symbol: 0\r\nSpecifick=C3=BD symbol:=20\r\n");
+
+        assertEquals(
+                new PaymentSymbols("20260042", "0", null),
+                BankNotifications.parseUnverified(bytes(changed)).symbols());
+    }
+
+    @Test
+    void stillRefusesAnEmptyLabelThatAppearsTwice() throws IOException {
+        String changed = text("incoming-transfer.eml")
+                .replace(
+                        "Konstantn=C3=AD symbol: 0\r\n",
+                        "Konstantn=C3=AD symbol: 0\r\nSpecifick=C3=BD symbol:=20\r\nSpecifick=C3=BD symbol: 7\r\n");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void keepsThePayerTheMessageAndTheBalanceOutOfToString() throws IOException {
         String logged = read("incoming-instant.eml").toString();
 
