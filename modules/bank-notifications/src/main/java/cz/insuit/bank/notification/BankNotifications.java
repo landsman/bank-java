@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public final class BankNotifications {
 
-    /** Every bank this release reads; adding one is a class in {@code src/banks/<bank>/} and a line here. */
+    /** Every bank this release reads; adding one is a class in {@code src/banks/<country>/<bank>/} and a line here. */
     private static final List<Bank> BANKS =
             List.of(new AirBank(), new FioCz(), new Moneta(), new Creditas(), new Raiffeisenbank());
 
