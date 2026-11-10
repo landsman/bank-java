@@ -74,21 +74,23 @@ final class NotificationLines {
     }
 
     /**
-     * Like {@link #labelled}, for a template that puts the label alone on a line ({@code Částka:}) and its value on the
-     * next one. A label not followed by a value, the end of the body or another label, is the field being absent.
+     * Like {@link #labelled}, for a template that puts the label alone on a line, with or without a colon
+     * ({@code Částka:}, {@code Částka v měně účtu}), and its value on the next one. A label not followed by a value, the
+     * end of the body or another label, is the field being absent.
      */
     Map<String, String> stacked(Set<String> labels, Set<String> freeText, Set<String> allowedAfterFreeText) {
         List<Map.Entry<String, String>> pairs = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            if (!line.endsWith(":")) continue;
-            String label = line.substring(0, line.length() - 1);
+            String label = withoutColon(lines.get(i));
             if (!labels.contains(label)) continue;
             String next = i + 1 < lines.size() ? lines.get(i + 1) : "";
-            boolean isValue = !(next.endsWith(":") && labels.contains(next.substring(0, next.length() - 1)));
-            pairs.add(Map.entry(label, isValue ? next : ""));
+            pairs.add(Map.entry(label, labels.contains(withoutColon(next)) ? "" : next));
         }
         return fields(pairs, freeText, allowedAfterFreeText);
+    }
+
+    private static String withoutColon(String line) {
+        return line.endsWith(":") ? line.substring(0, line.length() - 1) : line;
     }
 
     /**

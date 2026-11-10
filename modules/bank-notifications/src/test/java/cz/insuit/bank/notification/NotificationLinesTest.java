@@ -100,6 +100,14 @@ class NotificationLinesTest {
     }
 
     @Test
+    void stackedReadsALabelWrittenWithoutAColon() {
+        Map<String, String> fields =
+                new NotificationLines("Částka\r\n+1.234,56 CZK\r\nOd\r\n1/0100").stacked(STACKED, Set.of(), Set.of());
+
+        assertEquals(Map.of("Částka", "+1.234,56 CZK", "Od", "1/0100"), fields);
+    }
+
+    @Test
     void stackedTakesALabelFollowedByAnotherLabelForAnAbsentField() {
         Map<String, String> fields =
                 new NotificationLines("Popis:\r\nOd:\r\n1/0100").stacked(STACKED, Set.of(), Set.of());
