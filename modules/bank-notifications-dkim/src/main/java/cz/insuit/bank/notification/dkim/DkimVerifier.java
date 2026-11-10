@@ -120,7 +120,8 @@ public final class DkimVerifier {
     // ponytail: jDKIM 0.5 has parsing that is not linear in the input, fixed upstream on 2026-11-05 and not released
     // yet. Anyone can mail the address these come to, so the size is capped before jDKIM sees the message. A bank
     // notification is around 5 KiB; raise the cap once a jDKIM release carries those fixes.
-    static final int MAX_MESSAGE_BYTES = 64 * 1024;
+    /** The largest message read, in bytes; see the comment above. */
+    public static final int MAX_MESSAGE_BYTES = 64 * 1024;
 
     private static final int DEFAULT_MINIMUM_KEY_BITS = 1024;
 

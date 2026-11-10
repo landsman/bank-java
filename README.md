@@ -3,49 +3,64 @@
 Java libraries for learning that money moved on a Czech bank account: who paid, how much, with which variable symbol.
 Java 21, no framework required, nullability in JSpecify.
 
-| Module | Package | Reads |
-|---|---|---|
-| `bank-notifications` | `cz.insuit.bank.notification` | the e-mail a bank sends on every payment, for banks without an API |
-| `bank-notifications-dkim` | `cz.insuit.bank.notification.dkim` | whether that e-mail really comes from the bank |
+## Install
 
-Banks with an API of their own are a module each, as they come.
+One dependency. It brings the DKIM verification with it, at the same version.
 
-## bank-notifications
+```kotlin
+// build.gradle.kts; the jars are in this repository's GitHub Packages
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/landsman/bank-java")
+        credentials {
+            username = providers.environmentVariable("GITHUB_ACTOR").orNull
+            password = providers.environmentVariable("GITHUB_TOKEN").orNull // a token with read:packages
+        }
+    }
+}
+dependencies {
+    implementation("cz.insuit:bank-notifications:0.1.0")
+}
+```
+
+## Use
 
 Most Czech banks can e-mail every incoming and outgoing payment. Point that e-mail at an address you receive, and hand
-each raw message to the parser:
+each raw message, exactly as it arrived, to `read`:
 
 ```java
-switch (BankNotifications.parse(rawMessage)) {
-    case Transaction t -> ... // t.direction(), t.amountMinor(), t.variableSymbol(), t.transactionId()
-    case Unparsed u -> ...    // keep the message and look at u.reason(): a bank changed its template
+BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
+
+switch (notifications.read(rawMessage)) {
+    case Transaction t -> ...      // genuine: t.direction(), t.amountMinor(), t.variableSymbol(), t.transactionId()
+    case Unverified u -> ...       // no valid signature of the bank: anyone can send an e-mail that looks real
+    case TemporaryFailure f -> ... // the bank's key could not be looked up: keep the message, read it again later
+    case Unparsed u -> ...         // keep the message and look at u.reason(): a bank changed its template
 }
 ```
 
-**Verify before you trust.** Anyone can send an e-mail that looks like a bank's, so the parser trusts nothing.
-`bank-notifications-dkim` does the first check:
+A `Transaction` is only handed out once the message's DKIM signature verified, over the raw bytes and never from an
+`Authentication-Results` header that came with it: `d=` is the bank's domain, the whole body is signed (no `l=`), the
+key is not in testing mode and an RSA key has at least 1024 bits. Two checks stay with you:
 
-```java
-DkimVerifier dkim = DkimVerifier.withDns(); // or DkimVerifier.with(yourLookup), thread-safe, keep one
-if (BankNotifications.parse(raw) instanceof Transaction t
-        && dkim.verify(raw, t.signedBy()) instanceof DkimResult.Verified) {
-    // genuine
-}
-```
+- compare `t.account()` with the account you expect, or a genuine notification about somebody else's account counts as
+  yours;
+- deduplicate on `t.transactionId()`.
 
-It verifies the DKIM signature over the raw bytes, never an `Authentication-Results` header that arrived with the
-message, and counts it only when `d=` is the bank's domain, the whole body is signed (no `l=`), the key is not in testing
-mode and an RSA key has at least 1024 bits (`minimumKeyBits` raises it). A key lookup that fails is a
-`TemporaryFailure`, not a `Failed`. It runs on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5, and
-refuses messages over 64 KiB until a jDKIM release carries the linear-time parsing fixes made upstream on 2026-11-05.
+`BankNotifications.with(lookup)` takes your own key lookup instead of DNS: a resolver with its own timeouts, or a
+recorded key in a test.
 
-The other two checks stay with you:
+## Modules
 
-- check that `Transaction.account()` is the account you expect, or a genuine notification about somebody else's
-  account counts as yours;
-- deduplicate on `Transaction.transactionId()`.
+| Module | Package | Does |
+|---|---|---|
+| `bank-notifications` | `cz.insuit.bank.notification` | reads the bank's e-mail; the one to depend on |
+| `bank-notifications-dkim` | `cz.insuit.bank.notification.dkim` | verifies its DKIM signature, on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5; comes with the first |
 
-### Banks
+Messages over 64 KiB are refused until a jDKIM release carries the linear-time parsing fixes made upstream on
+2026-11-05. Banks with an API of their own will be a module each.
+
+## Banks
 
 | Bank | Sender | Notes |
 |---|---|---|

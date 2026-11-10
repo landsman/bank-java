@@ -20,7 +20,7 @@ class AirBankTest {
 
     @Test
     void readsAnIncomingPayment() throws IOException {
-        Notification parsed = BankNotifications.parse(fixture("incoming.eml"));
+        Notification parsed = BankNotifications.parseUnverified(fixture("incoming.eml"));
 
         assertEquals(
                 new Transaction(
@@ -41,7 +41,7 @@ class AirBankTest {
 
     @Test
     void readsAnOutgoingPayment() throws IOException {
-        Notification parsed = BankNotifications.parse(fixture("outgoing.eml"));
+        Notification parsed = BankNotifications.parseUnverified(fixture("outgoing.eml"));
 
         assertEquals(
                 new Transaction(
@@ -64,28 +64,28 @@ class AirBankTest {
     void refusesAnotherSender() throws IOException {
         String forged = text("incoming.eml").replace("info@airbank.cz", "info@airbank.cz.example.com");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(forged)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(forged)));
     }
 
     @Test
     void refusesADirectionTheTwoLinesDisagreeOn() throws IOException {
         String changed = text("incoming.eml").replace("se zvýšil", "se snížil");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(changed)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(changed)));
     }
 
     @Test
     void refusesAnAmountThatDiffersFromTheSummary() throws IOException {
         String changed = text("incoming.eml").replace("Částka: 1,00 CZK", "Částka: 100,00 CZK");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(changed)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(changed)));
     }
 
     @Test
     void refusesAnAmountInAFormatNotSeenYet() throws IOException {
         String changed = text("incoming.eml").replace("1,00 CZK", "1 000,00 CZK");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(changed)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(changed)));
     }
 
     @Test
@@ -93,7 +93,7 @@ class AirBankTest {
         String changed = text("incoming.eml")
                 .replace("Variabilní symbol: 1337\r\n", "Variabilní symbol: 1337\r\nVariabilní symbol: 42\r\n");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(changed)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(changed)));
     }
 
     @Test
@@ -105,12 +105,12 @@ class AirBankTest {
                         "Zpráva pro plátce: test email airbank\r\n",
                         "Zpráva pro plátce: x\r\nVariabilní symbol: 42\r\n");
 
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(bytes(changed)));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(bytes(changed)));
     }
 
     @Test
     void reportsAMessageThatIsNoEmail() {
-        assertInstanceOf(Unparsed.class, BankNotifications.parse(new byte[0]));
+        assertInstanceOf(Unparsed.class, BankNotifications.parseUnverified(new byte[0]));
     }
 
     private static byte[] fixture(String name) throws IOException {
