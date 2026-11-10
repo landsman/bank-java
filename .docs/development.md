@@ -61,5 +61,19 @@ the bank's `KEY_FINGERPRINTS` beside the old one, and release. Drop the old one 
 
 ## Releasing
 
-Not set up yet: there is no release workflow, and nothing is on GitHub Packages (2026-11-10). It will follow
-`moneta-api-java`: a tag `vX.Y.Z` publishes that version.
+A release is made by hand, and only a tag makes one: merging to `main` publishes nothing. A tag `vX.Y.Z` on `main`
+releases `X.Y.Z`. `make release` does all of what follows: it asks for the tag, suggesting the next patch (type
+`v0.1.0` for the first one), refuses one that exists or a checkout that is not a clean `origin/main`, asks once
+more, then tags, waits for the publish and writes the release page, a pre-release while it is 0.x. By hand:
+
+    git switch main && git pull --ff-only              # the commit to release, with CI green on it
+    git tag -a v0.1.0 -m "v0.1.0"                      # annotated, so it records who tagged it and when
+    git push origin v0.1.0                             # this push starts the release
+
+[release.yml](../.github/workflows/release.yml) then builds, tests and publishes the jar to GitHub Packages
+(`gh run watch` follows it). Once it is green, write the release page:
+
+    gh release create v0.1.0 --verify-tag --generate-notes --prerelease
+
+A version, once published, cannot be published again; the next fix is the next tag. `bin/release.sh` and its test,
+`bin/release.test.sh`, are the same as in `moneta-api-java`; `make scripts-test` runs shellcheck and the test.

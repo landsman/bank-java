@@ -44,3 +44,14 @@ jobs:
       - run: ./gradlew -q javaToolchains
       - run: make build TESTS_JDK=${{ matrix.jdk }}
 
+  scripts:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The shellcheck pinned in mise.toml, not the runner's: versions give one finding different codes.
+      - uses: jdx/mise-action@v5
+        with:
+          install_args: shellcheck
+      - run: make scripts-test
+

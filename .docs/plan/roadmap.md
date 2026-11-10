@@ -4,7 +4,8 @@ A working document: what is still unknown and what this library does next.
 
 ## Current state (2026-11-10)
 
-- **Not released.** `0.1.0-SNAPSHOT` only, built by CI on Java 21 and 25; no release workflow yet.
+- **Not released.** `0.1.0-SNAPSHOT` only, built by CI on Java 21 and 25; a tag `vX.Y.Z` publishes through
+  `release.yml`, none pushed yet.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
   ([air-bank.md](../air-bank.md)).
@@ -23,7 +24,7 @@ A working document: what is still unknown and what this library does next.
 
 ## Next
 
-- **Releasing**: a release workflow and `make release` as in `moneta-api-java`, then `0.1.0`.
+- **Releasing `0.1.0`**: `make release` and `release.yml` are in place; the first tag is still to be pushed.
 - **A jDKIM release with the parsing fixes**: Dependabot proposes it; then raise the 64 KiB limit.
 - **More Air Bank samples**, one issue each: [a business account](https://github.com/landsman/bank-java/issues/2),
   [1 000 CZK and more](https://github.com/landsman/bank-java/issues/5),
