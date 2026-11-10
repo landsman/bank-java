@@ -42,6 +42,5 @@ Mistakes to avoid:
 
 ## Optional
 
-- [How Air Bank's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/air-bank.md): the message, its body, what has not been seen
-- [How Fio CZ's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/fio-cz.md): the message, its body, the short template it cannot read
+- [Banks](https://github.com/landsman/bank-java/blob/main/.docs/banks/README.md): which banks it reads, what it reads from each, a page per bank
 - [Roadmap](https://github.com/landsman/bank-java/blob/main/.docs/plan/roadmap.md): what is next, what is not covered

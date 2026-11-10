@@ -19,7 +19,7 @@ six of them, anonymised; the card payment keeps its merchant.
   seen, Fio's own value rather than the merchant's, and the message is the purchase: merchant, address, date, amount.
 - **`Uživatelský symbol`** repeats the payer's name or the message. The library does not read it.
 - **`Konstantní symbol: 0`** comes as it is; `0` is not taken for "none".
-- **The account holder picks one of three formats** when setting the notification up ([setup](setup.md#fio-banka-cz)).
+- **The account holder picks one of three formats** when setting the notification up ([setup](../../../setup.md#fio-banka-cz)).
   This page is about the long one; the other two carry no transaction id. A fourth shape has arrived too, subject
   `Fio banka - prijem na konte` (2026-08-18): account, amount, symbols, message, balance and counter-account on six
   lines, but **no transaction id and no currency**, and it matches none of the form's previews, so it may be an older
@@ -81,11 +81,11 @@ Every line under `Další parametry` but `Typ pohybu` and `ID pokynu` appears on
 
 Every kind of e-mail Fio can send, and whether a real one has been read. ✅ read, 🚫 seen and refused, ❔ not seen yet,
 👁 seen only as a preview in the settings form. A ❔ needs one raw `.eml`, exported as the original, never forwarded; see
-[development](development.md#adding-a-bank). Parser, tests and fixtures are in `modules/bank-notifications/src/banks/fio-cz/`.
+[development](../../../development.md#adding-a-bank). Parser, tests and fixtures are in `modules/bank-notifications/src/banks/fio-cz/`.
 
 ### What the account holder chooses
 
-The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-mail that follows.
+The settings form ([setup](../../../setup.md#fio-banka-cz)) decides the shape of every e-mail that follows.
 
 | Choice | Option | Sample |
 |---|---|---|

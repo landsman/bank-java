@@ -8,9 +8,9 @@ A working document: what is still unknown and what this library does next.
   `release.yml`, none pushed yet.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
-  ([air-bank.md](../air-bank.md)).
+  ([air-bank.md](../banks/cz/airbank/README.md)).
 - **Reads Fio banka**: transfers in and out, card payments and direct debits, from ten real e-mails of a personal
-  account ([fio-cz.md](../fio-cz.md)); its short template is refused, it has no transaction id.
+  account ([fio-cz.md](../banks/cz/fio/README.md)); its short template is refused, it has no transaction id.
 - **Verifies DKIM** on Apache James jDKIM 0.5 before a `Transaction` is handed out ([verification](../verification.md));
   every real e-mail verifies against its bank's published key, and the Air Bank ones fail once their amount is changed.
 - **48 tests**: the parsers on nine fixtures and its refusals, account checksums, the verifier on messages signed

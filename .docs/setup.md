@@ -50,18 +50,18 @@ Check that `read` returns a `Transaction` for a small payment.
 
 ## MONETA
 
-See [moneta.md](moneta.md#setting-it-up): Upozornění - Info Servis, e-mail for incoming and outgoing payments, only
+See [moneta.md](banks/cz/moneta/README.md#setting-it-up): Upozornění - Info Servis, e-mail for incoming and outgoing payments, only
 from 100 Kč. Not verified yet: no real MONETA e-mail has been read.
 
 ## Creditas
 
-See [creditas.md](creditas.md#setting-it-up). Not verified yet: no real Creditas e-mail has been read.
+See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Not verified yet: no real Creditas e-mail has been read.
 
 ## Raiffeisenbank
 
-See [raiffeisenbank.md](raiffeisenbank.md#setting-it-up). Not verified yet: no real Raiffeisenbank e-mail has been read.
+See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not verified yet: no real Raiffeisenbank e-mail has been read.
 
 ## Another bank
 
-Not supported yet; see [what it covers](../README.md#what-it-covers). Adding one starts from one of its real e-mails,
+Not supported yet; see [banks](banks/README.md). Adding one starts from one of its real e-mails,
 see [development](development.md#adding-a-bank).

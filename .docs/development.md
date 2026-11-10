@@ -24,7 +24,8 @@ src/banks/fio-cz/
   fixtures/fio-cz/*.eml                              its anonymised e-mails, read as /fio-cz/<name>.eml
 ```
 
-Gradle picks every folder up as another source root. Each is in the package `cz.insuit.bank.notification`, like the
+Its documentation is `.docs/banks/<country>/<bank>/README.md`, with a row in [banks](banks/README.md); the country
+is a folder (`cz`, later `sk` and others). Gradle picks every code folder up as another source root. Each is in the package `cz.insuit.bank.notification`, like the
 rest, so the parser stays package-private and out of the public API: a folder is not a package.
 
 1. **Get a real e-mail**: the raw `.eml`, exported as "show original" or "raw source", never forwarded, which rewrites
@@ -49,7 +50,7 @@ rest, so the parser stays package-private and out of the public API: a folder is
    the bank's `KEY_FINGERPRINTS` (returned by `keyFingerprints()`, which `pinnedKeys()` lists), and a check in
    `KeyCheckLiveTest`.
    Its domain has to be DNSSEC-signed, or `withDns()` refuses every e-mail from it.
-6. **Document it** in [setup](setup.md), a page like [air-bank.md](air-bank.md), and the table in the README.
+6. **Document it** in [setup](setup.md), a folder like [banks/cz/airbank](banks/cz/airbank/README.md), and its row in [banks](banks/README.md).
 
 The real e-mail stays out of the repository: an anonymised message no longer matches its signature, so the tests sign
 the fixture with a key of their own.
