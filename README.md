@@ -20,7 +20,7 @@ try {
 ## What it does for you
 
 ```mermaid
-flowchart LR
+flowchart TB
     bank["Air Bank"] -- "payment e-mail,<br/>DKIM-signed" --> inbox["your inbound address"]
     inbox -- "raw bytes" --> read
 
