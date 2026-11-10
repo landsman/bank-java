@@ -5,7 +5,7 @@ Java 21, no framework required, nullability in JSpecify.
 
 ## Install
 
-One dependency. It brings the DKIM verification with it, at the same version.
+One dependency, the DKIM verification included.
 
 ```kotlin
 // build.gradle.kts; the jars are in this repository's GitHub Packages
@@ -50,12 +50,11 @@ key is not in testing mode and an RSA key has at least 1024 bits. Two checks sta
 `BankNotifications.with(lookup)` takes your own key lookup instead of DNS: a resolver with its own timeouts, or a
 recorded key in a test.
 
-## Modules
+## Inside
 
-| Module | Package | Does |
-|---|---|---|
-| `bank-notifications` | `cz.insuit.bank.notification` | reads the bank's e-mail; the one to depend on |
-| `bank-notifications-dkim` | `cz.insuit.bank.notification.dkim` | verifies its DKIM signature, on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5; comes with the first |
+One jar, two packages: `cz.insuit.bank.notification` reads the e-mail, `cz.insuit.bank.notification.dkim` verifies its
+signature on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5. `DkimVerifier` is public, for checking a
+message without reading it.
 
 Messages over 64 KiB are refused until a jDKIM release carries the linear-time parsing fixes made upstream on
 2026-11-05. Banks with an API of their own will be a module each.
