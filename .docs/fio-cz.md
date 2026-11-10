@@ -10,7 +10,7 @@ six of them, anonymised; the card payment keeps its merchant.
 ## Watch out for
 
 - **Every movement sends one**, money in and money out, card payments and direct debits included.
-- **The account number has no bank code**: `zůstatek účtu 2700284437`. It is Fio's, so the library adds `/2010`.
+- **The account number has no bank code**: `zůstatek účtu 1234567899`. It is Fio's, so the library adds `/2010`.
 - **Thousands are separated by a plain space**: `93 000,00 CZK`.
 - **No booking date of its own.** The sentence gives the date and time the balance changed; `bookedOn()` is that date
   and `balance().asOf()` that moment. A card payment arrives when it is settled, a day or so after the purchase
