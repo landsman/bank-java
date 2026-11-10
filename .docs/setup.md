@@ -61,6 +61,10 @@ See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Not verified yet: 
 
 See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not verified yet: no real Raiffeisenbank e-mail has been read.
 
+## UniCredit Bank
+
+See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: no real UniCredit e-mail has been read.
+
 ## Another bank
 
 Not supported yet; see [banks](banks/README.md). Adding one starts from one of its real e-mails,
