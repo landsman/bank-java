@@ -22,8 +22,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-// One folder per bank, src/banks/<country>/<bank>/: its parser in java/, its tests in test/, its anonymised e-mails in
-// fixtures/. Every folder is in the same package as the rest, so a parser stays package-private; a folder is not a package.
+// Three kinds of code, one package, so nothing internal becomes public; a folder is not a package:
+// src/main/java      the public API: BankNotifications, Transaction and its values, and dkim/
+// src/parsing/java   how an e-mail is parsed, shared by every bank: Bank, MailBody, NotificationLines
+// src/banks/<country>/<bank>/  one bank: its parser in java/, its tests in test/, its anonymised e-mails in fixtures/
 val banks =
     file("src/banks")
         .listFiles { file -> file.isDirectory }
@@ -32,9 +34,9 @@ val banks =
         .sortedBy { it.path }
 
 sourceSets {
-    main { java.srcDirs(banks.map { it.resolve("java") }) }
+    main { java.srcDirs(listOf(file("src/parsing/java")) + banks.map { it.resolve("java") }) }
     test {
-        java.srcDirs(banks.map { it.resolve("test") })
+        java.srcDirs(listOf(file("src/parsing/test")) + banks.map { it.resolve("test") })
         resources.srcDirs(banks.map { it.resolve("fixtures") })
     }
 }

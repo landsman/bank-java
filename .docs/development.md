@@ -6,9 +6,18 @@
 It also fails when a module declares a dependency it does not use, or uses one it only gets transitively. What to
 change is in `build/reports/dependency-analysis/build-health-report.txt`.
 
-What ships is in [modules/](../modules): `bank-notifications`, with the e-mail parsers in `cz.insuit.bank.notification`
-and the DKIM verification in `cz.insuit.bank.notification.dkim`. Projects that use it the way a caller's build would, on
-Spring Boot 3 and 4 and from Kotlin, are in [testing/](../testing/README.md).
+What ships is in [modules/](../modules): `bank-notifications`. Its code is split by what it is for, each kind in its own
+source folder but all in the package `cz.insuit.bank.notification`, so nothing internal has to become public:
+
+| Folder | Holds | Visible to callers |
+|---|---|---|
+| `src/main/java` | the API: `BankNotifications`, `Transaction` and its values, `BankNotificationException` | yes |
+| `src/main/java/…/dkim` | the signature check: `DkimVerifier`, `KeyLookup`; the DNSSEC lookup stays package-private | the verifier |
+| `src/parsing/java` | how any bank's e-mail is parsed: `Bank`, `MailBody` (the body, HTML as lines), `NotificationLines` | no |
+| `src/banks/<country>/<bank>` | one bank: its parser, tests and fixtures | no |
+
+A bank's parser knows its template and nothing else: no MIME, no DKIM, no deduplication. Projects that use the library
+the way a caller's build would, on Spring Boot 3 and 4 and from Kotlin, are in [testing/](../testing/README.md).
 
 `make lock` rewrites `modules/bank-notifications/gradle.lockfile` after a dependency changes; the weekly vulnerability
 scan in `security.yml` reads it, and the build fails when it drifts from what ships.
