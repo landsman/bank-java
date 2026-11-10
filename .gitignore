@@ -1,4 +1,28 @@
+# Gradle
 .gradle/
 build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Kotlin daemon: error logs and session files, written next to the build
+.kotlin/
+
+# IntelliJ, Eclipse, VS Code
 .idea/
+*.iml
+out/
+.classpath
+.project
+.settings/
+bin/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Local, never shared
+*.log
+.env
+.env.*
+
+# Agent worktrees
 .claude/worktrees/
