@@ -26,7 +26,7 @@ It is a balance-change notification: outgoing payments arrive as well, as `Direc
 ## Fio banka CZ
 
 Fio sends an e-mail for every movement, money in and out, card payments and direct debits included. In internet
-banking, the form is **Add a new account transaction notification** (*Přidat notifikaci o pohybu na účtu*); its fields,
+banking, the form is **Add a new account transaction notification** (its Czech name is not recorded); its fields,
 as the English interface showed them on 2026-11-10:
 
 1. **Account number**: the account.
