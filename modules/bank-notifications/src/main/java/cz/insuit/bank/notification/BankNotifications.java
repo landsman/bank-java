@@ -46,7 +46,8 @@ public final class BankNotifications {
             new Raiffeisenbank(),
             new Unicredit(),
             new Csob(),
-            new CsobSk());
+            new CsobSk(),
+            new TatraBanka());
 
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
