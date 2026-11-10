@@ -137,3 +137,19 @@ name is not in the table above `type()` as `GENERAL` and is still read; the samp
 | Specific symbol | ❔ |
 | Counter-party without a name | ✅ `outgoing-transfer.eml` |
 | A message with a line break | ❔ |
+
+### Other notifications
+
+Fio sends more than movements. These say nothing about a payment, so `read` does not make a `Transaction` of them:
+their subject matches no movement template and they are `Unparsed`. Recorded so a sample is recognised when one comes.
+
+**Balance** (*Přidat nové oznámení o zůstatku*), three kinds: the balance itself, the balance falling below an amount,
+the balance rising above an amount. Each in the same three formats as a movement, from the form's preview:
+
+| Format | Preview | Sample |
+|---|---|---|
+| long, `Fio banka - zůstatek na účtu` | `Dobrý den, stav účtu 2800201001 přesáhl 1.1.2025 v 14:20 hlídanou částku 950 000 CZK, aktuální zůstatek je 1 000 000 CZK.` | 👁 |
+| short, `Zůstatek na účtu` | `Účet 2800201001 přesáhl hlídanou částku: 950 000 CZK, zůstatek 1.1.2025 v 14:20 je: 1 000 000 CZK` | 👁 |
+| one sentence | `Účet 2800201001 přesáhl hlídanou částku. Aktuální zůstatek 1 000 000 CZK.` | 👁 |
+
+The previews show the rise above an amount only; the wording of the other two is not known.
