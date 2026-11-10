@@ -1,63 +1,32 @@
 # bank-java
 
 Java libraries for learning that money moved on a Czech bank account: who paid, how much, with which variable symbol.
-Java 21, no framework required, nullability in JSpecify.
 
-## Install
+Most Czech banks can e-mail every incoming and outgoing payment. `bank-notifications` reads that e-mail into a
+transaction, and hands it out only once the bank's DKIM signature verified, so an e-mail that merely looks like the
+bank's is never taken for a payment. No API key, no contract with the bank, no PSD2 licence: the account holder points
+the notification at an address you receive. Air Bank first.
 
-One dependency, the DKIM verification included.
-
-```kotlin
-// build.gradle.kts; the jars are in this repository's GitHub Packages
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/landsman/bank-java")
-        credentials {
-            username = providers.environmentVariable("GITHUB_ACTOR").orNull
-            password = providers.environmentVariable("GITHUB_TOKEN").orNull // a token with read:packages
-        }
-    }
-}
-dependencies {
-    implementation("cz.insuit:bank-notifications:0.1.0")
-}
-```
-
-## Use
-
-Most Czech banks can e-mail every incoming and outgoing payment. Point that e-mail at an address you receive, and hand
-each raw message, exactly as it arrived, to `read`:
+For Java 21+ and Kotlin, one jar, no framework required. Published on GitHub Packages, not Maven Central.
 
 ```java
-BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
-
-switch (notifications.read(rawMessage)) {
-    case Transaction t -> ...      // genuine: t.direction(), t.amountMinor(), t.variableSymbol(), t.transactionId()
-    case Unverified u -> ...       // no valid signature of the bank: anyone can send an e-mail that looks real
-    case TemporaryFailure f -> ... // the bank's key could not be looked up: keep the message, read it again later
-    case Unparsed u -> ...         // keep the message and look at u.reason(): a bank changed its template
+switch (BankNotifications.withDns().read(rawMessage)) {
+    case Transaction t -> ...      // genuine: compare t.account() with yours, deduplicate on t.transactionId()
+    case Unverified u -> ...       // not signed by the bank
+    case TemporaryFailure f -> ... // the bank's key could not be looked up: read it again later
+    case Unparsed u -> ...         // a template the library does not know
 }
 ```
 
-A `Transaction` is only handed out once the message's DKIM signature verified, over the raw bytes and never from an
-`Authentication-Results` header that came with it: `d=` is the bank's domain, the whole body is signed (no `l=`), the
-key is not in testing mode and an RSA key has at least 1024 bits. Two checks stay with you:
-
-- compare `t.account()` with the account you expect, or a genuine notification about somebody else's account counts as
-  yours;
-- deduplicate on `t.transactionId()`.
-
-`BankNotifications.with(lookup)` takes your own key lookup instead of DNS: a resolver with its own timeouts, or a
-recorded key in a test.
-
-## Inside
-
-One jar, two packages: `cz.insuit.bank.notification` reads the e-mail, `cz.insuit.bank.notification.dkim` verifies its
-signature on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5. `DkimVerifier` is public, for checking a
-message without reading it.
-
-Messages over 64 KiB are refused until a jDKIM release carries the linear-time parsing fixes made upstream on
-2026-11-05. Banks with an API of their own will be a module each.
+| Read | For |
+|---|---|
+| [Installing](.docs/install.md) | the artifact on GitHub Packages, for Gradle and Maven |
+| [Setting up a bank](.docs/setup.md) | how the account holder points the bank's e-mail at your address |
+| [Using the library](.docs/usage.md) | the raw message, the four results, a transaction's fields, the two checks left to you |
+| [How verification works](.docs/verification.md) | what makes a signature count, what it does not prove, jDKIM, the size limit |
+| [How Air Bank's e-mail behaves](.docs/air-bank.md) | the message, its body, what to watch out for, what has not been seen |
+| [Roadmap](.docs/plan/roadmap.md) | the working plan: what is next, what is not covered |
+| [Development](.docs/development.md) | build, tests, adding a bank |
 
 ## What it covers
 
@@ -84,19 +53,8 @@ sample has shown it yet, so the bank may well send it.
 | Balance after the payment | ✅ | ⬜ |
 | Business account | ❔ | ⬜ |
 | DKIM signature over the whole body | ✅ | ✅ verified |
-| Sent straight to any address, no mailbox forward | ✅ | — |
-| Other banks | — | ⬜ |
-| Spring Boot auto-configuration | — | ⬜ |
+| Sent straight to any address, no mailbox forward | ✅ | n/a |
+| Other banks | n/a | ⬜ |
+| Spring Boot auto-configuration | n/a | ⬜ |
 
-A new bank, or a ❔ turning into ✅, starts from one of its real e-mails, anonymised, as a test fixture.
-
-## Banks
-
-| Bank | Sender | Setting it up |
-|---|---|---|
-| Air Bank | `info@airbank.cz`, DKIM `d=airbank.cz` | Internet banking on a computer, not the app: Účty a karty → account → Možnosti → Info o dění na účtu → "Jiný kontakt" takes any address. |
-
-## Development
-
-`make build` checks formatting, compiles with Error Prone and NullAway, runs the tests and checks declared dependencies.
-`make format` fixes formatting.
+Licence: [Apache 2.0](LICENSE)
