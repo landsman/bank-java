@@ -1,0 +1,40 @@
+# bank-java
+
+> Java 21+ and Kotlin library that reads a Czech bank's payment notification e-mail into a `Transaction`, and hands
+> it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC and pinned in the
+> release. Air Bank only so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
+> GitHub Packages (group `cz.insuit`), not Maven Central. Pre-1.0: read records by accessor, never by record pattern.
+
+Setting it up in a project:
+
+- Add `cz.insuit:bank-notifications`; DKIM verification is inside it, there is nothing else to add or configure.
+- Add the GitHub Packages repository `https://maven.pkg.github.com/landsman/bank-java`. It asks for a token even for
+  a public package (`read:packages`). Never write a token into the build file or the repository.
+- One `BankNotifications.withDns()` per application, it is thread-safe. `read(rawMessage)` returns a `Transaction`
+  or throws a sealed `BankNotificationException`: `Unverified`, `TemporaryFailure` or `Unparsed`.
+- The account holder switches the bank's e-mail on and sends it straight to an address the application receives.
+
+Mistakes to avoid:
+
+- Hand `read` the message bytes exactly as they arrived, headers included. A message re-serialised by a mail library
+  no longer matches its signature and is `Unverified` every time.
+- Store the raw bytes before reading them: `Unparsed` and `TemporaryFailure` can be read again later.
+- Never act on `Unverified`: anyone can send an e-mail that looks like the bank's.
+- A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
+- Deduplicate on `transactionId()`, per bank: the same e-mail can arrive twice.
+- `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.
+- Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
+- Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.
+- Do not return a `Transaction` from a controller as JSON: it carries the payer's name, account and message.
+
+## Docs
+
+- [Installing](https://github.com/landsman/bank-java/blob/main/.docs/install.md): the repository block and the token, for Gradle and Maven
+- [Setting up a bank](https://github.com/landsman/bank-java/blob/main/.docs/setup.md): how the account holder points the bank's e-mail at your address
+- [Using the library](https://github.com/landsman/bank-java/blob/main/.docs/usage.md): the raw message, the exceptions, a transaction's fields, the two checks left to you
+- [How verification works](https://github.com/landsman/bank-java/blob/main/.docs/verification.md): what makes a signature count, DNSSEC, pinning, the size limit
+
+## Optional
+
+- [How Air Bank's e-mail behaves](https://github.com/landsman/bank-java/blob/main/.docs/air-bank.md): the message, its body, what has not been seen
+- [Roadmap](https://github.com/landsman/bank-java/blob/main/.docs/plan/roadmap.md): what is next, what is not covered

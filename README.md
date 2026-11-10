@@ -46,6 +46,7 @@ setting to forget: `BankNotifications.withDns().read(raw)`. Two questions stay y
 
 | Read | For |
 |---|---|
+| [llms.txt](llms.txt) | the setup and the mistakes to avoid, for a coding assistant adding the library to a project |
 | [Installing](.docs/install.md) | the artifact on GitHub Packages, for Gradle and Maven |
 | [Setting up a bank](.docs/setup.md) | how the account holder points the bank's e-mail at your address |
 | [Using the library](.docs/usage.md) | the raw message, the exceptions, a transaction's fields, the two checks left to you |
