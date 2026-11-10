@@ -107,7 +107,7 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 |---|---|
 | Personal, CZK | ✅ |
 | Business | ❔ |
-| Foreign currency | ❔ per currency, below |
+| Foreign currency | ❔ per currency, below; [#13](https://github.com/landsman/bank-java/issues/13) |
 | Balance in overdraft | ❔ |
 
 ### Currencies
