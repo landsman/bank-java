@@ -15,29 +15,33 @@ scan in `security.yml` reads it, and the build fails when it drifts from what sh
 
 ## Adding a bank
 
-Each bank has a folder of its own, `modules/bank-notifications/src/banks/<bank>/`:
+Each bank has a folder of its own, `modules/bank-notifications/src/banks/<country>/<bank>/`, and its documentation is
+`.docs/banks/<country>/<bank>/README.md`, with a row in [banks](banks/README.md). The country is a folder (`cz`, later
+`sk` and others), the same in both places:
 
 ```text
-src/banks/fio-cz/
+src/banks/cz/fio/
   java/cz/insuit/bank/notification/FioCz.java        the parser
   test/cz/insuit/bank/notification/FioCzTest.java    its tests
   fixtures/fio-cz/*.eml                              its anonymised e-mails, read as /fio-cz/<name>.eml
 ```
 
-Its documentation is `.docs/banks/<country>/<bank>/README.md`, with a row in [banks](banks/README.md); the country
-is a folder (`cz`, later `sk` and others). Gradle picks every code folder up as another source root. Each is in the package `cz.insuit.bank.notification`, like the
-rest, so the parser stays package-private and out of the public API: a folder is not a package.
+The fixtures' own folder keeps the country in its name (`fio-cz`): every bank's fixtures share one classpath, so Fio
+in Slovakia needs `fio-sk`, not a second `fio`. Gradle picks every bank folder up as another source root. Each is in the
+package `cz.insuit.bank.notification`, like the rest, so the parser stays package-private and out of the public API: a
+folder is not a package.
 
 1. **Get a real e-mail**: the raw `.eml`, exported as "show original" or "raw source", never forwarded, which rewrites
    the headers. An incoming payment with a variable symbol and a message is the most useful first one.
 2. **Verify its signature** against the bank's key in DNS before anything else, e.g.
    `uvx --from dkimpy==1.1.8 --with dnspython dkimverify < message.eml`. Note the `d=`, the selector, the key size,
    and that there is no `l=`.
-3. **Anonymise it into a fixture** under `src/banks/<bank>/fixtures/<bank>/`: keep the headers from
+3. **Anonymise it into a fixture** under `src/banks/<country>/<bank>/fixtures/<bank>-<country>/` (or the name the bank's
+   existing fixtures use): keep the headers from
    `Date:` on, drop the transport headers and the signature, replace accounts, names, balance, transaction codes and
    the recipient (`bruce.wayne@gothba.org`), and keep everything else byte for byte, line ends and invisible characters
    included. `.gitattributes` keeps git from touching `*.eml`.
-4. **Write the parser** in `src/banks/<bank>/java/`, with its test in `src/banks/<bank>/test/`, as `AirBank` and `FioCz` are:
+4. **Write the parser** in `src/banks/<country>/<bank>/java/`, with its test in `src/banks/<country>/<bank>/test/`, as `AirBank` and `FioCz` are:
    a class implementing `Bank`, listed in `BankNotifications.BANKS`, reading the body through `NotificationLines`
    (one-off lines, labelled lines, the guard against a forged line after a payer's message). What stays the bank's
    own: its patterns, the amount format, the movement types; lines read by label, the direction stated twice and required to agree,

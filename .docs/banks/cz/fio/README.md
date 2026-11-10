@@ -81,7 +81,7 @@ Every line under `Další parametry` but `Typ pohybu` and `ID pokynu` appears on
 
 Every kind of e-mail Fio can send, and whether a real one has been read. ✅ read, 🚫 seen and refused, ❔ not seen yet,
 👁 seen only as a preview in the settings form. A ❔ needs one raw `.eml`, exported as the original, never forwarded; see
-[development](../../../development.md#adding-a-bank). Parser, tests and fixtures are in `modules/bank-notifications/src/banks/fio-cz/`.
+[development](../../../development.md#adding-a-bank). Parser, tests and fixtures are in `modules/bank-notifications/src/banks/cz/fio/`.
 
 ### What the account holder chooses
 

@@ -4,7 +4,7 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One bank whose notification e-mail the library reads. Each lives in its own folder, {@code src/banks/<bank>/}, and
+ * One bank whose notification e-mail the library reads. Each lives in its own folder, {@code src/banks/<country>/<bank>/}, and
  * is listed in {@link BankNotifications}; the e-mail's {@code From} domain picks it.
  */
 interface Bank {
