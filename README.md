@@ -6,6 +6,7 @@ Java 21, no framework required, nullability in JSpecify.
 | Module | Package | Reads |
 |---|---|---|
 | `bank-notifications` | `cz.insuit.bank.notification` | the e-mail a bank sends on every payment, for banks without an API |
+| `bank-notifications-dkim` | `cz.insuit.bank.notification.dkim` | whether that e-mail really comes from the bank |
 
 Banks with an API of their own are a module each, as they come.
 
@@ -21,10 +22,25 @@ switch (BankNotifications.parse(rawMessage)) {
 }
 ```
 
-**Verify before you trust.** Anyone can send an e-mail that looks like a bank's, so the parser trusts nothing:
+**Verify before you trust.** Anyone can send an e-mail that looks like a bank's, so the parser trusts nothing.
+`bank-notifications-dkim` does the first check:
 
-- check that the raw message carries a valid DKIM signature of `Transaction.signedBy()`, verified by your own receiving
-  side, never read from an `Authentication-Results` header that arrived with the message;
+```java
+DkimVerifier dkim = DkimVerifier.withDns(); // or DkimVerifier.with(yourLookup), thread-safe, keep one
+if (BankNotifications.parse(raw) instanceof Transaction t
+        && dkim.verify(raw, t.signedBy()) instanceof DkimResult.Verified) {
+    // genuine
+}
+```
+
+It verifies the DKIM signature over the raw bytes, never an `Authentication-Results` header that arrived with the
+message, and counts it only when `d=` is the bank's domain, the whole body is signed (no `l=`), the key is not in testing
+mode and an RSA key has at least 1024 bits (`minimumKeyBits` raises it). A key lookup that fails is a
+`TemporaryFailure`, not a `Failed`. It runs on [Apache James jDKIM](https://github.com/apache/james-jdkim) 0.5, and
+refuses messages over 64 KiB until a jDKIM release carries the linear-time parsing fixes made upstream on 2026-11-05.
+
+The other two checks stay with you:
+
 - check that `Transaction.account()` is the account you expect, or a genuine notification about somebody else's
   account counts as yours;
 - deduplicate on `Transaction.transactionId()`.
