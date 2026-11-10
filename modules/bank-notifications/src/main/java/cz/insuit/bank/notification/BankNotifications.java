@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public final class BankNotifications {
 
     /** Every bank this release reads; adding one is a class in {@code src/banks/<bank>/} and a line here. */
-    private static final List<Bank> BANKS = List.of(new AirBank(), new FioCz());
+    private static final List<Bank> BANKS = List.of(new AirBank(), new FioCz(), new Moneta());
 
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated

@@ -7,6 +7,7 @@ with the message `no parser for sender domain <domain>`, until that bank is adde
 | Bank | Recognised by | Reads | Details |
 |---|---|---|---|
 | Air Bank | `From: info@airbank.cz`, signed by `airbank.cz` | incoming and outgoing transfers | [how its e-mail behaves](air-bank.md) |
+| MONETA | `From: infoservis@moneta.cz`, signed by `moneta.cz` | incoming and outgoing, from public samples; no key pinned, so `Unverified` until a real e-mail | [how its e-mail behaves](moneta.md) |
 | Fio banka CZ | `From: automat@fio.cz`, signed by `fio.cz` | transfers in and out, card payments, direct debits | [how its e-mail behaves](fio-cz.md) |
 
 ```java
@@ -67,14 +68,14 @@ from a fake.
 | `signedBy()` | the bank's domain whose signature verified: `airbank.cz`, `fio.cz` |
 | `direction()`, `incoming()` | `INCOMING` or `OUTGOING` |
 | `type()` | `TRANSFER`, `CARD`, `DIRECT_DEBIT`, or `GENERAL` when the e-mail does not say |
-| `account()` | the account the e-mail is about, a `BankAccount` |
+| `account()` | the account the e-mail is about, a `BankAccount`; `null` where the bank masks it (MONETA) |
 | `counterAccount()` | the payer of an incoming payment, the recipient of an outgoing one; `null` for a card payment |
 | `counterName()` | the other side's name, when the bank prints it; `null` otherwise |
 | `amount()` | a `Money`: `BigDecimal` and `Currency`, signed, positive in and negative out |
 | `symbols()` | `PaymentSymbols`: `variable()`, `constant()`, `specific()`, each `null` when absent |
 | `message()` | the payment's message, when the bank prints it; `null` otherwise |
 | `bookedOn()` | the booking date the bank states |
-| `transactionId()` | the bank's own id of the transaction |
+| `transactionId()` | the bank's own id of the transaction; `null` where the bank prints none (MONETA) |
 | `messageId()` | the e-mail's `Message-ID`, only when the bank's DKIM signature covers it; `null` otherwise (Air Bank and Fio do not sign it) |
 | `balance()` | a `Balance`: the `available()` money right after the payment and `asOf()`, the bank's time to the minute; `null` when the bank does not state it in a form the library reads |
 

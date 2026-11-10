@@ -12,7 +12,8 @@ import org.jspecify.annotations.Nullable;
  * @param direction whether the money arrived or left; {@link #amount()} carries it as the sign as well
  * @param type how it was paid, {@link Type#GENERAL} when the e-mail does not say
  * @param account the account the e-mail is about; compare it with the account you expect, so that a genuine
- *     notification about somebody else's account is not taken for yours
+ *     notification about somebody else's account is not taken for yours. {@code null} where the bank masks it in the
+ *     e-mail: MONETA prints {@code 238***891}. Then the inbound address has to tell whose account it is
  * @param counterAccount the other side: the payer of an incoming payment, the recipient of an outgoing one; {@code null}
  *     when the bank names no account, as for a card payment
  * @param counterName the other side's name, if the bank prints it (Air Bank for incoming only, Fio when it has one)
@@ -20,7 +21,8 @@ import org.jspecify.annotations.Nullable;
  * @param symbols the variable, constant and specific symbol, each {@code null} when absent
  * @param message the payment's message, if the bank prints it
  * @param bookedOn the booking date the bank states
- * @param transactionId the bank's own id of the transaction, the key to deduplicate on, per bank
+ * @param transactionId the bank's own id of the transaction, the key to deduplicate on, per bank. {@code null} where
+ *     the bank prints none: MONETA. Deduplicate on {@link #messageId()} then
  * @param balance the account's balance right after the payment, if the bank states it in a form this library reads
  * @param messageId the e-mail's {@code Message-ID}, only when the bank's DKIM signature covers it; unsigned, anyone
  *     holding a copy of the e-mail could change it, so it is {@code null} then. Where the bank gives no transaction
@@ -30,14 +32,14 @@ public record Transaction(
         String signedBy,
         Direction direction,
         Type type,
-        BankAccount account,
+        @Nullable BankAccount account,
         @Nullable BankAccount counterAccount,
         @Nullable String counterName,
         Money amount,
         PaymentSymbols symbols,
         @Nullable String message,
         LocalDate bookedOn,
-        String transactionId,
+        @Nullable String transactionId,
         @Nullable Balance balance,
         @Nullable String messageId) {
 

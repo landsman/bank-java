@@ -48,6 +48,11 @@ English); its fields, as both interfaces showed them on 2026-11-10:
 
 Check that `read` returns a `Transaction` for a small payment.
 
+## MONETA
+
+See [moneta.md](moneta.md#setting-it-up): Upozornění - Info Servis, e-mail for incoming and outgoing payments, only
+from 100 Kč. Not verified yet: no real MONETA e-mail has been read.
+
 ## Another bank
 
 Not supported yet; see [what it covers](../README.md#what-it-covers). Adding one starts from one of its real e-mails,
