@@ -59,13 +59,42 @@ message without reading it.
 Messages over 64 KiB are refused until a jDKIM release carries the linear-time parsing fixes made upstream on
 2026-11-05. Banks with an API of their own will be a module each.
 
+## What it covers
+
+What a bank's notification e-mail carries, seen in its real e-mails, against what this library reads. ❔ means no
+sample has shown it yet, so the bank may well send it.
+
+| Feature | Air Bank e-mail | This library |
+|---|:---:|:---:|
+| Incoming transfer | ✅ | ✅ |
+| Outgoing transfer | ✅ | ✅ |
+| Card payment | ❔ | ⬜ |
+| Direct debit | ❔ | ⬜ |
+| The account it is about | ✅ | ✅ |
+| Counter-account | ✅ | ✅ |
+| Counter-party name | ✅ incoming only | ✅ |
+| Amount and currency, under 1 000 | ✅ | ✅ |
+| Amount of 1 000 and more | ❔ | ⬜ |
+| Variable symbol | ✅ | ✅ |
+| Constant and specific symbol | ❔ | ⬜ |
+| Message, outgoing | ✅ | ✅ |
+| Message, incoming | ❔ | ⬜ |
+| Booking date | ✅ | ✅ |
+| Transaction id | ✅ | ✅ |
+| Balance after the payment | ✅ | ⬜ |
+| Business account | ❔ | ⬜ |
+| DKIM signature over the whole body | ✅ | ✅ verified |
+| Sent straight to any address, no mailbox forward | ✅ | — |
+| Other banks | — | ⬜ |
+| Spring Boot auto-configuration | — | ⬜ |
+
+A new bank, or a ❔ turning into ✅, starts from one of its real e-mails, anonymised, as a test fixture.
+
 ## Banks
 
-| Bank | Sender | Notes |
+| Bank | Sender | Setting it up |
 |---|---|---|
-| Air Bank | `info@airbank.cz`, DKIM `d=airbank.cz` | Internet banking on a computer: Účty a karty → account → Možnosti → Info o dění na účtu → "Jiný kontakt" takes any address, no mailbox forward needed. Incoming and outgoing transfers. Constant and specific symbols, the incoming message and amounts of 1 000 and more are not read yet: no sample has shown them. |
-
-A new bank starts from one of its real e-mails, anonymised, as a test fixture.
+| Air Bank | `info@airbank.cz`, DKIM `d=airbank.cz` | Internet banking on a computer, not the app: Účty a karty → account → Možnosti → Info o dění na účtu → "Jiný kontakt" takes any address. |
 
 ## Development
 
