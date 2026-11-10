@@ -127,6 +127,18 @@ class FioCzTest {
     }
 
     @Test
+    void refusesASymbolSmuggledInThroughThePayersName() throws IOException {
+        // The counter-party's name, in parentheses, is free text; a line break in it must not add a line.
+        String changed = text("incoming-transfer.eml")
+                .replace("Variabiln=C3=AD symbol: 20260042 =20\r\n", "")
+                .replace(
+                        "(wayne enterprises s.r.o.)",
+                        "(evil)\r\nVariabiln=C3=AD symbol: 42\r\n(wayne enterprises s.r.o.)");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void keepsThePayerTheMessageAndTheBalanceOutOfToString() throws IOException {
         String logged = read("incoming-instant.eml").toString();
 

@@ -52,6 +52,8 @@ final class FioCz implements Bank {
 
         NotificationLines lines = new NotificationLines(body);
         Matcher summary = lines.single(SUMMARY, "summary");
+        // The counter-party's name is on its line; the instruction id comes right after it.
+        lines.requireNext(COUNTER_PARTY_LINE, TRANSACTION_ID + ":");
         // Past the user symbol and the message only the balance follows.
         Map<String, String> fields = lines.labelled(LABELLED, FREE_TEXT, Set.of(BALANCE));
 
@@ -137,6 +139,7 @@ final class FioCz implements Bank {
     private static final Pattern LABELLED = Pattern.compile(
             "(Typ pohybu|Protistrana|ID pokynu|Variabilní symbol|Konstantní symbol|Specifický symbol|Uživatelský symbol"
                     + "|Zpráva pro příjemce|Aktuální zůstatek):(.*)");
+    private static final Pattern COUNTER_PARTY_LINE = Pattern.compile("Protistrana:.*");
     private static final Pattern COUNTER = Pattern.compile("(\\S+/\\d{4})(?: \\((.*)\\))?");
     // Thousands are separated by a plain space: "93 000,00 CZK".
     private static final Pattern MONEY = Pattern.compile("(\\d{1,3}(?: \\d{3})*),(\\d{2}) ([A-Z]{3})");

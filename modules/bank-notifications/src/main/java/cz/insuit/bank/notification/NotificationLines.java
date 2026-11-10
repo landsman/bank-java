@@ -43,6 +43,20 @@ final class NotificationLines {
     }
 
     /**
+     * {@link Unparsed} unless the line right after the one matching {@code line} starts with {@code next}; nothing when
+     * no line matches. A line holding a name the payer controls is pinned this way: a line break smuggled into the name
+     * would add lines, a counter-party or a variable symbol of its own, and push {@code next} down.
+     */
+    void requireNext(Pattern line, String next) {
+        for (int i = 0; i < lines.size(); i++) {
+            if (!line.matcher(lines.get(i)).matches()) continue;
+            if (i + 1 >= lines.size() || !lines.get(i + 1).startsWith(next)) {
+                throw new Unparsed("'" + next + "' does not follow the line naming the other side");
+            }
+        }
+    }
+
+    /**
      * The lines matching {@code labelled}, whose first group is the label and second the value, stripped.
      *
      * <p>Free text is what a payer controls: a message, a name. Should the bank ever pass a line break through, a forged

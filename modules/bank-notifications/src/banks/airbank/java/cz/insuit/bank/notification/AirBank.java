@@ -56,6 +56,9 @@ final class AirBank implements Bank {
         Matcher summary = lines.single(SUMMARY, "summary");
         Matcher incoming = lines.single(INCOMING, "counter-party");
         Matcher outgoing = lines.single(OUTGOING, "counter-party");
+        // The payer's name is on the incoming line; the amount comes right after it in both templates.
+        lines.requireNext(INCOMING, AMOUNT + ":");
+        lines.requireNext(OUTGOING, AMOUNT + ":");
         // Past the message only the transaction code follows.
         Map<String, String> fields = lines.labelled(LABELLED, MESSAGES, Set.of(TRANSACTION_ID));
 

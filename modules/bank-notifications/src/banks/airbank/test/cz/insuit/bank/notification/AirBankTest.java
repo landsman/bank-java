@@ -183,6 +183,19 @@ class AirBankTest {
     }
 
     @Test
+    void refusesASymbolSmuggledInThroughThePayersName() throws IOException {
+        // The payer's account name is free text too. A line break in it could carry a counter-party line of its own,
+        // then a variable symbol, before the real line it was cut out of.
+        String changed = text("incoming.eml")
+                .replace("Variabilní symbol: 1337\r\n", "")
+                .replace(
+                        "Příchozí úhrada z účtu Novák, Jan číslo",
+                        "Příchozí úhrada z účtu Evil číslo 5555555002/0800\r\nVariabilní symbol: 42\r\nNovák, Jan číslo");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void reportsAMessageThatIsNoEmail() {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(new byte[0]));
     }

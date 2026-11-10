@@ -73,6 +73,8 @@ Every line under `Další parametry` but `Typ pohybu` and `ID pokynu` appears on
 - A labelled line that appears twice makes the message `Unparsed`.
 - After `Uživatelský symbol:` or `Zpráva pro příjemce:`, the text a payer controls, only the other of the two and
   `Aktuální zůstatek:` may follow, so a message cannot smuggle in a symbol of its own.
+- `ID pokynu:` has to follow `Protistrana:` directly, so a line break in the counter-party's name cannot add lines
+  of its own.
 - A balance in a format not seen yet (an overdraft, perhaps) leaves `balance()` `null`; the payment is still read.
 
 ## Samples

@@ -71,6 +71,9 @@ Kód transakce: <12 digits><U+FEFF>
 - After the message, the only free text a payer controls, only `Kód transakce:` may follow, so a message cannot smuggle
   in a symbol of its own.
 - Each symbol is 1 to 10 digits, leading zeros kept.
+- `Částka:` has to follow the line naming the other side directly. The payer's account name is free text too; a line
+  break in it could add a counter-party line and a variable symbol of its own above the real ones, and that pushes
+  `Částka:` down. The idea comes from the attack fixtures of [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser/tree/master/tests/fixtures/csob-cz) (MIT).
 - Both kinds of line say "úhrada", a transfer, so `type()` is `TRANSFER`.
 
 ## Not seen yet
