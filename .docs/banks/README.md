@@ -23,7 +23,7 @@ A bank is in one of three states:
 | Creditas | samples only | incoming and outgoing; counter-account, symbol, balance | transaction id, name, message; card holds refused | [creditas](cz/creditas/README.md) |
 | Raiffeisenbank | samples only | transfers and card payments, from HTML; names, symbols, message, balance | transaction id | [raiffeisenbank](cz/raiffeisenbank/README.md) |
 | UniCredit Bank | samples only | incoming, from HTML; counter-account and name, symbols, message | transaction id, balance, type; how an outgoing payment writes its direction | [unicredit](cz/unicredit/README.md) |
-| ČSOB | samples only | CEB: incoming transfers and card payments, several in one e-mail (`readAll`); names, symbols, message | transaction id, balance time; SEPA, foreign and cash payments; its own internet banking's newer notification | [csob](cz/csob/README.md) |
+| ČSOB | samples only | CEB: incoming transfers and card payments, several in one e-mail (`readAll`); own banking's "Moje info - Avízo", in and out; names, symbols, message | transaction id, balance time; SEPA, foreign and cash payments | [csob](cz/csob/README.md) |
 | Komerční banka | not yet | | | [#14](https://github.com/landsman/bank-java/issues/14) |
 | Česká spořitelna | not yet | | | [#15](https://github.com/landsman/bank-java/issues/15) |
 | Citfin | not yet | | | [#21](https://github.com/landsman/bank-java/issues/21) |

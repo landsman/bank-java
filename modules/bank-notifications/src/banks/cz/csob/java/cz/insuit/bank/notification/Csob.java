@@ -55,6 +55,7 @@ final class Csob implements Bank {
 
     @Override
     public List<Transaction> parseAll(@Nullable String subject, String body) {
+        if (OWN_BANKING_SUBJECT.equals(subject)) return List.of(ownBanking(body));
         List<List<String>> blocks = blocks(body);
         if (blocks.isEmpty()) throw new Unparsed("no transaction sentence");
         List<Transaction> transactions = new ArrayList<>();
@@ -155,6 +156,74 @@ final class Csob implements Bank {
         }
     }
 
+    /**
+     * The notification of ČSOB's own internet banking, "Moje info - Avízo": one transaction, the labels on lines of their
+     * own and each value under its label. Read from radekhulan/myinvoice's samples (MIT), not a real e-mail. The
+     * direction is stated twice, in the kind ({@code Příchozí} / {@code Odchozí}) and the amount's sign.
+     */
+    private static Transaction ownBanking(String body) {
+        NotificationLines lines = new NotificationLines(body);
+        Matcher sentence = lines.single(OWN_SENTENCE, "transaction sentence");
+        if (sentence == null) throw new Unparsed("no transaction sentence");
+        // The counter-party's name is the line under its label; the booking date's label comes right after it.
+        lines.requireAt(OWN_NAME_LABEL, 2, OWN_BOOKED);
+        Map<String, String> fields = lines.stacked(OWN_LABELS, Set.of(), Set.of());
+
+        String ownText = fields.get(ACCOUNT);
+        Matcher own = ownText == null ? null : OWN_BANKING_ACCOUNT.matcher(ownText);
+        if (own == null || !own.matches()) throw new Unparsed("Účet missing or not in the known format");
+        if (!own.group(1).equals(sentence.group(2)))
+            throw new Unparsed("the sentence's account is not the Účet line's");
+        String amountText = fields.get(AMOUNT);
+        Money amount = amountText == null ? null : signed(amountText);
+        if (amount == null) throw new Unparsed("amount missing or not in the known format");
+        Direction direction = sentence.group(3).equals("Příchozí") ? Direction.INCOMING : Direction.OUTGOING;
+        if ((direction == Direction.INCOMING) != (amount.amount().signum() > 0)) {
+            throw new Unparsed("the kind and the amount's sign disagree on the direction");
+        }
+        String booked = fields.get(OWN_BOOKED);
+        if (booked == null) throw new Unparsed("no Datum účtování");
+        LocalDate bookedOn;
+        try {
+            bookedOn = LocalDate.parse(booked, DATE);
+        } catch (DateTimeParseException e) {
+            throw new Unparsed("Datum účtování not d.M.yyyy: " + booked);
+        }
+        String counter = fields.get(COUNTER_ACCOUNT);
+        try {
+            return new Transaction(
+                    DOMAIN,
+                    direction,
+                    Transaction.Type.TRANSFER,
+                    BankAccount.parse(own.group(1) + "/" + BANK_CODE),
+                    counter == null ? null : BankAccount.parse(counter),
+                    fields.get(COUNTER_NAME),
+                    amount,
+                    new PaymentSymbols(
+                            PaymentSymbols.checked(VARIABLE_SYMBOL, unpadded(fields.get(VARIABLE_SYMBOL))),
+                            PaymentSymbols.checked(CONSTANT_SYMBOL, unpadded(fields.get(CONSTANT_SYMBOL))),
+                            PaymentSymbols.checked(SPECIFIC_SYMBOL, unpadded(fields.get(SPECIFIC_SYMBOL)))),
+                    null,
+                    bookedOn,
+                    null,
+                    null,
+                    null);
+        } catch (IllegalArgumentException e) {
+            throw new Unparsed(e.getMessage() == null ? "invalid value" : e.getMessage(), e);
+        }
+    }
+
+    /**
+     * A symbol as this template prints it, padded with zeros to 13 digits in the sample ({@code 0009002567593}); a symbol
+     * has 10 at most. Only the zeros beyond ten are cut, so zeros that belong to the symbol stay; anything else is left
+     * for {@link PaymentSymbols#checked} to refuse.
+     */
+    private static @Nullable String unpadded(@Nullable String symbol) {
+        if (symbol == null || symbol.length() <= 10) return symbol;
+        String excess = symbol.substring(0, symbol.length() - 10);
+        return excess.chars().allMatch(c -> c == '0') ? symbol.substring(symbol.length() - 10) : symbol;
+    }
+
     /** A signed amount, {@code +1 234,56 CZK}: positive for money in, negative for money out. */
     private static @Nullable Money signed(String text) {
         Matcher matcher = MONEY.matcher(text);
@@ -179,6 +248,23 @@ final class Csob implements Bank {
     // A sign, a space between thousands: "+1 234,56 CZK".
     private static final Pattern MONEY = Pattern.compile("([+-])(\\d{1,3}(?: \\d{3})*),(\\d{2}) ([A-Z]{3})");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d.M.uuuu");
+
+    private static final String OWN_BANKING_SUBJECT = "Moje info - Avízo";
+    private static final Pattern OWN_SENTENCE =
+            Pattern.compile("dne (\\d{1,2}\\.\\d{1,2}\\.\\d{4}) byla na účtu (\\d{2,10}) zaúčtována transakce typu:"
+                    + " (Příchozí|Odchozí) úhrada(?: okamžitá)?\\.");
+    private static final Pattern OWN_BANKING_ACCOUNT = Pattern.compile("(\\d{2,10})/0300");
+    private static final Pattern OWN_NAME_LABEL = Pattern.compile("Název protistrany");
+    private static final String OWN_BOOKED = "Datum účtování";
+    private static final Set<String> OWN_LABELS = Set.of(
+            "Účet",
+            "Účet protistrany",
+            "Název protistrany",
+            OWN_BOOKED,
+            "Částka",
+            "Variabilní symbol",
+            "Konstantní symbol",
+            "Specifický symbol");
     private static final String BANK_CODE = "0300";
 
     private static final String CARD = "platební kartou";

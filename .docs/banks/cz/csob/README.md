@@ -7,9 +7,9 @@ them, 2018 to 2022), whose accounts fail the modulo 11 check. ČSOB signed as `d
 none is pinned and `withDns()` refuses every ČSOB e-mail as `Unverified`. See
 [#16](https://github.com/landsman/bank-java/issues/16).
 
-The newer notification of ČSOB's own internet banking (labels on their own lines, `Parametry platby`, as in
-[myinvoice's sample](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/CsobBankEmailNoticeParserTest.php))
-is not read yet.
+ČSOB's own internet banking sends another template, **"Moje info - Avízo"**, read from
+[myinvoice's samples](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/CsobBankEmailNoticeParserTest.php)
+(MIT); see [below](#moje-info---avízo).
 
 ## What it carries
 
@@ -44,6 +44,36 @@ Zůstatek na účtu po zaúčtování transakce: +1 234 567,89 CZK.
 - **After `Zpráva příjemci`**, the payer's text, no labelled line may follow.
 - **No transaction id**, and the balance has no time, so `balance()` is `null`. Deduplicate on a signed `messageId()`
   (ČSOB signed `message-id` in 2020) and the position in `readAll()`'s list.
+
+## Moje info - Avízo
+
+The subject picks it. One transaction, the labels on lines of their own and each value under its label:
+
+```
+dne 31.5.2026 byla na účtu 123456789 zaúčtována transakce typu: Odchozí úhrada okamžitá.
+
+Parametry platby
+Účet
+123456789/0300
+Účet protistrany
+35-4544230267/0100
+Datum účtování
+31.5.2026
+Částka
+-10 000,00 CZK
+Variabilní symbol
+0009002567593
+Konstantní symbol
+1120
+Zůstatek na účtu po zaúčtování transakce: +0,00 CZK.
+```
+
+- **The direction is stated twice**, `Příchozí` / `Odchozí` in the kind and the amount's sign, and has to agree.
+- **A symbol may be padded with zeros to 13 digits**; only the zeros beyond ten are cut, so `0000002567593` is
+  `0002567593`. A longer symbol that is not zero padding is refused.
+- **The line under `Název protistrany` is the name; the one after it has to be `Datum účtování`**, so a line break in
+  the name cannot add lines.
+- No transaction id, no message label seen; the balance has no time.
 
 ## Setting it up
 
