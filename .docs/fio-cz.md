@@ -20,10 +20,10 @@ six of them, anonymised; the card payment keeps its merchant.
 - **`Uživatelský symbol`** repeats the payer's name or the message. The library does not read it.
 - **`Konstantní symbol: 0`** comes as it is; `0` is not taken for "none".
 - **The account holder picks one of three formats** when setting the notification up ([setup](setup.md#fio-banka-cz)).
-  This page is about the long one. The short one, subject `Fio banka - prijem na konte` (seen 2026-08-18), lists
-  account, amount, symbols, message, balance and counter-account on six lines, but **no transaction id and no
-  currency**; it is `Unparsed`, because without an id the same e-mail arriving twice would count twice. The third is
-  one sentence without the counter-party, not seen as an e-mail.
+  This page is about the long one; the other two carry no transaction id. A fourth shape has arrived too, subject
+  `Fio banka - prijem na konte` (2026-08-18): account, amount, symbols, message, balance and counter-account on six
+  lines, but **no transaction id and no currency**, and it matches none of the form's previews, so it may be an older
+  setting. All of them are `Unparsed`: without an id, the same e-mail arriving twice would count twice.
 
 ## The message
 
@@ -91,8 +91,10 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 | | SMS | ❔ not signed, so a hint at most: [#12](https://github.com/landsman/bank-java/issues/12) |
 | | push to Fio's app | n/a: no third party can read it |
 | Format | long, `Fio banka - příjem na účtu` | ✅ |
-| | short, one line, `Fio banka - prijem na konte` | 🚫 no transaction id, no currency |
-| | one sentence, no counter-party | 👁 |
+| | short, `Nový příjem na účtu`: account, amount, date, counter-party, balance, type | 🚫 no transaction id |
+| | one sentence, `Nový příjem na účtu`, no counter-party | 👁 |
+| | `Fio banka - prijem na konte`, six lines | 🚫 no transaction id, no currency; seen 2026-08-18, it matches none of the three previews |
+| Direction | all, incoming, outgoing | ✅ both directions; it decides which e-mails come, not their shape |
 | Language | Czech | ✅ |
 | | English | 👁 [#11](https://github.com/landsman/bank-java/issues/11) |
 | Online notifications | on | ✅ |
@@ -105,7 +107,7 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 |---|---|
 | Personal, CZK | ✅ |
 | Business | ❔ |
-| Foreign currency (EUR, USD) | ❔ |
+| Foreign currency (EUR, USD) | ❔ a EUR account exists to ask for one |
 | Balance in overdraft | ❔ |
 
 ### The movement (`Typ pohybu`)
