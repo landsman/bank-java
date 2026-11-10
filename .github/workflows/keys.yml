@@ -1,0 +1,38 @@
+name: keys
+
+# The banks' DKIM keys are pinned in the code (AirBank.KEY_FINGERPRINTS). Once a day this compares them with what DNS
+# publishes, validated through DNSSEC from the root, and opens an issue when they differ: a bank that rotated its key,
+# a forged key, or a root key rollover the built-in trust anchors miss. Until a release pins the new key, readers on the
+# old one get Unverified, so the issue is the start of a release.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v6
+      - run: make check-keys
+      # One open issue at a time, however many days it keeps failing.
+      - if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: DKIM key check failed
+          BODY: >-
+            make check-keys failed in ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+            A bank may have published a new key. Read the failure, check the key through a second resolver,
+            pin it beside the old one in that bank's KEY_FINGERPRINTS, and release.
+        run: |
+          open=$(gh issue list --state open --search "$TITLE in:title" --json number --jq length)
+          [ "$open" = 0 ] && gh issue create --title "$TITLE" --body "$BODY" || true

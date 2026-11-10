@@ -48,7 +48,7 @@ class BankNotificationsTest {
 
     @Test
     void waitsWhenTheKeyCannotBeLookedUp() throws Exception {
-        BankNotifications unreachable = BankNotifications.with((selector, domain) -> {
+        BankNotifications unreachable = BankNotifications.trustingKeysFrom((selector, domain) -> {
             throw new IOException("resolver timed out");
         });
 
@@ -59,7 +59,7 @@ class BankNotificationsTest {
 
     @Test
     void leavesAnUnreadableMessageUnparsedWithoutLookingUpAKey() throws Exception {
-        BankNotifications noLookup = BankNotifications.with((selector, domain) -> {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
             throw new AssertionError("looked up a key for a message it could not read");
         });
 
@@ -80,7 +80,7 @@ class BankNotificationsTest {
     private static BankNotifications notifications() {
         String record = "v=DKIM1; k=rsa; p="
                 + Base64.getEncoder().encodeToString(key.getPublic().getEncoded());
-        return BankNotifications.with((selector, domain) ->
+        return BankNotifications.trustingKeysFrom((selector, domain) ->
                 selector.equals("ab") && domain.equals("airbank.cz") ? List.of(record) : List.of());
     }
 

@@ -26,10 +26,19 @@ scan in `security.yml` reads it, and the build fails when it drifts from what sh
    included. `.gitattributes` keeps git from touching `*.eml`.
 4. **Write the parser** beside `AirBank`: lines read by label, the direction stated twice and required to agree,
    nothing guessed. A test per refusal, not only per success.
-5. **Document it** in [setup](setup.md), a page like [air-bank.md](air-bank.md), and the table in the README.
+5. **Pin its key**: the fingerprint `DkimVerifier.fingerprint` gives for the key in DNS, read through two resolvers, in
+   the bank's `KEY_FINGERPRINTS`, its domain in `BankNotifications.pinnedKeys()`, and a check in `KeyCheckLiveTest`.
+   Its domain has to be DNSSEC-signed, or `withDns()` refuses every e-mail from it.
+6. **Document it** in [setup](setup.md), a page like [air-bank.md](air-bank.md), and the table in the README.
 
 The real e-mail stays out of the repository: an anonymised message no longer matches its signature, so the tests sign
 the fixture with a key of their own.
+
+## A bank rotates its key
+
+`keys.yml` opens an issue. Read the new fingerprint from the failure, confirm it through a second resolver
+(`dig +short TXT <selector>._domainkey.<domain> @8.8.8.8`, then the `p=` value Base64-decoded and SHA-256'd), add it to
+the bank's `KEY_FINGERPRINTS` beside the old one, and release. Drop the old one once DNS no longer publishes it.
 
 ## Releasing
 

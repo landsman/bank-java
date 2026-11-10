@@ -11,6 +11,8 @@ dependencies {
     runtimeOnly("org.eclipse.angus:angus-mail:2.0.5")
     // Apache James jDKIM verifies the signature. No jDKIM type leaves the library, so replacing it stays inside it.
     implementation("org.apache.james.jdkim:apache-jdkim-library:0.5")
+    // DNSSEC validation of the key lookups; jDKIM brings it too, at this version.
+    implementation("dnsjava:dnsjava:3.6.3")
 
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -45,3 +47,21 @@ val verifyLocks =
 tasks.check {
     dependsOn(verifyLocks)
 }
+
+// Live DNS stays out of make build; make check-keys runs it, and keys.yml does so daily.
+tasks.test {
+    useJUnitPlatform { excludeTags("live") }
+}
+
+val checkKeys =
+    tasks.register<Test>("checkKeys") {
+        description = "Checks the banks' DKIM keys in live DNS against the pinned ones, through DNSSEC."
+        group = "verification"
+        testClassesDirs =
+            sourceSets.test
+                .get()
+                .output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
+        useJUnitPlatform { includeTags("live") }
+        outputs.upToDateWhen { false }
+    }

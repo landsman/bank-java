@@ -82,17 +82,23 @@ If each customer has their own address, compare against that customer's account.
 **Deduplicate on `transactionId()`**, per bank. The same e-mail can arrive twice, and two real payments can share an
 amount, a variable symbol and a date.
 
-## Your own key lookup
+## Keys
 
-`BankNotifications.with(lookup)` takes a `KeyLookup` instead of DNS: a resolver with its own timeouts, or a recorded key
-in a test. It returns the TXT records of `<selector>._domainkey.<domain>`, and throws `IOException` when the lookup could
-not be made, which becomes a `TemporaryFailure`.
+`withDns()` needs nothing from you: it validates the bank's key through DNSSEC and accepts only the keys this release
+pins, see [whose key it is](verification.md#whose-key-it-is). The machine's resolver only has to pass DNSSEC records
+through, as nearly every one does; one that strips them makes every e-mail `Unverified` with the message
+`... is not DNSSEC-secure`. `BankNotifications.pinnedKeys()` lists the pinned keys, for an audit or a line at start-up.
+
+`BankNotifications.trustingKeysFrom(lookup)` takes the keys from your `KeyLookup` and trusts them as they come, no
+DNSSEC and no pinning: for tests, and for a resolver you vouch for yourself. It returns the TXT records of
+`<selector>._domainkey.<domain>`, and throws `IOException` when the lookup could not be made, which becomes a
+`TemporaryFailure`.
 
 ```java
-BankNotifications notifications = BankNotifications.with((selector, domain) -> myResolver.txt(selector + "._domainkey." + domain));
+BankNotifications notifications = BankNotifications.trustingKeysFrom((selector, domain) -> myResolver.txt(selector + "._domainkey." + domain));
 ```
 
 ## Testing your code
 
-Your tests should not reach DNS. Sign a message with a key made in the test and hand `with` its public half; this
+Your tests should not reach DNS. Sign a message with a key made in the test and hand `trustingKeysFrom` its public half; this
 repository's `BankNotificationsTest` does exactly that with jDKIM's `DKIMSigner`.

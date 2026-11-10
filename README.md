@@ -17,12 +17,39 @@ try {
 }
 ```
 
+## What it does for you
+
+```mermaid
+flowchart LR
+    bank["Air Bank"] -- "payment e-mail,<br/>DKIM-signed" --> inbox["your inbound address"]
+    inbox -- "raw bytes" --> read
+
+    subgraph lib ["bank-notifications: read(raw)"]
+        direction TB
+        read["read"] --> parse{"Air Bank's template,<br/>every field consistent?"}
+        parse -- "no" --> unparsed(["Unparsed"])
+        parse -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
+        dns -- "DNS down" --> temporary(["TemporaryFailure"])
+        dns -- "forged or unsigned" --> unverified(["Unverified"])
+        dns -- "secure" --> pin{"key pinned<br/>in this release?"}
+        pin -- "no" --> unverified
+        pin -- "yes" --> sig{"signature valid,<br/>d=airbank.cz,<br/>whole body?"}
+        sig -- "no" --> unverified
+        sig -- "yes" --> transaction(["Transaction"])
+    end
+
+    transaction --> you["you: is it my account?<br/>seen this transactionId?"]
+```
+
+Every arrow out of the box but one ends in an exception. A `Transaction` exists only when all four checks passed, with no
+setting to forget: `BankNotifications.withDns().read(raw)`. Two questions stay yours, because only you know the answer.
+
 | Read | For |
 |---|---|
 | [Installing](.docs/install.md) | the artifact on GitHub Packages, for Gradle and Maven |
 | [Setting up a bank](.docs/setup.md) | how the account holder points the bank's e-mail at your address |
 | [Using the library](.docs/usage.md) | the raw message, the exceptions, a transaction's fields, the two checks left to you |
-| [How verification works](.docs/verification.md) | what makes a signature count, what it does not prove, jDKIM, the size limit |
+| [How verification works](.docs/verification.md) | what makes a signature count, whose key it is (DNSSEC, pinning), what it does not prove, the size limit |
 | [How Air Bank's e-mail behaves](.docs/air-bank.md) | the message, its body, what to watch out for, what has not been seen |
 | [Roadmap](.docs/plan/roadmap.md) | the working plan: what is next, what is not covered |
 | [Development](.docs/development.md) | build, tests, adding a bank |
@@ -52,6 +79,8 @@ sample has shown it yet, so the bank may well send it.
 | Balance after the payment | ✅ | ⬜ |
 | Business account | ❔ | ⬜ |
 | DKIM signature over the whole body | ✅ | ✅ verified |
+| DNSSEC-signed key | ✅ | ✅ validated from the root |
+| Key pinned in the release | n/a | ✅ checked daily against DNS |
 | Sent straight to any address, no mailbox forward | ✅ | n/a |
 | Other banks | n/a | ⬜ |
 | Spring Boot auto-configuration | n/a | ⬜ |

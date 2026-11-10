@@ -26,7 +26,8 @@ class ReadsOnSpringBootTest {
     @Test
     void readsAndVerifies() throws Exception {
         KeyPair key = rsa();
-        BankNotifications notifications = BankNotifications.with((selector, domain) -> List.of(record(key)));
+        BankNotifications notifications =
+                BankNotifications.trustingKeysFrom((selector, domain) -> List.of(record(key)));
 
         Transaction t = notifications.read(signed(key));
 
@@ -37,7 +38,7 @@ class ReadsOnSpringBootTest {
 
     @Test
     void refusesAnUnsignedOne() throws Exception {
-        BankNotifications notifications = BankNotifications.with((selector, domain) -> List.of());
+        BankNotifications notifications = BankNotifications.trustingKeysFrom((selector, domain) -> List.of());
 
         assertThrows(BankNotificationException.Unverified.class, () -> notifications.read(bytes(MESSAGE)));
     }

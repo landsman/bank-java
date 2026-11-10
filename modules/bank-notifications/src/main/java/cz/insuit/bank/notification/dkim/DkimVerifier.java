@@ -2,11 +2,17 @@ package cz.insuit.bank.notification.dkim;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.apache.james.jdkim.DKIMVerifier;
 import org.apache.james.jdkim.api.PublicKeyRecordRetriever;
 import org.apache.james.jdkim.api.Result;
@@ -14,7 +20,6 @@ import org.apache.james.jdkim.api.SignatureRecord;
 import org.apache.james.jdkim.exceptions.FailException;
 import org.apache.james.jdkim.exceptions.PermFailException;
 import org.apache.james.jdkim.exceptions.TempFailException;
-import org.apache.james.jdkim.impl.DNSPublicKeyRecordRetriever;
 import org.apache.james.jdkim.tagvalue.PublicKeyRecordImpl;
 import org.jspecify.annotations.Nullable;
 
@@ -23,8 +28,8 @@ import org.jspecify.annotations.Nullable;
  * received.
  *
  * <p>A signature counts only when its {@code d=} is the expected domain, it covers the whole body (no {@code l=}), its
- * key is not in testing mode ({@code t=y}) and an RSA key has at least {@link #minimumKeyBits(int)} bits. Thread-safe
- * and reusable.
+ * key is not in testing mode ({@code t=y}), an RSA key has at least {@link #minimumKeyBits(int)} bits, and, for a
+ * domain with {@link #pinnedKeys pinned keys}, the key is one of them. Thread-safe and reusable.
  *
  * <pre>{@code
  * DkimVerifier dkim = DkimVerifier.withDns();
@@ -36,9 +41,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class DkimVerifier {
 
-    /** Looks keys up in DNS. */
+    /**
+     * Looks keys up in DNS and refuses any key whose answer is not DNSSEC-secure, validated here from the root's trust
+     * anchors rather than taken from the resolver.
+     */
     public static DkimVerifier withDns() {
-        return new DkimVerifier(new DNSPublicKeyRecordRetriever(), DEFAULT_MINIMUM_KEY_BITS);
+        return new DkimVerifier(DnssecKeyLookup.usingSystemResolvers(), DEFAULT_MINIMUM_KEY_BITS, Map.of());
     }
 
     /**
@@ -54,7 +62,7 @@ public final class DkimVerifier {
                 throw new TempFailException("key lookup failed: " + e.getMessage());
             }
         };
-        return new DkimVerifier(retriever, DEFAULT_MINIMUM_KEY_BITS);
+        return new DkimVerifier(retriever, DEFAULT_MINIMUM_KEY_BITS, Map.of());
     }
 
     /**
@@ -64,7 +72,35 @@ public final class DkimVerifier {
      * @param bits the shortest RSA modulus accepted
      */
     public DkimVerifier minimumKeyBits(int bits) {
-        return new DkimVerifier(keys, bits);
+        return new DkimVerifier(keys, bits, pins);
+    }
+
+    /**
+     * Returns a verifier that accepts, for {@code domain}, only keys whose fingerprint is listed: the SHA-256 of the
+     * public key (its DER SubjectPublicKeyInfo, the decoded {@code p=}), in Base64. A key the domain publishes but this
+     * list does not name is refused, so a key forged into DNS is refused even if DNSSEC were broken.
+     *
+     * @param domain the signing domain, {@code d=}
+     * @param fingerprints the accepted keys' fingerprints
+     */
+    public DkimVerifier pinnedKeys(String domain, Set<String> fingerprints) {
+        Map<String, Set<String>> next = new HashMap<>(pins);
+        next.put(domain.toLowerCase(Locale.ROOT), Set.copyOf(fingerprints));
+        return new DkimVerifier(keys, minimumKeyBits, Map.copyOf(next));
+    }
+
+    /**
+     * The fingerprint {@link #pinnedKeys} compares: SHA-256 of the key's encoded form, in Base64.
+     *
+     * @param key a public key
+     */
+    public static String fingerprint(PublicKey key) {
+        try {
+            return Base64.getEncoder()
+                    .encodeToString(MessageDigest.getInstance("SHA-256").digest(key.getEncoded()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("every JDK has SHA-256", e);
+        }
     }
 
     /**
@@ -80,7 +116,7 @@ public final class DkimVerifier {
                     "message of " + rawMessage.length + " bytes is over the " + MAX_MESSAGE_BYTES + " byte limit");
         }
         // One jDKIM verifier per message: it keeps its results on the instance.
-        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits));
+        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins));
         try {
             verifier.verify(new ByteArrayInputStream(rawMessage));
         } catch (FailException e) {
@@ -130,14 +166,17 @@ public final class DkimVerifier {
 
     private final PublicKeyRecordRetriever keys;
     private final int minimumKeyBits;
+    private final Map<String, Set<String>> pins;
 
-    private DkimVerifier(PublicKeyRecordRetriever keys, int minimumKeyBits) {
+    private DkimVerifier(PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins) {
         this.keys = keys;
         this.minimumKeyBits = minimumKeyBits;
+        this.pins = pins;
     }
 
-    /** Refuses, as a permanent failure, a key in testing mode or an RSA key that is too short. */
-    private static PublicKeyRecordRetriever checked(PublicKeyRecordRetriever keys, int minimumKeyBits) {
+    /** Refuses, as a permanent failure, a key in testing mode, an RSA key that is too short, or one not pinned. */
+    private static PublicKeyRecordRetriever checked(
+            PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins) {
         return (method, selector, domain) -> {
             List<String> records = keys.getRecords(method, selector, domain);
             for (String record : records) {
@@ -152,6 +191,11 @@ public final class DkimVerifier {
                 String name = selector + "._domainkey." + domain;
                 if (parsed.isTesting()) {
                     throw new PermFailException("key " + name + " is in testing mode");
+                }
+                Set<String> pinned = pins.get(domain.toString().toLowerCase(Locale.ROOT));
+                if (pinned != null && !pinned.contains(fingerprint(key))) {
+                    throw new PermFailException("key " + name + " is not one of the keys pinned for " + domain
+                            + " (fingerprint " + fingerprint(key) + ")");
                 }
                 if (key instanceof RSAPublicKey rsa && rsa.getModulus().bitLength() < minimumKeyBits) {
                     throw new PermFailException(

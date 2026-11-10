@@ -22,7 +22,7 @@ class HostileInputTest {
     @Test
     void throwsNothingButItsOwnException() throws IOException {
         BankNotifications notifications =
-                BankNotifications.with((selector, domain) -> List.of("v=DKIM1; k=rsa; p=AAAA"));
+                BankNotifications.trustingKeysFrom((selector, domain) -> List.of("v=DKIM1; k=rsa; p=AAAA"));
         for (byte[] input : hostileInputs()) {
             try {
                 notifications.read(input);

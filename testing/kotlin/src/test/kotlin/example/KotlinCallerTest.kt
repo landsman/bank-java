@@ -17,7 +17,7 @@ import java.util.Base64
 class KotlinCallerTest {
     @Test
     fun whenOverTheExceptionIsExhaustive() {
-        val unsigned = BankNotifications.with { _, _ -> emptyList() }
+        val unsigned = BankNotifications.trustingKeysFrom { _, _ -> emptyList() }
 
         val outcome =
             try {
@@ -45,7 +45,7 @@ class KotlinCallerTest {
                 key.private,
             ).sign(MESSAGE.toByteArray().inputStream())
 
-        val t: Transaction = BankNotifications.with { _, _ -> listOf(record) }.read("$header\r\n$MESSAGE".toByteArray())
+        val t: Transaction = BankNotifications.trustingKeysFrom { _, _ -> listOf(record) }.read("$header\r\n$MESSAGE".toByteArray())
 
         // message is String? in Kotlin: assigning it to a String would not compile.
         val message: String? = t.message()

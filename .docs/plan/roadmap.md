@@ -11,6 +11,8 @@ A working document: what is still unknown and what this library does next.
   both real e-mails verify against Air Bank's published key and fail once their amount is changed.
 - **32 tests**: the parser on the two fixtures and its refusals, account checksums, the verifier on messages signed
   in the test, reading end to end, and hostile input that must end in `BankNotificationException` and nothing else.
+- **Trusts only Air Bank's key**: validated through DNSSEC from the root and pinned in the code, checked daily against
+  DNS by `keys.yml` ([verification](../verification.md#whose-key-it-is)).
 - **Tested as a caller** on Spring Boot 3.5.16 and 4.1.2 and from Kotlin ([testing](../../testing/README.md)).
 - **Scanned**: Semgrep and a dependency scan weekly and on every pull request; Dependabot proposes bumps.
 - **Typed**: `BankAccount` with the modulo 11 check, `Money` and `PaymentSymbols` as in `moneta-api-java`, one sealed

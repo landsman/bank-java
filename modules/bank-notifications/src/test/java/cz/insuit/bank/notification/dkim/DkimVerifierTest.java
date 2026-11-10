@@ -12,6 +12,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import org.apache.james.jdkim.DKIMSigner;
 import org.apache.james.jdkim.exceptions.FailException;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,29 @@ class DkimVerifierTest {
 
         assertInstanceOf(DkimResult.Failed.class, result);
         assertTrue(((DkimResult.Failed) result).reason().contains("under 2048"), result.toString());
+    }
+
+    @Test
+    void acceptsAPinnedKey() throws Exception {
+        KeyPair key = rsa(1024);
+        DkimVerifier verifier =
+                verifierFor(key).pinnedKeys("airbank.cz", Set.of(DkimVerifier.fingerprint(key.getPublic())));
+
+        assertEquals(
+                new DkimResult.Verified("airbank.cz", "ab"), verifier.verify(signed(MESSAGE, key, ""), "airbank.cz"));
+    }
+
+    @Test
+    void refusesAValidKeyThatIsNotPinned() throws Exception {
+        KeyPair forged = rsa(1024);
+        DkimVerifier verifier = verifierFor(forged)
+                .pinnedKeys(
+                        "airbank.cz", Set.of(DkimVerifier.fingerprint(rsa(1024).getPublic())));
+
+        DkimResult result = verifier.verify(signed(MESSAGE, forged, ""), "airbank.cz");
+
+        assertInstanceOf(DkimResult.Failed.class, result);
+        assertTrue(((DkimResult.Failed) result).reason().contains("not one of the keys pinned"), result.toString());
     }
 
     @Test

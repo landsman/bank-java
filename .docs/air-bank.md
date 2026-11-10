@@ -19,7 +19,9 @@ test fixtures are those two e-mails, anonymised.
 
 - `From: Air Bank<info@airbank.cz>`, relayed by `mx10.airbank.cz`, `X-Mailer: PHPMailer 5.1`.
 - `DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=Date:To:From:Subject;`, no `l=`, so
-  the whole body is signed. The key at `ab._domainkey.airbank.cz` is RSA 1024-bit. SPF passes, DMARC is
+  the whole body is signed. The key at `ab._domainkey.airbank.cz` is RSA 1024-bit, fingerprint
+  `M1mJ01eTgtt/3Jw9syH2YdwTWzPzYeST8Hfk/dfZg6E=` (the same through 1.1.1.1 and 8.8.8.8, 2026-11-10), pinned in
+  `AirBank.KEY_FINGERPRINTS`. `airbank.cz` is DNSSEC-signed and so is the key record. SPF passes, DMARC is
   `p=QUARANTINE`.
 - `Message-ID` is `<hex@localhost.localdomain>` and not signed: no use for deduplication. The transaction code is.
 - `text/plain; charset="utf-8"`, `8bit`, CRLF line ends, Czech, one part.

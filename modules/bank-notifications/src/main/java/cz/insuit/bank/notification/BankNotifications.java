@@ -11,7 +11,9 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Reads a bank's notification e-mail into what it says about money that moved, once its DKIM signature shows it really
@@ -33,17 +35,33 @@ import java.util.Properties;
  */
 public final class BankNotifications {
 
-    /** Looks the banks' DKIM keys up in DNS. */
+    /**
+     * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
+     * here from the root's trust anchors, and only when it is one of the keys this release pins for that bank.
+     */
     public static BankNotifications withDns() {
-        return new BankNotifications(DkimVerifier.withDns());
+        DkimVerifier dkim = DkimVerifier.withDns();
+        for (Map.Entry<String, Set<String>> bank : pinnedKeys().entrySet()) {
+            dkim = dkim.pinnedKeys(bank.getKey(), bank.getValue());
+        }
+        return new BankNotifications(dkim);
     }
 
     /**
-     * Looks the banks' DKIM keys up with your own lookup: a resolver with its own timeouts, or a recorded key in a test.
+     * The DKIM keys {@link #withDns()} accepts, per bank domain, as {@link DkimVerifier#fingerprint} gives them: what this
+     * release trusts, for an audit or a log line at start-up.
+     */
+    public static Map<String, Set<String>> pinnedKeys() {
+        return Map.of(AirBank.DOMAIN, AirBank.KEY_FINGERPRINTS);
+    }
+
+    /**
+     * Takes the keys from your lookup and trusts them as they come: no DNSSEC, no pinning. For tests, which sign with a
+     * key of their own, and for a resolver whose answers you vouch for yourself. In production, use {@link #withDns()}.
      *
      * @param keys where the key records come from
      */
-    public static BankNotifications with(KeyLookup keys) {
+    public static BankNotifications trustingKeysFrom(KeyLookup keys) {
         return new BankNotifications(DkimVerifier.with(keys));
     }
 

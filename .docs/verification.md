@@ -6,7 +6,7 @@ half it publishes in DNS. The library verifies it before it hands out a `Transac
 
 ## What counts
 
-A signature counts only when all of these hold:
+A signature counts only when all of these hold, besides [whose key it is](#whose-key-it-is):
 
 - it verifies over the **raw bytes**, recomputed here; an `Authentication-Results` header that came with the message
   is never read, because whoever sent the message could have written it;
@@ -18,6 +18,27 @@ A signature counts only when all of these hold:
 
 A key lookup that fails (a timeout, a resolver error) throws `TemporaryFailure`, never `Unverified`: the e-mail may be
 perfectly genuine.
+
+## Whose key it is
+
+A valid signature only proves the e-mail was signed with the key DNS handed out. Two more checks make sure that key is
+the bank's, and `BankNotifications.withDns()` does both without being asked:
+
+- **DNSSEC, validated here.** The key's DNS answer has to be DNSSEC-secure, and the library validates it itself, from the
+  root zone's trust anchors (IANA's KSK-2017 and KSK-2024) down, instead of trusting the machine's resolver. An unsigned
+  zone, a forged answer, a broken signature chain and a resolver that strips the signatures are all refused.
+  `airbank.cz` is signed, and so is its key record (2026-11-10).
+- **The key is pinned.** Each bank's key fingerprints are written in the code (`AirBank.KEY_FINGERPRINTS`, the SHA-256
+  of the public key), and only those are accepted, whatever DNS says. Forging a key would take breaking DNSSEC *and*
+  holding the bank's private key. `BankNotifications.pinnedKeys()` lists them.
+
+The price of pinning: **when a bank rotates its key, a release that does not know the new one throws `Unverified` for
+that bank's e-mails** until you upgrade. Nothing is lost, the e-mails are still there to read again; `.github/workflows/keys.yml`
+compares the pins with DNS every day and opens an issue the day a bank publishes another key, so a release follows.
+`make check-keys` runs the same check by hand.
+
+`BankNotifications.trustingKeysFrom(lookup)` skips both, by name: for tests, which sign with a key of their own, and for
+a resolver you vouch for yourself.
 
 ## What it does not prove
 

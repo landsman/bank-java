@@ -10,6 +10,7 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
@@ -25,6 +26,16 @@ import org.jspecify.annotations.Nullable;
 final class AirBank {
 
     static final String DOMAIN = "airbank.cz";
+
+    /**
+     * The keys Air Bank signs with, as {@link cz.insuit.bank.notification.dkim.DkimVerifier#fingerprint} gives them.
+     * Only these are accepted, whatever DNS says. The daily key check (.github/workflows/keys.yml) compares them with
+     * the DNSSEC-validated key in DNS and opens an issue when Air Bank publishes another one; a new key goes in here
+     * beside the old one, and the old one leaves once DNS no longer publishes it.
+     *
+     * <p>{@code ab._domainkey.airbank.cz}, RSA 1024-bit, read on 2026-11-10 through 1.1.1.1 and 8.8.8.8 alike.
+     */
+    static final Set<String> KEY_FINGERPRINTS = Set.of("M1mJ01eTgtt/3Jw9syH2YdwTWzPzYeST8Hfk/dfZg6E=");
 
     static Transaction parse(String body) {
         Matcher summary = null;
