@@ -9,8 +9,10 @@ A working document: what is still unknown and what this library does next.
   ([air-bank.md](../air-bank.md)).
 - **Verifies DKIM** on Apache James jDKIM 0.5 before a `Transaction` is handed out ([verification](../verification.md));
   both real e-mails verify against Air Bank's published key and fail once their amount is changed.
-- **23 tests**: the parser on the two fixtures and its refusals, the verifier on messages signed in the test, and
-  reading end to end.
+- **32 tests**: the parser on the two fixtures and its refusals, account checksums, the verifier on messages signed
+  in the test, reading end to end, and hostile input that must end in `BankNotificationException` and nothing else.
+- **Typed**: `BankAccount` with the modulo 11 check, `Money` and `PaymentSymbols` as in `moneta-api-java`, one sealed
+  `BankNotificationException`.
 
 ## Next
 

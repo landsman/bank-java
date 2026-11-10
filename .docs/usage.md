@@ -2,7 +2,7 @@
 
 **It reads Air Bank's e-mails, and only those so far.** Air Bank sends one for every payment on an account once the
 account holder [switches it on](setup.md#air-bank); `read` turns it into a `Transaction`. An e-mail from any other bank
-comes back `Unparsed` with the reason `no parser for sender domain <domain>`, until that bank is added.
+is `Unparsed` with the message `no parser for sender domain <domain>`, until that bank is added.
 
 | Bank | Recognised by | Reads | Details |
 |---|---|---|---|
@@ -11,11 +11,14 @@ comes back `Unparsed` with the reason `no parser for sender domain <domain>`, un
 ```java
 BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one
 
-switch (notifications.read(rawMessage)) {
-    case Transaction t -> ...      // genuine
-    case Unverified u -> ...       // no valid signature of the bank
-    case TemporaryFailure f -> ... // the bank's key could not be looked up
-    case Unparsed u -> ...         // not a template the library knows
+try {
+    Transaction t = notifications.read(rawMessage);   // genuine
+} catch (BankNotificationException e) {
+    switch (e) {
+        case BankNotificationException.Unverified u -> ...       // not signed by the bank
+        case BankNotificationException.TemporaryFailure f -> ... // the bank's key could not be looked up
+        case BankNotificationException.Unparsed u -> ...         // not an e-mail the library can read
+    }
 }
 ```
 
@@ -23,38 +26,52 @@ switch (notifications.read(rawMessage)) {
 
 Hand `read` the message **exactly as it arrived**: the bytes your SMTP server, Cloudflare Email Worker or inbound
 provider received, headers included. A message re-serialised by a mail library (headers refolded, CRLF turned into LF,
-a body decoded) no longer matches its signature and comes back `Unverified`, every time.
+a body decoded) no longer matches its signature and is `Unverified`, every time.
 
-Store those bytes before reading them. A template the library does not know yet comes back `Unparsed`, and a later
+Store those bytes before reading them. A template the library does not know yet is `Unparsed`, and a later
 release can read the stored message again.
 
 Messages over 64 KiB are `Unparsed` without being looked at; a bank's notification is around 5 KiB. See
 [verification](verification.md#the-size-limit).
 
-## The four results
+## When there is no transaction
 
-| Result | Means | Do |
+`read` returns a `Transaction` or throws a `BankNotificationException`, and nothing else, whatever the bytes. The
+exception is sealed, so a `switch` over its three subtypes is exhaustive:
+
+| Exception | Means | Do |
 |---|---|---|
-| `Transaction` | the bank sent it, and this is what it says | the two checks below, then act on it |
-| `Unverified` | no valid DKIM signature of the bank; `reason()` says why | do not act on it; anyone can send an e-mail that looks real |
+| `Unverified` | no valid DKIM signature of the bank | do not act on it; anyone can send an e-mail that looks real |
 | `TemporaryFailure` | the bank's key could not be looked up | keep the message, read it again later |
-| `Unparsed` | not an e-mail the library can read: another bank's, a template that changed, or not a bank's at all | keep it; `reason()` says which |
+| `Unparsed` | not an e-mail the library can read: another bank's, a template that changed, or not a bank's at all | keep it, so a later release can read it again |
+
+`getMessage()` says why, and is safe to log: it never carries the payer's name, the payment's message or the e-mail's
+body, and control characters from the e-mail are replaced. The constructors are public, so your own tests can throw them
+from a fake.
 
 ## A transaction
 
 | Field | Holds |
 |---|---|
 | `signedBy()` | the bank's domain whose signature verified: `airbank.cz` |
-| `direction()` | `INCOMING` or `OUTGOING` |
+| `direction()`, `incoming()` | `INCOMING` or `OUTGOING` |
 | `type()` | `TRANSFER`, `CARD`, `DIRECT_DEBIT`, or `GENERAL` when the e-mail does not say |
-| `account()` | the account the e-mail is about, `number/bankCode` |
+| `account()` | the account the e-mail is about, a `BankAccount` |
 | `counterAccount()` | the payer of an incoming payment, the recipient of an outgoing one |
 | `counterName()` | the other side's name, when the bank prints it; `null` otherwise |
-| `amountMinor()`, `currency()` | the amount in minor units (haléře) and its ISO 4217 code, always positive |
-| `variableSymbol()` | the variable symbol, or `null` |
+| `amount()` | a `Money`: `BigDecimal` and `Currency`, signed, positive in and negative out |
+| `symbols()` | `PaymentSymbols`: `variable()`, `constant()`, `specific()`, each `null` when absent |
 | `message()` | the payment's message, when the bank prints it; `null` otherwise |
 | `bookedOn()` | the booking date the bank states |
 | `transactionId()` | the bank's own id of the transaction |
+
+`toString()` leaves out the other side and the message, so logging a transaction does not log who paid or what they
+wrote.
+
+`BankAccount` is `[prefix-]number/bankCode`, without leading zeros, so the same account is equal however it was written,
+and it checks the Czech National Bank's modulo 11 rule: an account number misread from an e-mail is refused, not handed
+out. `BankAccount.parse("19-2000145399/0800")` reads one, for comparing against yours. `Money` and `PaymentSymbols` have
+the same shape as in `moneta-api-java`.
 
 ## Two checks stay with you
 

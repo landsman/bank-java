@@ -10,11 +10,10 @@ the notification at an address you receive. Air Bank first.
 For Java 21+ and Kotlin, one jar, no framework required. Published on GitHub Packages, not Maven Central.
 
 ```java
-switch (BankNotifications.withDns().read(rawMessage)) {
-    case Transaction t -> ...      // genuine: compare t.account() with yours, deduplicate on t.transactionId()
-    case Unverified u -> ...       // not signed by the bank
-    case TemporaryFailure f -> ... // the bank's key could not be looked up: read it again later
-    case Unparsed u -> ...         // a template the library does not know
+try {
+    Transaction t = BankNotifications.withDns().read(rawMessage); // genuine: compare t.account() with yours
+} catch (BankNotificationException e) {                           // Unverified, TemporaryFailure or Unparsed
+    ...
 }
 ```
 
@@ -22,7 +21,7 @@ switch (BankNotifications.withDns().read(rawMessage)) {
 |---|---|
 | [Installing](.docs/install.md) | the artifact on GitHub Packages, for Gradle and Maven |
 | [Setting up a bank](.docs/setup.md) | how the account holder points the bank's e-mail at your address |
-| [Using the library](.docs/usage.md) | the raw message, the four results, a transaction's fields, the two checks left to you |
+| [Using the library](.docs/usage.md) | the raw message, the exceptions, a transaction's fields, the two checks left to you |
 | [How verification works](.docs/verification.md) | what makes a signature count, what it does not prove, jDKIM, the size limit |
 | [How Air Bank's e-mail behaves](.docs/air-bank.md) | the message, its body, what to watch out for, what has not been seen |
 | [Roadmap](.docs/plan/roadmap.md) | the working plan: what is next, what is not covered |

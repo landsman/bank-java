@@ -1,8 +1,11 @@
 package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import cz.insuit.bank.notification.BankNotificationException.TemporaryFailure;
+import cz.insuit.bank.notification.BankNotificationException.Unparsed;
+import cz.insuit.bank.notification.BankNotificationException.Unverified;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,15 +27,14 @@ class BankNotificationsTest {
 
     @Test
     void readsASignedNotification() throws Exception {
-        Notification read = notifications().read(signed("incoming.eml"));
+        Transaction transaction = notifications().read(signed("incoming.eml"));
 
-        Transaction transaction = assertInstanceOf(Transaction.class, read);
         assertEquals("100000000001", transaction.transactionId());
     }
 
     @Test
     void doesNotTrustAnUnsignedOne() throws Exception {
-        assertInstanceOf(Unverified.class, notifications().read(fixture("incoming.eml")));
+        assertThrows(Unverified.class, () -> notifications().read(fixture("incoming.eml")));
     }
 
     @Test
@@ -41,7 +43,7 @@ class BankNotificationsTest {
                 .replace("Variabilní symbol: 1337", "Variabilní symbol: 4242")
                 .getBytes(StandardCharsets.UTF_8);
 
-        assertInstanceOf(Unverified.class, notifications().read(changed));
+        assertThrows(Unverified.class, () -> notifications().read(changed));
     }
 
     @Test
@@ -50,7 +52,9 @@ class BankNotificationsTest {
             throw new IOException("resolver timed out");
         });
 
-        assertInstanceOf(TemporaryFailure.class, unreachable.read(signed("incoming.eml")));
+        byte[] signed = signed("incoming.eml");
+
+        assertThrows(TemporaryFailure.class, () -> unreachable.read(signed));
     }
 
     @Test
@@ -59,8 +63,9 @@ class BankNotificationsTest {
             throw new AssertionError("looked up a key for a message it could not read");
         });
 
-        assertInstanceOf(
-                Unparsed.class, noLookup.read("From: someone@example.com\r\n\r\nhi".getBytes(StandardCharsets.UTF_8)));
+        byte[] other = "From: someone@example.com\r\n\r\nhi".getBytes(StandardCharsets.UTF_8);
+
+        assertThrows(Unparsed.class, () -> noLookup.read(other));
     }
 
     private static KeyPair key;

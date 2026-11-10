@@ -4,38 +4,47 @@ import java.time.LocalDate;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Money that arrived on, or left, {@link #account()}.
+ * Money that arrived on, or left, {@link #account()}, read from an e-mail whose DKIM signature verified. A new
+ * component may be added in a minor version, so construct these only in tests and read them by accessor rather than
+ * by record pattern.
  *
- * @param signedBy the domain whose DKIM signature makes the message genuine, e.g. {@code airbank.cz}; trust the
- *     transaction only once that signature is verified
- * @param direction whether the money arrived or left
+ * @param signedBy the bank's domain whose signature verified, e.g. {@code airbank.cz}
+ * @param direction whether the money arrived or left; {@link #amount()} carries it as the sign as well
  * @param type how it was paid, {@link Type#GENERAL} when the e-mail does not say
- * @param account the account the e-mail is about, {@code number/bankCode}; compare it with the account you expect,
- *     so that a genuine notification about somebody else's account is not taken for yours
- * @param counterAccount the other side, {@code [prefix-]number/bankCode}: the payer of an incoming payment, the
- *     recipient of an outgoing one
- * @param counterName the other side's account name, if the bank prints it (Air Bank does for incoming only)
- * @param amountMinor the amount in minor units (haléře for CZK), always positive
- * @param currency ISO 4217 code
- * @param variableSymbol the variable symbol, if the payment carried one
+ * @param account the account the e-mail is about; compare it with the account you expect, so that a genuine
+ *     notification about somebody else's account is not taken for yours
+ * @param counterAccount the other side: the payer of an incoming payment, the recipient of an outgoing one
+ * @param counterName the other side's name, if the bank prints it (Air Bank does for incoming only)
+ * @param amount signed: positive for money in, negative for money out, so amounts add up as they are
+ * @param symbols the variable, constant and specific symbol, each {@code null} when absent
  * @param message the payment's message, if the bank prints it
  * @param bookedOn the booking date the bank states
- * @param transactionId the bank's id of the transaction, the key to deduplicate on
+ * @param transactionId the bank's own id of the transaction, the key to deduplicate on, per bank
  */
 public record Transaction(
         String signedBy,
         Direction direction,
         Type type,
-        String account,
-        String counterAccount,
+        BankAccount account,
+        BankAccount counterAccount,
         @Nullable String counterName,
-        long amountMinor,
-        String currency,
-        @Nullable String variableSymbol,
+        Money amount,
+        PaymentSymbols symbols,
         @Nullable String message,
         LocalDate bookedOn,
-        String transactionId)
-        implements Notification {
+        String transactionId) {
+
+    /** Whether money arrived on the account. */
+    public boolean incoming() {
+        return direction == Direction.INCOMING;
+    }
+
+    /** Leaves out the other side and the message, so logging a transaction does not log who paid or what they wrote. */
+    @Override
+    public String toString() {
+        return "Transaction[signedBy=%s, direction=%s, type=%s, account=%s, amount=%s, symbols=%s, bookedOn=%s, transactionId=%s]"
+                .formatted(signedBy, direction, type, account, amount, symbols, bookedOn, transactionId);
+    }
 
     /** Whether money arrived on the account or left it. */
     public enum Direction {

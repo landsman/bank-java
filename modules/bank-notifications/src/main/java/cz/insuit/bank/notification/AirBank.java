@@ -1,9 +1,12 @@
 package cz.insuit.bank.notification;
 
+import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import cz.insuit.bank.notification.Transaction.Direction;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +26,7 @@ final class AirBank {
 
     static final String DOMAIN = "airbank.cz";
 
-    static Notification parse(String body) {
+    static Transaction parse(String body) {
         Matcher summary = null;
         Matcher incoming = null;
         Matcher outgoing = null;
@@ -38,10 +41,10 @@ final class AirBank {
             Matcher outgoingLine = OUTGOING.matcher(line);
             Matcher labelled = LABELLED.matcher(line);
             if (summaryLine.matches()) {
-                if (summary != null) return new Unparsed("two summary lines");
+                if (summary != null) throw new Unparsed("two summary lines");
                 summary = summaryLine;
             } else if (incomingLine.matches() || outgoingLine.matches()) {
-                if (incoming != null || outgoing != null) return new Unparsed("two counter-party lines");
+                if (incoming != null || outgoing != null) throw new Unparsed("two counter-party lines");
                 if (incomingLine.matches()) incoming = incomingLine;
                 else outgoing = outgoingLine;
             } else if (labelled.matches()) {
@@ -49,63 +52,69 @@ final class AirBank {
                 // The message is the only free text a payer controls. Should the bank ever pass a line break through,
                 // a forged "Variabilní symbol:" after it must not count: past the message only the code may follow.
                 if (afterMessage && !label.equals(TRANSACTION_ID)) {
-                    return new Unparsed("'" + label + "' after the message");
+                    throw new Unparsed("'" + label + "' after the message");
                 }
-                if (fields.put(label, labelled.group(2)) != null) return new Unparsed("two '" + label + "' lines");
+                if (fields.put(label, labelled.group(2)) != null) throw new Unparsed("two '" + label + "' lines");
                 afterMessage |= label.equals(MESSAGE);
             }
         }
 
-        if (summary == null) return new Unparsed("no balance-change sentence");
-        if (incoming == null && outgoing == null) return new Unparsed("no counter-party line");
+        if (summary == null) throw new Unparsed("no balance-change sentence");
+        if (incoming == null && outgoing == null) throw new Unparsed("no counter-party line");
         Direction direction = summary.group(2).equals("zvýšil") ? Direction.INCOMING : Direction.OUTGOING;
         if ((direction == Direction.INCOMING) != (incoming != null)) {
-            return new Unparsed("summary and counter-party line disagree on the direction");
+            throw new Unparsed("summary and counter-party line disagree on the direction");
         }
 
         String amount = fields.get(AMOUNT);
         if (amount == null || !amount.equals(summary.group(3))) {
-            return new Unparsed("amount line missing or different from the summary");
+            throw new Unparsed("amount line missing or different from the summary");
         }
         Matcher money = MONEY.matcher(amount);
         // A thousands separator has not been seen yet; until it is, an amount that does not match is not guessed at.
-        if (!money.matches()) return new Unparsed("amount not in the known format: " + amount);
+        if (!money.matches()) throw new Unparsed("amount not in the known format: " + amount);
 
         String booked = fields.get(BOOKED_ON);
         String transactionId = fields.get(TRANSACTION_ID);
         if (booked == null || transactionId == null || !transactionId.matches("\\d+")) {
-            return new Unparsed("booking date or transaction code missing");
+            throw new Unparsed("booking date or transaction code missing");
         }
         String variableSymbol = fields.get(VARIABLE_SYMBOL);
         if (variableSymbol != null && !variableSymbol.matches("\\d{1,10}")) {
-            return new Unparsed("variable symbol is not 1 to 10 digits");
+            throw new Unparsed("variable symbol is not 1 to 10 digits");
         }
         LocalDate bookedOn;
         try {
             bookedOn = LocalDate.parse(booked, DATE);
         } catch (DateTimeParseException e) {
-            return new Unparsed("booking date not d.M.yyyy: " + booked);
+            throw new Unparsed("booking date not d.M.yyyy: " + booked);
         }
 
         String counterAccount = incoming != null
                 ? incoming.group(2)
                 : Objects.requireNonNull(outgoing).group(1);
         @Nullable String counterName = incoming != null ? incoming.group(1) : null;
-        return new Transaction(
-                DOMAIN,
-                direction,
-                // Both lines this parser reads say "úhrada", a transfer. A card payment or a direct debit, once seen,
-                // is a line of its own.
-                Transaction.Type.TRANSFER,
-                summary.group(1),
-                counterAccount,
-                counterName,
-                Long.parseLong(money.group(1)) * 100 + Long.parseLong(money.group(2)),
-                money.group(3),
-                variableSymbol,
-                fields.get(MESSAGE),
-                bookedOn,
-                transactionId);
+        try {
+            BigDecimal value = new BigDecimal(money.group(1) + "." + money.group(2));
+            Money signed = new Money(value, Currency.getInstance(money.group(3)));
+            return new Transaction(
+                    DOMAIN,
+                    direction,
+                    // Both lines this parser reads say "úhrada", a transfer. A card payment or a direct debit, once
+                    // seen, is a line of its own.
+                    Transaction.Type.TRANSFER,
+                    BankAccount.parse(summary.group(1)),
+                    BankAccount.parse(counterAccount),
+                    counterName,
+                    direction == Direction.INCOMING ? signed : signed.negate(),
+                    new PaymentSymbols(variableSymbol, null, null),
+                    fields.get(MESSAGE),
+                    bookedOn,
+                    transactionId);
+        } catch (IllegalArgumentException e) {
+            // An account failing its checksum, or a currency code ISO 4217 does not know: a misread, not a payment.
+            throw new Unparsed(e.getMessage() == null ? "invalid value" : e.getMessage(), e);
+        }
     }
 
     // The account nickname is the client's own text and may contain "číslo", hence the greedy ".*" before it.

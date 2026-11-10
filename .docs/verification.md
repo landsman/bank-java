@@ -16,7 +16,7 @@ A signature counts only when all of these hold:
 - an RSA key has at least 1024 bits, the shortest [RFC 8301](https://www.rfc-editor.org/rfc/rfc8301) lets a verifier
   accept; Air Bank's is 1024 (2026-11-10). `DkimVerifier.minimumKeyBits` raises it for a direct caller.
 
-A key lookup that fails (a timeout, a resolver error) is a `TemporaryFailure`, never an `Unverified`: the e-mail may be
+A key lookup that fails (a timeout, a resolver error) throws `TemporaryFailure`, never `Unverified`: the e-mail may be
 perfectly genuine.
 
 ## What it does not prove
