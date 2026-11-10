@@ -87,6 +87,9 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 
 | Choice | Option | Sample |
 |---|---|---|
+| Channel | e-mail | ✅ |
+| | SMS | ❔ not signed, so a hint at most: [#12](https://github.com/landsman/bank-java/issues/12) |
+| | push to Fio's app | n/a: no third party can read it |
 | Format | long, `Fio banka - příjem na účtu` | ✅ |
 | | short, one line, `Fio banka - prijem na konte` | 🚫 no transaction id, no currency |
 | | one sentence, no counter-party | 👁 |
