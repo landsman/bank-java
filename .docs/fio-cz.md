@@ -107,8 +107,23 @@ The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-
 |---|---|
 | Personal, CZK | ✅ |
 | Business | ❔ |
-| Foreign currency (EUR, USD) | ❔ a EUR account exists to ask for one |
+| Foreign currency | ❔ per currency, below |
 | Balance in overdraft | ❔ |
+
+### Currencies
+
+Fio opens a personal current account in 14 currencies (the account form, 2026-11-10). Each one sends its own
+notification, and the amount is read with the currency it names. What a sample has to show: that the currency code is
+printed as on a CZK account, and how many decimals the amount carries.
+
+| Currency | Decimals in ISO 4217 | Sample |
+|---|:---:|---|
+| CZK | 2 | ✅ |
+| EUR | 2 | ❔ an account exists to ask for one |
+| USD, GBP, CHF, PLN, AUD, CAD, DKK, NOK, SEK | 2 | ❔ |
+| HUF | 2, though forints are not divided in practice | ❔ whether Fio prints `,00` |
+| JPY | 0 | ❔ the parser expects two decimals today, so `1 000 JPY` would be `Unparsed` |
+| RUB | 2 | ❔ |
 
 ### The movement (`Typ pohybu`)
 
