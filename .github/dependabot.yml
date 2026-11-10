@@ -8,6 +8,9 @@ updates:
       default-days: 7
     commit-message:
       prefix: deps
+    # Each testing/spring-boot project pins the Spring Boot it proves the library on; a bump would stop testing it.
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
   - package-ecosystem: github-actions
     directory: /
     schedule:
