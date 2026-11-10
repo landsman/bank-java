@@ -52,10 +52,18 @@ final class NotificationLines {
      * would add lines, a counter-party or a variable symbol of its own, and push {@code next} down.
      */
     void requireNext(Pattern line, String next) {
+        requireAt(line, 1, next);
+    }
+
+    /**
+     * Like {@link #requireNext}, {@code offset} lines down: for a template that puts the name on the line under its
+     * label, the line after the name is two below the label.
+     */
+    void requireAt(Pattern line, int offset, String expected) {
         for (int i = 0; i < lines.size(); i++) {
             if (!line.matcher(lines.get(i)).matches()) continue;
-            if (i + 1 >= lines.size() || !lines.get(i + 1).startsWith(next)) {
-                throw new Unparsed("'" + next + "' does not follow the line naming the other side");
+            if (i + offset >= lines.size() || !lines.get(i + offset).startsWith(expected)) {
+                throw new Unparsed("'" + expected + "' is not where the template puts it after the other side's name");
             }
         }
     }

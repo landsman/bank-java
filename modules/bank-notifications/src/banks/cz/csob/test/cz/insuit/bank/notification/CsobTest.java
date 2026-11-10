@@ -133,6 +133,68 @@ class CsobTest {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
     }
 
+    /** Synthetic: myinvoice's sanitised samples of "Moje info - Avízo" (MIT), with this repository's accounts. */
+    @Test
+    void readsTheOwnBankingNotice() throws IOException {
+        assertEquals(
+                new Transaction(
+                        "csob.cz",
+                        Direction.INCOMING,
+                        Transaction.Type.TRANSFER,
+                        BankAccount.parse("1234567899/0300"),
+                        BankAccount.parse("9876543211/2700"),
+                        "WAYNE ENTERPRISES",
+                        czk("10000.00"),
+                        PaymentSymbols.NONE,
+                        null,
+                        LocalDate.of(2026, 5, 31),
+                        null,
+                        null,
+                        "<0001@csob.cz>"),
+                BankNotifications.parseUnverified(fixture("own-banking-incoming-synthetic.eml")));
+    }
+
+    @Test
+    void readsAnOutgoingOwnBankingNoticeAndCutsOnlyTheZerosPaddingASymbol() throws IOException {
+        Transaction out = BankNotifications.parseUnverified(fixture("own-banking-outgoing-synthetic.eml"));
+
+        assertEquals(Direction.OUTGOING, out.direction());
+        assertEquals(czk("-10000.00"), out.amount());
+        assertEquals(new PaymentSymbols("9002567593", "1120", null), out.symbols());
+    }
+
+    @Test
+    void keepsTheZerosThatBelongToAPaddedSymbol() throws IOException {
+        String changed = text("own-banking-outgoing-synthetic.eml").replace("0009002567593", "0000002567593");
+
+        assertEquals(
+                "0002567593",
+                BankNotifications.parseUnverified(bytes(changed)).symbols().variable());
+    }
+
+    @Test
+    void refusesASymbolLongerThanTenThatIsNotZeroPadding() throws IOException {
+        String changed = text("own-banking-outgoing-synthetic.eml").replace("0009002567593", "1009002567593");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
+    void refusesAnOwnBankingKindTheSignDisagreesWith() throws IOException {
+        String changed = text("own-banking-incoming-synthetic.eml")
+                .replace("Částka\r\n+10 000,00 CZK", "Částka\r\n-10 000,00 CZK");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
+    void refusesASymbolSmuggledInThroughTheOwnBankingCounterPartysName() throws IOException {
+        String changed = text("own-banking-incoming-synthetic.eml")
+                .replace("WAYNE ENTERPRISES\r\n", "EVIL\r\nVariabilní symbol\r\n42\r\nX\r\n");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
     private static Money czk(String amount) {
         return new Money(new BigDecimal(amount), Currency.getInstance("CZK"));
     }

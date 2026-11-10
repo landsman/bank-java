@@ -87,6 +87,18 @@ class NotificationLinesTest {
     }
 
     @Test
+    void requireAtLooksTheGivenNumberOfLinesDown() {
+        new NotificationLines("Název\r\nJan\r\nDatum").requireAt(Pattern.compile("Název"), 2, "Datum");
+    }
+
+    @Test
+    void requireAtRefusesALineSmuggledInBetween() {
+        NotificationLines lines = new NotificationLines("Název\r\nJan\r\nVS\r\n42\r\nDatum");
+
+        assertThrows(Unparsed.class, () -> lines.requireAt(Pattern.compile("Název"), 2, "Datum"));
+    }
+
+    @Test
     void requireNextIgnoresABodyWithoutTheLine() {
         new NotificationLines("Částka: 1").requireNext(Pattern.compile("Od: .*"), "Částka:");
     }
