@@ -18,6 +18,9 @@ try {
 }
 ```
 
+One e-mail can report several transactions (ČSOB's does): `readAll(rawMessage)` returns them all, in order, and
+`read` refuses such an e-mail rather than return one of them. For any other bank `readAll` returns a list of one.
+
 ## The raw message
 
 Hand `read` the message **exactly as it arrived**: the bytes your SMTP server, Cloudflare Email Worker or inbound
@@ -91,7 +94,8 @@ the same shape as in `moneta-api-java`.
 about *your* account: a genuine notification of somebody else's account, sent to your address, verifies just as well.
 If each customer has their own address, compare against that customer's account.
 
-**Deduplicate on `transactionId()`**, per bank, or on a signed `messageId()` where a bank gives no transaction id.
+**Deduplicate on `transactionId()`**, per bank, or on a signed `messageId()` where a bank gives no transaction id,
+together with the position in `readAll()`'s list when one e-mail reports several transactions (ČSOB does).
 Never on an unsigned `Message-ID` from your mail server: anyone holding a copy of the e-mail can change it while the
 signature stays valid, and the same payment counts twice. The same e-mail can arrive twice, and two real payments can share an
 amount, a variable symbol and a date.
