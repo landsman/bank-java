@@ -127,9 +127,11 @@ final class AirBank implements Bank {
             Pattern.compile("zůstatek na účtu .* číslo (\\S+/3030) se (zvýšil|snížil) o částku (\\S+ [A-Z]{3})\\. .*");
     private static final Pattern INCOMING = Pattern.compile("Příchozí úhrada z účtu (.*) číslo (\\S+/\\d{4})");
     private static final Pattern OUTGOING = Pattern.compile("Odchozí úhrada na účet číslo (\\S+/\\d{4})");
-    private static final Pattern LABELLED =
-            Pattern.compile("(Částka|Datum zaúčtování|Variabilní symbol|Konstantní symbol|Specifický symbol"
-                    + "|Zpráva pro příjemce|Zpráva pro plátce|Kód transakce): (.*)");
+    private static final Pattern LABELLED = Pattern.compile(
+            "(Částka|Datum zaúčtování|Variabilní symbol|Konstantní symbol|Specifický symbol"
+                    + "|Zpráva pro příjemce|Zpráva pro plátce|Kód transakce): (.*)",
+            // A line holds no CR or LF, so DOTALL only lets a message keep a NEL or U+2028 instead of being dropped.
+            Pattern.DOTALL);
     private static final Pattern BALANCE = Pattern.compile(
             "\\. Dostupný zůstatek k (\\d{1,2}\\.\\d{1,2}\\.\\d{4} v \\d{1,2}:\\d{2}) je (\\d+),(\\d{2}) ([A-Z]{3})\\.");
     private static final Pattern MONEY = Pattern.compile("(\\d+),(\\d{2}) ([A-Z]{3})");

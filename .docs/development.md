@@ -40,7 +40,10 @@ rest, so the parser stays package-private and out of the public API: a folder is
    a class implementing `Bank`, listed in `BankNotifications.BANKS`, reading the body through `NotificationLines`
    (one-off lines, labelled lines, the guard against a forged line after a payer's message). What stays the bank's
    own: its patterns, the amount format, the movement types; lines read by label, the direction stated twice and required to agree,
-   nothing guessed. A test per refusal, not only per success.
+   nothing guessed. A test per refusal, not only per success. **Lines** are split by `String.lines()`, on CR and LF
+   only: a NEL, U+2028 or NBSP in a payer's text stays inside its line, so compile the labelled-line pattern with
+   `DOTALL`, or such a message is dropped. The separator tests in `AirBankTest` and `FioCzTest` show both: a symbol
+   behind any separator is never taken, and a message keeps what it holds.
 5. **Pin its key**: the fingerprint `DkimVerifier.fingerprint` gives for the key in DNS, read through two resolvers, in
    the bank's `KEY_FINGERPRINTS` (returned by `keyFingerprints()`, which `pinnedKeys()` lists), and a check in
    `KeyCheckLiveTest`.
