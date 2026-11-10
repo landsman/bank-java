@@ -19,9 +19,11 @@ six of them, anonymised; the card payment keeps its merchant.
   seen, Fio's own value rather than the merchant's, and the message is the purchase: merchant, address, date, amount.
 - **`Uživatelský symbol`** repeats the payer's name or the message. The library does not read it.
 - **`Konstantní symbol: 0`** comes as it is; `0` is not taken for "none".
-- **A short template exists too**, subject `Fio banka - prijem na konte` (seen 2026-08-18): account, amount, symbols,
-  message, balance and counter-account on six lines, but **no transaction id and no currency**. It is `Unparsed`:
-  without an id, the same e-mail arriving twice would count twice. Which setting in Fio sends it is not known.
+- **The account holder picks one of three formats** when setting the notification up ([setup](setup.md#fio-banka-cz)).
+  This page is about the long one. The short one, subject `Fio banka - prijem na konte` (seen 2026-08-18), lists
+  account, amount, symbols, message, balance and counter-account on six lines, but **no transaction id and no
+  currency**; it is `Unparsed`, because without an id the same e-mail arriving twice would count twice. The third is
+  one sentence without the counter-party, not seen as an e-mail.
 
 ## The message
 
@@ -33,7 +35,7 @@ six of them, anonymised; the card payment keeps its merchant.
   `p=REJECT`.
 - `text/plain; charset=UTF-8`, quoted-printable, CRLF line ends, Czech, one part. Most lines end in a space.
 - Under a minute from the balance changing to the `Date` header (18:29 to 18:29:45), except at night: a card payment
-  settled at 05:56 was sent at 08:16.
+  settled at 05:56 was sent at 08:16, because with *online notifications* off Fio holds them between 00:00 and 8:00.
 
 ## The body
 

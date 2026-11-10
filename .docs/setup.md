@@ -25,11 +25,24 @@ It is a balance-change notification: outgoing payments arrive as well, as `Direc
 
 ## Fio banka CZ
 
-Fio sends an e-mail for every movement, money in and out, card payments and direct debits included. Where to switch it
-on in Fio's internet banking, and to which address it may go, is not written down here yet (2026-11-10).
+Fio sends an e-mail for every movement, money in and out, card payments and direct debits included. In internet
+banking, the form is **Add a new account transaction notification** (*Přidat notifikaci o pohybu na účtu*); its fields,
+as the English interface showed them on 2026-11-10:
 
-It also has a short template, `Fio banka - prijem na konte`, which the library cannot read: it carries no transaction
-id. Choose the longer e-mail if Fio offers both, and check that `read` returns a `Transaction` for a small payment.
+1. **Account number**: the account.
+2. **Send to**: one of the account holder's contact e-mails in Fio. The address has to be added as a contact first;
+   whether Fio confirms it is not known.
+3. **Amount**, **Payment from/to account**, **Bank code**, **Variable symbol**: filters. Leave them empty, so every
+   payment is sent.
+4. **Notification format**: three choices, each shown with a preview. **Choose the long one**, the preview starting
+   `Fio banka - new income on account` / `Dear Client, the balance of account … has increased`, with an
+   `instruction ID`. The one-line format (`Account … income CZK … Counterparty: …, balance: …, type: …`) is the short
+   template the library cannot read: it carries no transaction id. The third is a single sentence without the
+   counter-party.
+5. **Online notifications**: keep them on. Off, Fio holds notifications between 00:00 and 8:00, so a payment at
+   night is announced in the morning.
+
+Check that `read` returns a `Transaction` for a small payment.
 
 ## Another bank
 
