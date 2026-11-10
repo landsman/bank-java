@@ -2,6 +2,7 @@ package cz.insuit.bank.notification;
 
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +58,8 @@ final class NotificationLines {
     }
 
     /**
-     * The lines matching {@code labelled}, whose first group is the label and second the value, stripped.
+     * The lines matching {@code labelled}, whose first group is the label and second the value, stripped. A label
+     * with nothing after it (`SS: `) is the field being absent, not a value to refuse, and stays out of the map.
      *
      * <p>Free text is what a payer controls: a message, a name. Should the bank ever pass a line break through, a forged
      * "Variabilní symbol:" after it must not count, so once a free-text label has appeared only another free-text
@@ -65,6 +67,7 @@ final class NotificationLines {
      */
     Map<String, String> labelled(Pattern labelled, Set<String> freeText, Set<String> allowedAfterFreeText) {
         Map<String, String> fields = new HashMap<>();
+        Set<String> seen = new HashSet<>();
         boolean afterFreeText = false;
         for (String line : lines) {
             Matcher matcher = labelled.matcher(line);
@@ -73,7 +76,9 @@ final class NotificationLines {
             if (afterFreeText && !freeText.contains(label) && !allowedAfterFreeText.contains(label)) {
                 throw new Unparsed("'" + label + "' after the message");
             }
-            if (fields.put(label, matcher.group(2).strip()) != null) throw new Unparsed("two '" + label + "' lines");
+            if (!seen.add(label)) throw new Unparsed("two '" + label + "' lines");
+            String value = matcher.group(2).strip();
+            if (!value.isEmpty()) fields.put(label, value);
             afterFreeText |= freeText.contains(label);
         }
         return fields;
