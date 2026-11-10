@@ -30,6 +30,8 @@ A working document: what is still unknown and what this library does next.
   [a card payment](https://github.com/landsman/bank-java/issues/6),
   [instant against ordinary](https://github.com/landsman/bank-java/issues/7),
   [the lowest amount notified](https://github.com/landsman/bank-java/issues/8).
+- **Fio banka beyond Czech**: [its Slovak e-mail](https://github.com/landsman/bank-java/issues/10) and
+  [its English one](https://github.com/landsman/bank-java/issues/11).
 
 ## Later
 
