@@ -75,7 +75,65 @@ Every line under `Další parametry` but `Typ pohybu` and `ID pokynu` appears on
   `Aktuální zůstatek:` may follow, so a message cannot smuggle in a symbol of its own.
 - A balance in a format not seen yet (an overdraft, perhaps) leaves `balance()` `null`; the payment is still read.
 
-## Not seen yet
+## Samples
 
-A business account; a foreign-currency account; an outgoing instant payment; a standing order; a cash withdrawal; an
-overdraft balance; a specific symbol. Each needs one real e-mail.
+Every kind of e-mail Fio can send, and whether a real one has been read. ✅ read, 🚫 seen and refused, ❔ not seen yet,
+👁 seen only as a preview in the settings form. A ❔ needs one raw `.eml`, exported as the original, never forwarded; see
+[development](development.md#adding-a-bank). Fixtures are in `src/test/resources/fio-cz/`.
+
+### What the account holder chooses
+
+The settings form ([setup](setup.md#fio-banka-cz)) decides the shape of every e-mail that follows.
+
+| Choice | Option | Sample |
+|---|---|---|
+| Format | long, `Fio banka - příjem na účtu` | ✅ |
+| | short, one line, `Fio banka - prijem na konte` | 🚫 no transaction id, no currency |
+| | one sentence, no counter-party | 👁 |
+| Language | Czech | ✅ |
+| | English | 👁 [#11](https://github.com/landsman/bank-java/issues/11) |
+| Online notifications | on | ✅ |
+| | off: held between 00:00 and 8:00 | ✅ same e-mail, sent later |
+| Filters | amount, counter-account, bank code, variable symbol | n/a: they decide which e-mails come, not their shape |
+
+### The account
+
+| Account | Sample |
+|---|---|
+| Personal, CZK | ✅ |
+| Business | ❔ |
+| Foreign currency (EUR, USD) | ❔ |
+| Balance in overdraft | ❔ |
+
+### The movement (`Typ pohybu`)
+
+| Movement | Direction | Sample |
+|---|---|---|
+| `Bezhotovostní příjem`, from another bank | in | ✅ `incoming-transfer.eml` |
+| `Okamžitá příchozí platba` | in | ✅ `incoming-instant.eml` |
+| `Příjem převodem uvnitř banky` | in | ✅ read, no fixture |
+| `Bezhotovostní platba`, to another bank | out | ✅ `outgoing-transfer.eml` |
+| `Platba kartou`, in Czechia and abroad | out | ✅ `card.eml` |
+| `Inkaso` | out | ✅ `direct-debit.eml` |
+| Outgoing instant payment | out | ❔ |
+| Transfer within Fio | out | ❔ |
+| Standing order | out | ❔ |
+| Card refund | in | ❔ |
+| Cash withdrawal, ATM | out | ❔ |
+| Cash deposit | in | ❔ |
+| Foreign payment, SEPA or SWIFT | in, out | ❔ |
+| Between the holder's own accounts | in, out | ❔ |
+| Fee, interest | in, out | ❔ |
+
+The names of the ❔ rows are descriptions, not Fio's wording: `Typ pohybu` is read from the sample. A movement whose
+name is not in the table above `type()` as `GENERAL` and is still read; the sample is what turns it into `TRANSFER`,
+`CARD` or `DIRECT_DEBIT`.
+
+### Fields
+
+| Field | Sample |
+|---|---|
+| Variable and constant symbol | ✅ |
+| Specific symbol | ❔ |
+| Counter-party without a name | ✅ `outgoing-transfer.eml` |
+| A message with a line break | ❔ |
