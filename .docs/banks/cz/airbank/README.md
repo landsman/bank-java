@@ -14,11 +14,14 @@ are those e-mails, anonymised.
   `Zpráva pro plátce:` on an outgoing one. `message()` holds either.
 - **The subject carries the account's nickname**, whatever the client named it. The parser does not read the subject.
 - **The outgoing transaction code ends in a U+FEFF**, an invisible character, before the line break.
-- **The amount uses a decimal comma** (`1,00 CZK`). How 1 000 and more is written has not been seen; until it is, such
-  an e-mail is `Unparsed`, not guessed at.
+- **The amount uses a decimal comma** (`1,00 CZK`). Thousands are read with a plain space between them (`9 500,00`), as
+  [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/AirBankBankEmailNoticeParserTest.php)'s
+  samples (MIT) show; no real e-mail of 1 000 or more has been read yet ([#5](https://github.com/landsman/bank-java/issues/5)),
+  and any other separator, a no-break space say, is `Unparsed`, not guessed at.
 - **The balance after the payment and its time** are in the first sentence, to the minute, in Prague time.
-  `balance()` is `null` when it is not in the format seen so far (1 000 and more, an overdraft): the payment itself is
-  still read.
+  `balance()` is `null` when it is not in that format (an overdraft, say): the payment itself is still read.
+- **An outgoing payment may name its recipient** (`Odchozí úhrada na účet <name> číslo …`), as myinvoice's sample does
+  when the recipient is saved; the real one, without a saved name, does not. Both are read.
 
 ## The message
 
@@ -78,5 +81,5 @@ Kód transakce: <12 digits><U+FEFF>
 
 ## Not seen yet
 
-A business account's template; 1 000 CZK and more, as an amount or a balance; an overdraft; a card payment; an instant against an ordinary transfer; anything below
+A business account's template (myinvoice's samples show the same one); 1 000 CZK and more in a real e-mail; an overdraft; a card payment; an instant against an ordinary transfer; anything below
 1 CZK. Each needs one real e-mail.

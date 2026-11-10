@@ -17,8 +17,8 @@ A bank is in one of three states:
 
 | Bank | State | Reads | Leaves out | Details |
 |---|---|---|---|---|
-| Air Bank | verified | transfers in and out; symbols, message, balance | amounts and balances of 1 000 and more ([#5](https://github.com/landsman/bank-java/issues/5)), cards, direct debits | [airbank](cz/airbank/README.md) |
-| Fio banka | verified | transfers in and out, card payments, direct debits; symbols, message, balance; thousands | other currencies ([#13](https://github.com/landsman/bank-java/issues/13)), English ([#11](https://github.com/landsman/bank-java/issues/11)); its short format is refused | [fio](cz/fio/README.md) |
+| Air Bank | verified | transfers in and out, EUR accounts; symbols, message, balance; thousands as public samples write them | a real e-mail of 1 000 or more ([#5](https://github.com/landsman/bank-java/issues/5)), cards, direct debits | [airbank](cz/airbank/README.md) |
+| Fio banka | verified | transfers in and out, card payments, direct debits; symbols, message, balance; thousands; English, from public samples ([#11](https://github.com/landsman/bank-java/issues/11)) | other currencies ([#13](https://github.com/landsman/bank-java/issues/13)); its short format is refused | [fio](cz/fio/README.md) |
 | MONETA | samples only | incoming and outgoing; counter-account, symbol from the description | own account (masked), transaction id, balance; payments under 100 Kč are never sent | [moneta](cz/moneta/README.md) |
 | Creditas | samples only | incoming and outgoing; counter-account, symbol, balance | transaction id, name, message; card holds refused | [creditas](cz/creditas/README.md) |
 | Raiffeisenbank | samples only | transfers and card payments, from HTML; names, symbols, message, balance | transaction id | [raiffeisenbank](cz/raiffeisenbank/README.md) |

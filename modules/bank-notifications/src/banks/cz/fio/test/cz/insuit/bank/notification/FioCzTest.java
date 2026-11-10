@@ -203,6 +203,85 @@ class FioCzTest {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
     }
 
+    /** Synthetic: myinvoice's sanitised English sample (MIT), with this repository's accounts and id. */
+    @Test
+    void readsTheEnglishTemplate() throws IOException {
+        assertEquals(
+                new Transaction(
+                        "fio.cz",
+                        Direction.INCOMING,
+                        Transaction.Type.GENERAL,
+                        BankAccount.parse("1234567899/2010"),
+                        BankAccount.parse("9876543211/2010"),
+                        "Pennyworth, Alfred",
+                        czk("1.00"),
+                        new PaymentSymbols("123456", null, null),
+                        "Faktura 123456",
+                        LocalDate.of(2026, 10, 25),
+                        "10000000006",
+                        balance("1234.75", 2026, 10, 25, 10, 37),
+                        "<0000.0.0.JavaMail.ums@sap.private.fio.cz>"),
+                read("english-incoming-synthetic.eml"));
+    }
+
+    @Test
+    void readsTheEnglishDateMonthFirst() throws IOException {
+        // 3/4 is the 4th of March, not the 3rd of April.
+        String changed =
+                text("english-incoming-synthetic.eml").replace("on 10/25/2026 at 10:37", "on 3/4/2026 at 8:05");
+
+        assertEquals(
+                LocalDate.of(2026, 3, 4),
+                BankNotifications.parseUnverified(bytes(changed)).bookedOn());
+    }
+
+    @Test
+    void refusesAnEnglishSubjectTheSentenceDisagreesWith() throws IOException {
+        String changed = text("english-incoming-synthetic.eml").replace("has increased by", "has decreased by");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
+    void readsTheCzechTemplateUnderASubjectThatStatesNoDirection() throws IOException {
+        String changed = text("incoming-instant.eml")
+                .replace(
+                        "Subject: =?UTF-8?Q?Fio_banka_-_p=C5=99=C3=ADjem_na_=C3=BA=C4=8Dtu?=",
+                        "Subject: Fio banka - zmena zustatku");
+
+        assertEquals(
+                Direction.INCOMING,
+                BankNotifications.parseUnverified(bytes(changed)).direction());
+    }
+
+    @Test
+    void readsADateWrittenWithSpacesAndWithoutLeadingZeros() throws IOException {
+        String changed = text("incoming-instant.eml").replace("se 11.10.2026 v 18:29", "se 1. 9. 2026 v 8:05");
+
+        Transaction read = BankNotifications.parseUnverified(bytes(changed));
+
+        assertEquals(LocalDate.of(2026, 9, 1), read.bookedOn());
+    }
+
+    @Test
+    void refusesTheOutgoingShortTemplateAsAFormatTheAccountHolderCanChange() throws IOException {
+        String changed = text("incoming-short.eml")
+                .replace("Subject: Fio banka - prijem na konte", "Subject: Fio banka - vydaj na konte");
+
+        Unparsed refused = assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+
+        assertEquals(Unparsed.Reason.UNSUPPORTED_FORMAT, refused.reason());
+    }
+
+    @Test
+    void takesAnOutgoingPaymentForATransfer() throws IOException {
+        String changed = text("outgoing-transfer.eml").replace("Bezhotovostn=C3=AD platba", "Odchoz=C3=AD platba");
+
+        assertEquals(
+                Transaction.Type.TRANSFER,
+                BankNotifications.parseUnverified(bytes(changed)).type());
+    }
+
     @Test
     void keepsThePayerTheMessageAndTheBalanceOutOfToString() throws IOException {
         String logged = read("incoming-instant.eml").toString();
