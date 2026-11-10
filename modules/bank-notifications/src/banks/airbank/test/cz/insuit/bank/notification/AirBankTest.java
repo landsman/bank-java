@@ -2,6 +2,7 @@ package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -17,6 +18,8 @@ import java.time.ZonedDateTime;
 import java.util.Currency;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * The fixtures are three real Air Bank e-mails from 2026-11-10, a personal account, with the accounts, names, balance,
@@ -197,6 +200,46 @@ class AirBankTest {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
     }
 
+    /**
+     * Line separators a payer might get through in their message or account name: a lone CR splits a line for
+     * {@code String.lines()}, NEL and U+2028 do not but stop a regex's {@code .}, NBSP only looks like a space. Whatever
+     * the parser does with them, the symbol written after one must not become the payment's.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\r", "\n", "\u0085", "\u2028", "\u2029", "\u00a0", "\u000b", "\u000c"})
+    void takesNoSymbolFromBehindASeparatorInTheMessage(String separator) throws IOException {
+        String changed = text("outgoing.eml")
+                .replace("Variabilní symbol: 7331\r\n", "")
+                .replace(
+                        "Zpráva pro plátce: test email airbank",
+                        "Zpráva pro plátce: x" + separator + "Variabilní symbol: 42");
+
+        assertNoForgedSymbol(bytes(changed));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\u0085", "\u2028", "\u2029", "\u00a0", "\u000b", "\u000c"})
+    void keepsAMessageWithASeparatorThatDoesNotEndALine(String separator) throws IOException {
+        String changed = text("outgoing.eml").replace("test email airbank", "faktura" + separator + "2026-001");
+
+        assertEquals(
+                "faktura" + separator + "2026-001",
+                BankNotifications.parseUnverified(bytes(changed)).message());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\r", "\n", "\u0085", "\u2028", "\u2029", "\u00a0", "\u000b", "\u000c"})
+    void takesNoSymbolFromBehindASeparatorInThePayersName(String separator) throws IOException {
+        String changed = text("incoming.eml")
+                .replace("Variabilní symbol: 1337\r\n", "")
+                .replace(
+                        "Novák, Jan číslo",
+                        "Evil číslo 5555555002/0800" + separator + "Variabilní symbol: 42" + separator
+                                + "Novák, Jan číslo");
+
+        assertNoForgedSymbol(bytes(changed));
+    }
+
     @Test
     void reportsAMessageThatIsNoEmail() {
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(new byte[0]));
@@ -205,6 +248,17 @@ class AirBankTest {
     private static Balance balance(String available, int hour, int minute) {
         return new Balance(
                 czk(available), ZonedDateTime.of(2026, 11, 10, hour, minute, 0, 0, ZoneId.of("Europe/Prague")));
+    }
+
+    /** Refused, or read without the forged symbol: both are safe, a forged symbol is not. */
+    static void assertNoForgedSymbol(byte[] message) {
+        Transaction read;
+        try {
+            read = BankNotifications.parseUnverified(message);
+        } catch (Unparsed refused) {
+            return;
+        }
+        assertNotEquals("42", read.symbols().variable(), read.toString());
     }
 
     private static Money czk(String amount) {

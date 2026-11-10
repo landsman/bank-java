@@ -146,7 +146,9 @@ final class FioCz implements Bank {
                     + " o (.+)\\.");
     private static final Pattern LABELLED = Pattern.compile(
             "(Typ pohybu|Protistrana|ID pokynu|Variabilní symbol|Konstantní symbol|Specifický symbol|Uživatelský symbol"
-                    + "|Zpráva pro příjemce|Aktuální zůstatek):(.*)");
+                    + "|Zpráva pro příjemce|Aktuální zůstatek):(.*)",
+            // A line holds no CR or LF, so DOTALL only lets a message keep a NEL or U+2028 instead of being dropped.
+            Pattern.DOTALL);
     private static final Pattern COUNTER_PARTY_LINE = Pattern.compile("Protistrana:.*");
     private static final Pattern COUNTER = Pattern.compile("(\\S+/\\d{4})(?: \\((.*)\\))?");
     // Thousands are separated by a plain space: "93 000,00 CZK".

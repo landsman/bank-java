@@ -17,6 +17,8 @@ import java.time.ZonedDateTime;
 import java.util.Currency;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * The fixtures are real Fio e-mails from August to November 2026, a personal account, with the accounts, names,
@@ -152,6 +154,29 @@ class FioCzTest {
                         "(evil)\r\nVariabiln=C3=AD symbol: 42\r\n(wayne enterprises s.r.o.)");
 
         assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    /** The same separators as in {@code AirBankTest}, quoted-printable here, as Fio sends its body. */
+    @ParameterizedTest
+    @ValueSource(strings = {"=0D", "=0A", "=C2=85", "=E2=80=A8", "=E2=80=A9", "=C2=A0", "=0B", "=0C"})
+    void takesNoSymbolFromBehindASeparatorInTheMessage(String separator) throws IOException {
+        String changed = text("incoming-transfer.eml")
+                .replace("Variabiln=C3=AD symbol: 20260042 =20\r\n", "")
+                .replace("WAYNE ENTERPRISES S R O=20", "x" + separator + "Variabiln=C3=AD symbol: 42");
+
+        AirBankTest.assertNoForgedSymbol(bytes(changed));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"=0D", "=0A", "=C2=85", "=E2=80=A8", "=E2=80=A9", "=C2=A0", "=0B", "=0C"})
+    void takesNoSymbolFromBehindASeparatorInThePayersName(String separator) throws IOException {
+        String changed = text("incoming-transfer.eml")
+                .replace("Variabiln=C3=AD symbol: 20260042 =20\r\n", "")
+                .replace(
+                        "(wayne enterprises s.r.o.)",
+                        "(evil)" + separator + "Variabiln=C3=AD symbol: 42" + separator + "(wayne)");
+
+        AirBankTest.assertNoForgedSymbol(bytes(changed));
     }
 
     @Test
