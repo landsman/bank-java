@@ -35,8 +35,8 @@ class FioCzTest {
                         "fio.cz",
                         Direction.INCOMING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/2010"),
-                        BankAccount.parse("5555555002/0800"),
+                        BankAccount.parse("1234567899/2010", Country.CZ),
+                        BankAccount.parse("5555555002/0800", Country.CZ),
                         "pennyworth alfred",
                         czk("1000.00"),
                         new PaymentSymbols(null, "0", null),
@@ -65,8 +65,8 @@ class FioCzTest {
                         "fio.cz",
                         Direction.OUTGOING,
                         Transaction.Type.TRANSFER,
-                        BankAccount.parse("1234567899/2010"),
-                        BankAccount.parse("1939000008/5500"),
+                        BankAccount.parse("1234567899/2010", Country.CZ),
+                        BankAccount.parse("1939000008/5500", Country.CZ),
                         null,
                         czk("-2768.00"),
                         PaymentSymbols.NONE,
@@ -97,7 +97,7 @@ class FioCzTest {
         assertEquals(Transaction.Type.DIRECT_DEBIT, parsed.type());
         assertEquals(czk("-602.00"), parsed.amount());
         assertEquals(new PaymentSymbols("1000000042", "0308", null), parsed.symbols());
-        assertEquals(BankAccount.parse("270000000/0300"), parsed.counterAccount());
+        assertEquals(BankAccount.parse("270000000/0300", Country.CZ), parsed.counterAccount());
     }
 
     @Test
@@ -211,8 +211,8 @@ class FioCzTest {
                         "fio.cz",
                         Direction.INCOMING,
                         Transaction.Type.GENERAL,
-                        BankAccount.parse("1234567899/2010"),
-                        BankAccount.parse("9876543211/2010"),
+                        BankAccount.parse("1234567899/2010", Country.CZ),
+                        BankAccount.parse("9876543211/2010", Country.CZ),
                         "Pennyworth, Alfred",
                         czk("1.00"),
                         new PaymentSymbols("123456", null, null),

@@ -136,8 +136,8 @@ final class Csob implements Bank {
                     DOMAIN,
                     direction,
                     kind.equals(CARD) ? Transaction.Type.CARD : Transaction.Type.TRANSFER,
-                    BankAccount.parse(own.group(1) + "/" + BANK_CODE),
-                    counter == null ? null : BankAccount.parse(counter),
+                    BankAccount.parse(own.group(1) + "/" + BANK_CODE, Country.CZ),
+                    counter == null ? null : BankAccount.parse(counter, Country.CZ),
                     fields.get(COUNTER_NAME),
                     amount,
                     new PaymentSymbols(
@@ -195,8 +195,8 @@ final class Csob implements Bank {
                     DOMAIN,
                     direction,
                     Transaction.Type.TRANSFER,
-                    BankAccount.parse(own.group(1) + "/" + BANK_CODE),
-                    counter == null ? null : BankAccount.parse(counter),
+                    BankAccount.parse(own.group(1) + "/" + BANK_CODE, Country.CZ),
+                    counter == null ? null : BankAccount.parse(counter, Country.CZ),
                     fields.get(COUNTER_NAME),
                     amount,
                     new PaymentSymbols(

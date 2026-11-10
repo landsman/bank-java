@@ -87,8 +87,8 @@ final class Unicredit implements Bank {
                     DOMAIN,
                     direction,
                     Transaction.Type.GENERAL,
-                    BankAccount.parse(sentence.group(1) + "/" + BANK_CODE),
-                    counter == null ? null : BankAccount.parse(counter),
+                    BankAccount.parse(sentence.group(1) + "/" + BANK_CODE, Country.CZ),
+                    counter == null ? null : BankAccount.parse(counter, Country.CZ),
                     fields.get(COUNTER_NAME),
                     direction == Direction.INCOMING ? value : value.negate(),
                     new PaymentSymbols(
