@@ -95,10 +95,19 @@ stop injection where the text is used:
 
 The same holds for the symbols, which are digits only, and the account numbers, which are checked, only less so.
 
-`BankAccount` is `[prefix-]number/bankCode`, without leading zeros, so the same account is equal however it was written,
-and it checks the Czech National Bank's modulo 11 rule: an account number misread from an e-mail is refused, not handed
-out. `BankAccount.parse("19-2000145399/0800")` reads one, for comparing against yours. `Money` and `PaymentSymbols` have
-the same shape as in `moneta-api-java`.
+`BankAccount` is a Czech or Slovak account, its `country()` with `[prefix-]number/bankCode`, without leading zeros, so
+the same account is equal however it was written: its local form and its IBAN compare equal. It checks the modulo 11
+rule both countries share, and an IBAN's modulo 97 digits, so an account number misread from an e-mail is refused, not
+handed out. To compare against yours:
+
+| You have | Read it with |
+|---|---|
+| `19-2000145399/0800`, Czech | `BankAccount.parse("19-2000145399/0800")` |
+| `4019425381/7500`, Slovak | `BankAccount.parse("4019425381/7500", BankAccount.Country.SK)` |
+| `CZ65 0800 0000 1920 0014 5399` | `BankAccount.parseIban("CZ65 0800 0000 1920 0014 5399")`, with or without spaces |
+
+`iban()` writes the IBAN back, `toString()` the local form. The same digits under a Czech and a Slovak bank code are two
+accounts. `Money` and `PaymentSymbols` have the same shape as in `moneta-api-java`.
 
 ## Two checks stay with you
 
