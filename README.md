@@ -22,40 +22,20 @@ flowchart TB
 
 For Java 21+ and Kotlin, one jar, no framework required.
 
-## What it covers
+## Which banks
 
-✅ read, ⬜ not yet, ❔ no real e-mail has shown it yet. MONETA, Creditas and Raiffeisenbank are read from public samples only. Details per bank:
-[Air Bank](.docs/air-bank.md), [Fio CZ](.docs/fio-cz.md), [MONETA](.docs/moneta.md), [Creditas](.docs/creditas.md), [Raiffeisenbank](.docs/raiffeisenbank.md).
-
-| Feature | Air Bank | Fio banka CZ | MONETA | Creditas | Raiffeisenbank |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Incoming payment | ✅ | ✅ | ❔ | ❔ | ❔ |
-| Outgoing payment | ✅ | ✅ | ❔ | ❔ | ❔ |
-| Card payment | ❔ | ✅ | ❔ | ⬜ holds refused | ❔ |
-| Direct debit | ❔ | ✅ | ❔ | ❔ | ❔ |
-| Amount | ✅ below 1 000 so far | ✅ | ❔ | ❔ | ❔ |
-| Who paid: name and account | ✅ | ✅ | ❔ account only | ❔ account only | ❔ |
-| Variable symbol | ✅ | ✅ | ❔ from Popis | ❔ | ❔ |
-| Message for the recipient | ✅ | ✅ | ❔ | ⬜ | ❔ |
-| Date and transaction id | ✅ | ✅ | ❔ date only | ❔ date only | ❔ date only |
-| Balance after the payment | ✅ below 1 000 so far | ✅ | ⬜ | ❔ | ❔ |
-| Proven to come from the bank | ✅ | ✅ | ⬜ no key yet | ⬜ no key yet | ⬜ no key yet |
-
-Other banks: not yet.
+Air Bank and Fio banka CZ from real e-mails; MONETA, Creditas and Raiffeisenbank from public samples, until a real
+e-mail confirms them. Each bank, and what it reads: [banks](.docs/banks/README.md).
 
 ## Docs
 
 | Read | For |
 |---|---|
+| [Banks](.docs/banks/README.md) | which banks it reads, what it reads from each, and a page per bank |
 | [Setting up a bank](.docs/setup.md) | what the account holder clicks in their internet banking |
 | [Installing](.docs/install.md) | adding the library to a Gradle or Maven project |
 | [Using the library](.docs/usage.md) | reading an e-mail, the failures, a payment's fields, the two checks left to you |
 | [How verification works](.docs/verification.md) | why a forged e-mail cannot pass |
-| [How Air Bank's e-mail behaves](.docs/air-bank.md) | what the bank sends and what has not been seen yet |
-| [How Fio CZ's e-mail behaves](.docs/fio-cz.md) | the same for Fio banka in Czechia |
-| [How MONETA's e-mail behaves](.docs/moneta.md) | the same for MONETA, from public samples |
-| [How Creditas's e-mail behaves](.docs/creditas.md) | the same for Creditas, from public samples |
-| [How Raiffeisenbank's e-mail behaves](.docs/raiffeisenbank.md) | the same for Raiffeisenbank, from public samples |
 | [Roadmap](.docs/plan/roadmap.md) | what is next |
 | [Development](.docs/development.md) | building it, adding a bank |
 | [llms.txt](llms.txt) | for a coding assistant adding the library to a project |

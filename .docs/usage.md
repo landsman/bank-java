@@ -1,16 +1,8 @@
 # Using the library
 
-**It reads Air Bank's and Fio banka's Czech e-mails so far.** Each bank sends one for every payment on an account once the account
-holder [switches it on](setup.md); `read` turns it into a `Transaction`. An e-mail from any other bank is `Unparsed`
-with the message `no parser for sender domain <domain>`, until that bank is added.
-
-| Bank | Recognised by | Reads | Details |
-|---|---|---|---|
-| Air Bank | `From: info@airbank.cz`, signed by `airbank.cz` | incoming and outgoing transfers | [how its e-mail behaves](air-bank.md) |
-| MONETA | `From: infoservis@moneta.cz`, signed by `moneta.cz` | incoming and outgoing, from public samples; no key pinned, so `Unverified` until a real e-mail | [how its e-mail behaves](moneta.md) |
-| Creditas | `From: info@creditas.cz`, signed by `creditas.cz` | incoming and outgoing, card holds refused; from public samples, no key pinned | [how its e-mail behaves](creditas.md) |
-| Raiffeisenbank | `From: info@rb.cz`, signed by `rb.cz` | transfers and card payments, from HTML; from public samples, no key pinned | [how its e-mail behaves](raiffeisenbank.md) |
-| Fio banka CZ | `From: automat@fio.cz`, signed by `fio.cz` | transfers in and out, card payments, direct debits | [how its e-mail behaves](fio-cz.md) |
+Each bank sends an e-mail for every payment on an account once the account holder [switches it on](setup.md); `read`
+turns it into a `Transaction`. Which banks it reads, and what it reads from each: [banks](banks/README.md). An e-mail from any
+other bank is `Unparsed` with the message `no parser for sender domain <domain>`.
 
 ```java
 BankNotifications notifications = BankNotifications.withDns(); // thread-safe, keep one

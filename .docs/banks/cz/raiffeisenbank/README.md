@@ -9,7 +9,7 @@ see [#17](https://github.com/landsman/bank-java/issues/17).
 ## What it carries
 
 Subject `Pohyb na účtě`, from `info@rb.cz`, **HTML only** as far as public code shows. The library turns it into one line
-per cell ([usage](usage.md#the-raw-message)); the labels have no colon and the value is on the next line:
+per cell ([usage](../../../usage.md#the-raw-message)); the labels have no colon and the value is on the next line:
 
 ```
 na účtě byla provedena následující příchozí platba:
