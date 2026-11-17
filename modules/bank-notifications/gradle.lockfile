@@ -3,7 +3,7 @@
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :modules:bank-notifications:dependencies --write-locks
 commons-io:commons-io:2.17.0=runtimeClasspath
-dnsjava:dnsjava:3.6.3=runtimeClasspath
+dnsjava:dnsjava:3.7.1=runtimeClasspath
 jakarta.activation:jakarta.activation-api:2.1.4=runtimeClasspath
 jakarta.mail:jakarta.mail-api:2.1.5=runtimeClasspath
 org.apache.james.jdkim:apache-jdkim-library:0.5=runtimeClasspath
