@@ -3,7 +3,7 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     id("com.diffplug.spotless") version "8.11.0"
-    id("com.autonomousapps.dependency-analysis") version "3.20.1"
+    id("com.autonomousapps.dependency-analysis") version "3.20.2"
     id("net.ltgt.errorprone") version "5.2.0" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     kotlin("jvm") version "2.4.21" apply false
