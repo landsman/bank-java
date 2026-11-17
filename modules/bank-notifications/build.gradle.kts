@@ -15,7 +15,7 @@ dependencies {
     implementation("dnsjava:dnsjava:3.7.1")
     // HTML-only notifications (Raiffeisenbank, UniCredit) are turned into lines through jsoup's HTML5 parser; 1.23.2 is
     // the first without CVE-2026-75140. Only the HTML parser is used, never the XML one.
-    implementation("org.jsoup:jsoup:1.23.2")
+    implementation("org.jsoup:jsoup:1.24.1")
 
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
