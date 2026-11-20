@@ -46,8 +46,15 @@ java {
     withJavadocJar()
 }
 
+// Implementation-Version: an app reads the release it runs on with Package.getImplementationVersion(), e.g. to read
+// again what an earlier release could not.
 tasks.jar {
-    manifest { attributes("Automatic-Module-Name" to "cz.insuit.bank.notification") }
+    manifest {
+        attributes(
+            "Automatic-Module-Name" to "cz.insuit.bank.notification",
+            "Implementation-Version" to project.version,
+        )
+    }
 }
 
 // Trivy reads Gradle only through gradle.lockfile. Only what ships is locked: tooling and tests stay out of the scan,
