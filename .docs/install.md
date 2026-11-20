@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation("cz.insuit:bank-notifications:0.1.0")
+    implementation("cz.insuit:bank-notifications:0.1.1")
 }
 ```
 
@@ -45,7 +45,7 @@ with `gpr.user` and `gpr.key` in `~/.gradle/gradle.properties`, not in the proje
 <dependency>
     <groupId>cz.insuit</groupId>
     <artifactId>bank-notifications</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
@@ -53,7 +53,7 @@ and in `~/.m2/settings.xml` a `<server>` with the same `id`, your GitHub user an
 
 ## Snapshots
 
-None are published: only tags are, the first `0.1.0` on 2026-11-10
-([release](https://github.com/landsman/bank-java/releases/tag/v0.1.0), a pre-release while it is 0.x). To try `main`
+None are published: only tags are, the latest `0.1.1` on 2026-11-20
+([release](https://github.com/landsman/bank-java/releases/tag/v0.1.1), a pre-release while it is 0.x). To try `main`
 before its next release, `make publish-local` in a checkout installs the jar into `~/.m2` as the next `-SNAPSHOT`, where
 `mavenLocal()` finds it.
