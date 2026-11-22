@@ -34,8 +34,8 @@ send HTML only. That HTML becomes lines at every `<br>`, table cell, row and blo
 Store those bytes before reading them. A template the library does not know yet is `Unparsed`, and a later
 release can read the stored message again.
 
-Messages over 64 KiB are `Unparsed` without being looked at; a bank's notification is around 5 KiB. See
-[verification](verification.md#the-size-limit).
+Messages over 64 KiB are `Unverified` without being looked at: their signature is never checked, and a bank's
+notification is around 5 KiB. See [verification](verification.md#the-size-limit).
 
 ## When there is no transaction
 

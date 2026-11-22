@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import cz.insuit.bank.notification.BankNotificationException.TemporaryFailure;
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import cz.insuit.bank.notification.BankNotificationException.Unverified;
+import cz.insuit.bank.notification.dkim.DkimVerifier;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,6 +92,18 @@ class BankNotificationsTest {
         assertEquals(
                 Unparsed.Reason.NOT_A_BANK_EMAIL,
                 assertThrows(Unparsed.class, () -> noLookup.read(broken)).reason());
+    }
+
+    @Test
+    void doesNotTrustAMessageTooLargeToVerify() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message too large to verify");
+        });
+        byte[] padded = new byte[DkimVerifier.MAX_MESSAGE_BYTES + 1];
+        byte[] head = unreadable();
+        System.arraycopy(head, 0, padded, 0, head.length);
+
+        assertThrows(Unverified.class, () -> noLookup.read(padded));
     }
 
     @Test

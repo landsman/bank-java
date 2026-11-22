@@ -104,10 +104,11 @@ public final class BankNotifications {
      * where the bank gives no transaction id.
      */
     public List<Transaction> readAll(byte[] rawMessage) {
-        // Before the parser too: anyone can mail the address these come to.
+        // Before the parser too: anyone can mail the address these come to. Unverified, as DkimVerifier says too: its
+        // signature is never checked, so it cannot pass for the bank writing (a notification is about 5 KiB).
         if (rawMessage.length > DkimVerifier.MAX_MESSAGE_BYTES) {
-            throw new BankNotificationException.Unparsed("message of " + rawMessage.length + " bytes is over the "
-                    + DkimVerifier.MAX_MESSAGE_BYTES + " byte limit");
+            throw new BankNotificationException.Unverified("message of " + rawMessage.length + " bytes is over the "
+                    + DkimVerifier.MAX_MESSAGE_BYTES + " byte limit, so its signature is not checked");
         }
         // The signature first, against the key of the bank the sender domain picks: an unsigned e-mail that claims a
         // bank must end as Unverified whatever its body says, not as Unparsed, which an app reads as "the bank wrote".
