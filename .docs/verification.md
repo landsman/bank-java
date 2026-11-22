@@ -86,5 +86,5 @@ the wrapper makes one per message; `BankNotifications` and `DkimVerifier` are th
 
 jDKIM's maintainers fixed parsing that was not linear in its input on 2026-11-05 (the `g=` check and the space after a
 header name), after 0.5. Those fixes are not released yet. Since anyone can send mail to the address these e-mails come
-to, the library refuses messages over 64 KiB, as `Unverified`, before parsing them. The limit goes up once a jDKIM release carries the
+to, the library refuses to verify messages over 64 KiB, so it never parses them. The limit goes up once a jDKIM release carries the
 fixes.

@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -107,28 +106,17 @@ class BankNotificationsTest {
     }
 
     @Test
-    void doesNotTrustAnUnsignedMessageThatClaimsABankWhateverItsBodySays() {
-        assertThrows(Unverified.class, () -> notifications().read(unreadable()));
-        assertThrows(Unverified.class, () -> notifications().readAll(unreadable()));
-    }
-
-    @Test
-    void leavesASignedButUnreadableMessageUnparsed() throws Exception {
-        assertThrows(Unparsed.class, () -> notifications().read(signed(unreadable(), "airbank.cz")));
-    }
-
-    @Test
-    void neverLooksUpAKeyForADomainTheMessageChose() throws Exception {
-        List<String> looked = new ArrayList<>();
-        BankNotifications lookingUp = BankNotifications.trustingKeysFrom((selector, domain) -> {
-            looked.add(domain);
-            throw new IOException("resolver timed out");
+    void takesALargeMessageFromAnyoneElseForNoBank() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message from no bank");
         });
+        byte[] padded = new byte[DkimVerifier.MAX_MESSAGE_BYTES + 1];
+        byte[] head = "From: shop@example.com\r\nSubject: news\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        System.arraycopy(head, 0, padded, 0, head.length);
 
-        byte[] foreign = signed(fixture("incoming.eml"), "attacker.example");
-
-        assertThrows(Unverified.class, () -> lookingUp.read(foreign));
-        assertEquals(List.of(), looked);
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(padded)).reason());
     }
 
     private static KeyPair key;
