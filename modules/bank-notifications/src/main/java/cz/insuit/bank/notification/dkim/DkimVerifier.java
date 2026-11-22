@@ -34,9 +34,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <pre>{@code
  * DkimVerifier dkim = DkimVerifier.withDns();
- * if (BankNotifications.parse(raw) instanceof Transaction t
- *         && dkim.verify(raw, t.signedBy()) instanceof DkimResult.Verified) {
- *     // genuine; still compare t.account() with the account you expect
+ * // The domain comes from your own configuration, never from the message: check first, parse after.
+ * if (dkim.verify(raw, "bank.example") instanceof DkimResult.Verified) {
+ *     // genuine; only now read it, and compare what it says with the account you expect
  * }
  * }</pre>
  */
@@ -108,7 +108,7 @@ public final class DkimVerifier {
      * Verifies one raw message against the domain that has to have signed it.
      *
      * @param rawMessage the message exactly as received, headers included; not re-serialised by a mail library
-     * @param domain the domain that must have signed it, e.g. {@code Transaction.signedBy()}
+     * @param domain the domain that must have signed it, from the caller's own configuration, never from the message
      * @return verified, failed, or temporarily undecidable
      */
     public DkimResult verify(byte[] rawMessage, String domain) {
@@ -179,7 +179,10 @@ public final class DkimVerifier {
         this.pins = pins;
     }
 
-    /** Refuses, as a permanent failure, a domain other than the expected one, a key in testing mode, an RSA key that is too short, or one not pinned. */
+    /**
+     * Refuses, as a permanent failure, a domain other than the expected one, a key in testing mode, an RSA key that is
+     * too short, or one not pinned.
+     */
     private static PublicKeyRecordRetriever checked(
             PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins, String expected) {
         return (method, selector, domain) -> {
