@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -69,6 +70,31 @@ class BankNotificationsTest {
         assertThrows(Unparsed.class, () -> noLookup.read(other));
     }
 
+    @Test
+    void doesNotTrustAnUnsignedMessageThatClaimsABankWhateverItsBodySays() {
+        assertThrows(Unverified.class, () -> notifications().read(unreadable()));
+        assertThrows(Unverified.class, () -> notifications().readAll(unreadable()));
+    }
+
+    @Test
+    void leavesASignedButUnreadableMessageUnparsed() throws Exception {
+        assertThrows(Unparsed.class, () -> notifications().read(signed(unreadable(), "airbank.cz")));
+    }
+
+    @Test
+    void neverLooksUpAKeyForADomainTheMessageChose() throws Exception {
+        List<String> looked = new ArrayList<>();
+        BankNotifications lookingUp = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            looked.add(domain);
+            throw new IOException("resolver timed out");
+        });
+
+        byte[] foreign = signed(fixture("incoming.eml"), "attacker.example");
+
+        assertThrows(Unverified.class, () -> lookingUp.read(foreign));
+        assertEquals(List.of(), looked);
+    }
+
     private static KeyPair key;
 
     @BeforeAll
@@ -101,9 +127,22 @@ class BankNotificationsTest {
     }
 
     private static byte[] signed(String name, String headers) throws Exception {
-        byte[] message = fixture(name);
+        return signed(fixture(name), "airbank.cz", headers);
+    }
+
+    private static byte[] signed(byte[] message, String domain) throws Exception {
+        return signed(message, domain, "Date:To:From:Subject");
+    }
+
+    /** What anyone can send to the receiving address: a bank's sender domain over a body no parser understands. */
+    private static byte[] unreadable() {
+        return "From: Bank <info@airbank.cz>\r\nTo: me@example.com\r\nSubject: hello\r\nDate: Mon, 1 Jan 2024 10:00:00 +0100\r\n\r\nNothing a parser knows.\r\n"
+                .getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] signed(byte[] message, String domain, String headers) throws Exception {
         String header = new DKIMSigner(
-                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=" + headers + "; bh=; b=;",
+                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=" + domain + "; s=ab; h=" + headers + "; bh=; b=;",
                         key.getPrivate())
                 .sign(new ByteArrayInputStream(message));
         byte[] prefix = (header + "\r\n").getBytes(StandardCharsets.UTF_8);

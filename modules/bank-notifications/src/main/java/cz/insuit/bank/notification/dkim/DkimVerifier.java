@@ -117,7 +117,7 @@ public final class DkimVerifier {
                     "message of " + rawMessage.length + " bytes is over the " + MAX_MESSAGE_BYTES + " byte limit");
         }
         // One jDKIM verifier per message: it keeps its results on the instance.
-        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins));
+        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins, domain.toLowerCase(Locale.ROOT)));
         try {
             verifier.verify(new ByteArrayInputStream(rawMessage));
         } catch (FailException e) {
@@ -179,10 +179,15 @@ public final class DkimVerifier {
         this.pins = pins;
     }
 
-    /** Refuses, as a permanent failure, a key in testing mode, an RSA key that is too short, or one not pinned. */
+    /** Refuses, as a permanent failure, a domain other than the expected one, a key in testing mode, an RSA key that is too short, or one not pinned. */
     private static PublicKeyRecordRetriever checked(
-            PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins) {
+            PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins, String expected) {
         return (method, selector, domain) -> {
+            // jDKIM looks up the d= of every signature the message carries; the sender picks those, so a name that is
+            // not the expected domain is never looked up.
+            if (!domain.toString().toLowerCase(Locale.ROOT).equals(expected)) {
+                throw new PermFailException("d=" + domain + " is not " + expected + ", not looked up");
+            }
             List<String> records = keys.getRecords(method, selector, domain);
             for (String record : records) {
                 PublicKeyRecordImpl parsed;
