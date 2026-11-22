@@ -1,0 +1,10 @@
+# The notes `gh release create --generate-notes` writes: a library's users read what changed in the code, then which
+# dependencies moved. Dependabot labels its pull requests `dependencies`; everything else is a change.
+changelog:
+  categories:
+    - title: Changes
+      labels: ["*"]
+      exclude:
+        labels: [dependencies]
+    - title: Dependencies
+      labels: [dependencies]
