@@ -38,6 +38,9 @@ A signature counts only when all of these hold, besides [whose key it is](#whose
 - it verifies over the **raw bytes**, recomputed here; an `Authentication-Results` header that came with the message
   is never read, because whoever sent the message could have written it;
 - its `d=` is the domain of the bank whose template matched (`airbank.cz` for Air Bank, `fio.cz` for Fio);
+- the headers reading depends on (`Message-ID`, `Subject`, `Content-Type`, `Content-Transfer-Encoding`) come once:
+  DKIM signs the last copy of a header and the mail library reads the first, so a copy added above a signed one is
+  `Unverified`;
 - it signs the **whole body**: a signature with `l=` covers only the first bytes, and anything could follow them;
 - its key is not in testing mode (`t=y` in the key record);
 - an RSA key has at least 1024 bits, the shortest [RFC 8301](https://www.rfc-editor.org/rfc/rfc8301) lets a verifier

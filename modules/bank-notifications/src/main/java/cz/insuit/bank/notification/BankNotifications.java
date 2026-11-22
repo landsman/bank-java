@@ -111,6 +111,7 @@ public final class BankNotifications {
         // sender, NOT_A_BANK_EMAIL from anyone else.
         MimeMessage message = mime(rawMessage);
         Bank bank = bankOf(message);
+        refuseRepeatedHeaders(message);
         DkimResult dkim;
         try {
             dkim = this.dkim.verify(rawMessage, bank.domain());
@@ -175,6 +176,31 @@ public final class BankNotifications {
                         BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL,
                         "no parser for sender domain " + domain));
     }
+
+    /**
+     * DKIM signs the last copy of a header (RFC 6376, 5.4.2) and Jakarta Mail reads the first, so a copy added above a
+     * signed one would pass verification and be what is read: a replayed notification under a new {@code Message-ID},
+     * or another {@code Subject} picking another template. RFC 5322 and MIME allow one of each, so a bank sends one. A
+     * second {@code From} never gets here: {@link #bankOf} names no bank for it.
+     */
+    private static void refuseRepeatedHeaders(MimeMessage message) {
+        for (String name : READ_HEADERS) {
+            String[] copies;
+            try {
+                copies = message.getHeader(name);
+            } catch (MessagingException e) {
+                throw new BankNotificationException.Unverified("unreadable " + name + " header: " + e);
+            }
+            if (copies != null && copies.length > 1) {
+                throw new BankNotificationException.Unverified(
+                        name + " appears " + copies.length + " times; a bank sends one, so the others are not its own");
+            }
+        }
+    }
+
+    /** The headers besides {@code From} that reading depends on: the id, the template's subject, how the body decodes. */
+    private static final List<String> READ_HEADERS =
+            List.of("Message-ID", "Subject", "Content-Type", "Content-Transfer-Encoding");
 
     private static List<Transaction> parse(Bank bank, MimeMessage message) {
         try {

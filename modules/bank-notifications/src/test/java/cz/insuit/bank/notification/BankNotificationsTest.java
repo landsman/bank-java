@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -117,6 +118,54 @@ class BankNotificationsTest {
         assertEquals(
                 Unparsed.Reason.NOT_A_BANK_EMAIL,
                 assertThrows(Unparsed.class, () -> noLookup.read(padded)).reason());
+    }
+
+    @Test
+    void doesNotTrustASecondMessageIdAddedAboveASignedOne() throws Exception {
+        byte[] replayed = prepended(
+                "Message-ID: <forged@attacker.example>", signed("incoming.eml", "Date:To:From:Subject:Message-ID"));
+
+        assertThrows(Unverified.class, () -> notifications().read(replayed));
+    }
+
+    @Test
+    void doesNotTrustASecondSubjectAddedAboveASignedOne() throws Exception {
+        byte[] retitled = prepended("Subject: something else", signed("incoming.eml"));
+
+        assertThrows(Unverified.class, () -> notifications().read(retitled));
+    }
+
+    private static byte[] prepended(String header, byte[] message) {
+        byte[] line = (header + "\r\n").getBytes(StandardCharsets.UTF_8);
+        byte[] out = new byte[line.length + message.length];
+        System.arraycopy(line, 0, out, 0, line.length);
+        System.arraycopy(message, 0, out, line.length, message.length);
+        return out;
+    }
+
+    @Test
+    void doesNotTrustAnUnsignedMessageThatClaimsABankWhateverItsBodySays() {
+        assertThrows(Unverified.class, () -> notifications().read(unreadable()));
+        assertThrows(Unverified.class, () -> notifications().readAll(unreadable()));
+    }
+
+    @Test
+    void leavesASignedButUnreadableMessageUnparsed() throws Exception {
+        assertThrows(Unparsed.class, () -> notifications().read(signed(unreadable(), "airbank.cz")));
+    }
+
+    @Test
+    void neverLooksUpAKeyForADomainTheMessageChose() throws Exception {
+        List<String> looked = new ArrayList<>();
+        BankNotifications lookingUp = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            looked.add(domain);
+            throw new IOException("resolver timed out");
+        });
+
+        byte[] foreign = signed(fixture("incoming.eml"), "attacker.example");
+
+        assertThrows(Unverified.class, () -> lookingUp.read(foreign));
+        assertEquals(List.of(), looked);
     }
 
     private static KeyPair key;
