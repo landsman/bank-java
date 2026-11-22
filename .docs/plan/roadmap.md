@@ -2,10 +2,10 @@
 
 A working document: what is still unknown and what this library does next.
 
-## Current state (2026-11-10)
+## Current state (2026-11-20)
 
-- **Released `0.1.0`** on 2026-11-10 to GitHub Packages
-  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.0)); CI builds on Java 21 and 25, and a tag
+- **Released `0.1.1`** on 2026-11-20 to GitHub Packages
+  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.1)), the jar naming its version in its manifest; CI builds on Java 21 and 25, and a tag
   `vX.Y.Z` publishes the next one through `release.yml`.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
