@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import cz.insuit.bank.notification.BankNotificationException.TemporaryFailure;
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
 import cz.insuit.bank.notification.BankNotificationException.Unverified;
+import cz.insuit.bank.notification.dkim.DkimVerifier;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +68,104 @@ class BankNotificationsTest {
 
         byte[] other = "From: someone@example.com\r\n\r\nhi".getBytes(StandardCharsets.UTF_8);
 
-        assertThrows(Unparsed.class, () -> noLookup.read(other));
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(other)).reason());
+    }
+
+    @Test
+    void takesAnUnreadableFromForNoBankRatherThanForTheBankWriting() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message that names no bank");
+        });
+        // An unclosed quote: Jakarta Mail refuses the From, so the sender is never known.
+        byte[] broken = String.join(
+                        "\r\n",
+                        "From: \"Air Bank <info@airbank.cz>",
+                        "To: me@example.com",
+                        "Subject: hello",
+                        "",
+                        "Nothing a parser knows.",
+                        "")
+                .getBytes(StandardCharsets.UTF_8);
+
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(broken)).reason());
+    }
+
+    @Test
+    void doesNotTrustAMessageTooLargeToVerify() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message too large to verify");
+        });
+        byte[] padded = new byte[DkimVerifier.MAX_MESSAGE_BYTES + 1];
+        byte[] head = unreadable();
+        System.arraycopy(head, 0, padded, 0, head.length);
+
+        assertThrows(Unverified.class, () -> noLookup.read(padded));
+    }
+
+    @Test
+    void takesALargeMessageFromAnyoneElseForNoBank() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message from no bank");
+        });
+        byte[] padded = new byte[DkimVerifier.MAX_MESSAGE_BYTES + 1];
+        byte[] head = "From: shop@example.com\r\nSubject: news\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        System.arraycopy(head, 0, padded, 0, head.length);
+
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(padded)).reason());
+    }
+
+    @Test
+    void doesNotTrustASecondMessageIdAddedAboveASignedOne() throws Exception {
+        byte[] replayed = prepended(
+                "Message-ID: <forged@attacker.example>", signed("incoming.eml", "Date:To:From:Subject:Message-ID"));
+
+        assertThrows(Unverified.class, () -> notifications().read(replayed));
+    }
+
+    @Test
+    void doesNotTrustASecondSubjectAddedAboveASignedOne() throws Exception {
+        byte[] retitled = prepended("Subject: something else", signed("incoming.eml"));
+
+        assertThrows(Unverified.class, () -> notifications().read(retitled));
+    }
+
+    private static byte[] prepended(String header, byte[] message) {
+        byte[] line = (header + "\r\n").getBytes(StandardCharsets.UTF_8);
+        byte[] out = new byte[line.length + message.length];
+        System.arraycopy(line, 0, out, 0, line.length);
+        System.arraycopy(message, 0, out, line.length, message.length);
+        return out;
+    }
+
+    @Test
+    void doesNotTrustAnUnsignedMessageThatClaimsABankWhateverItsBodySays() {
+        assertThrows(Unverified.class, () -> notifications().read(unreadable()));
+        assertThrows(Unverified.class, () -> notifications().readAll(unreadable()));
+    }
+
+    @Test
+    void leavesASignedButUnreadableMessageUnparsed() throws Exception {
+        assertThrows(Unparsed.class, () -> notifications().read(signed(unreadable(), "airbank.cz")));
+    }
+
+    @Test
+    void neverLooksUpAKeyForADomainTheMessageChose() throws Exception {
+        List<String> looked = new ArrayList<>();
+        BankNotifications lookingUp = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            looked.add(domain);
+            throw new IOException("resolver timed out");
+        });
+
+        byte[] foreign = signed(fixture("incoming.eml"), "attacker.example");
+
+        assertThrows(Unverified.class, () -> lookingUp.read(foreign));
+        assertEquals(List.of(), looked);
     }
 
     private static KeyPair key;
@@ -101,9 +200,22 @@ class BankNotificationsTest {
     }
 
     private static byte[] signed(String name, String headers) throws Exception {
-        byte[] message = fixture(name);
+        return signed(fixture(name), "airbank.cz", headers);
+    }
+
+    private static byte[] signed(byte[] message, String domain) throws Exception {
+        return signed(message, domain, "Date:To:From:Subject");
+    }
+
+    /** What anyone can send to the receiving address: a bank's sender domain over a body no parser understands. */
+    private static byte[] unreadable() {
+        return "From: Bank <info@airbank.cz>\r\nTo: me@example.com\r\nSubject: hello\r\nDate: Mon, 1 Jan 2024 10:00:00 +0100\r\n\r\nNothing a parser knows.\r\n"
+                .getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] signed(byte[] message, String domain, String headers) throws Exception {
         String header = new DKIMSigner(
-                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=" + headers + "; bh=; b=;",
+                        "v=1; a=rsa-sha256; c=relaxed/relaxed; d=" + domain + "; s=ab; h=" + headers + "; bh=; b=;",
                         key.getPrivate())
                 .sign(new ByteArrayInputStream(message));
         byte[] prefix = (header + "\r\n").getBytes(StandardCharsets.UTF_8);

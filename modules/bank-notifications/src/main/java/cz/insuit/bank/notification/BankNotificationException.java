@@ -77,14 +77,20 @@ public abstract sealed class BankNotificationException extends RuntimeException 
 
         /** Why an e-mail was not read. A constant may be added in a minor version: keep a {@code default} branch. */
         public enum Reason {
-            /** Not from a bank this release reads: another bank, or not a bank at all. Nothing for the account holder to fix. */
+            /**
+             * Not from a bank this release reads: another bank, not a bank at all, or no readable sender. Nothing for the
+             * account holder to fix. The only reason given before the signature is checked: there is no key to check.
+             */
             NOT_A_BANK_EMAIL,
             /**
              * A bank's notification in a format the library knows but will not read, such as one without a transaction
              * id. The account holder can fix it in their banking; the message says what to choose instead.
              */
             UNSUPPORTED_FORMAT,
-            /** Anything else: a template that changed, a misread value, a message cut short, bytes that are no e-mail. */
+            /**
+             * Anything else in a message the bank's signature verified: a template that changed, a misread value. Like
+             * {@link #UNSUPPORTED_FORMAT}, only ever given after the signature holds, so it is the bank writing.
+             */
             NOT_READ
         }
     }

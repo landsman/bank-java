@@ -34,8 +34,8 @@ send HTML only. That HTML becomes lines at every `<br>`, table cell, row and blo
 Store those bytes before reading them. A template the library does not know yet is `Unparsed`, and a later
 release can read the stored message again.
 
-Messages over 64 KiB are `Unparsed` without being looked at; a bank's notification is around 5 KiB. See
-[verification](verification.md#the-size-limit).
+Messages over 64 KiB are never verified: from a bank's sender they are `Unverified`, from anyone else
+`NOT_A_BANK_EMAIL`. A bank's notification is around 5 KiB. See [verification](verification.md#the-size-limit).
 
 ## When there is no transaction
 
@@ -52,9 +52,13 @@ exception is sealed, so a `switch` over its three subtypes is exhaustive:
 
 | `reason()` | Means | Do |
 |---|---|---|
-| `NOT_A_BANK_EMAIL` | not from a bank this release reads | nothing for the account holder; another bank may be added later |
+| `NOT_A_BANK_EMAIL` | not from a bank this release reads, or no readable sender at all | nothing for the account holder; another bank may be added later |
 | `UNSUPPORTED_FORMAT` | a bank's notification in a format the library will not read, e.g. Fio's short one without a transaction id | show the account holder `getMessage()`: it says what to choose in their banking |
-| `NOT_READ` | anything else: a changed template, a misread value, bytes that are no e-mail | keep it; a later release, or a bug report with an anonymised copy, can fix it |
+| `NOT_READ` | anything else: a changed template, a misread value | keep it; a later release, or a bug report with an anonymised copy, can fix it |
+
+`UNSUPPORTED_FORMAT` and `NOT_READ` come only once the bank's signature holds, so either one means the bank wrote.
+`NOT_A_BANK_EMAIL` is the only reason given before the signature is checked: with no bank named, there is no key to
+check it against.
 
 Keep a `default` branch: a reason may be added in a minor version.
 

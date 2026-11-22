@@ -34,9 +34,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <pre>{@code
  * DkimVerifier dkim = DkimVerifier.withDns();
- * if (BankNotifications.parse(raw) instanceof Transaction t
- *         && dkim.verify(raw, t.signedBy()) instanceof DkimResult.Verified) {
- *     // genuine; still compare t.account() with the account you expect
+ * // The domain comes from your own configuration, never from the message: check first, parse after.
+ * if (dkim.verify(raw, "bank.example") instanceof DkimResult.Verified) {
+ *     // genuine; only now read it, and compare what it says with the account you expect
  * }
  * }</pre>
  */
@@ -108,7 +108,7 @@ public final class DkimVerifier {
      * Verifies one raw message against the domain that has to have signed it.
      *
      * @param rawMessage the message exactly as received, headers included; not re-serialised by a mail library
-     * @param domain the domain that must have signed it, e.g. {@code Transaction.signedBy()}
+     * @param domain the domain that must have signed it, from the caller's own configuration, never from the message
      * @return verified, failed, or temporarily undecidable
      */
     public DkimResult verify(byte[] rawMessage, String domain) {
@@ -117,7 +117,7 @@ public final class DkimVerifier {
                     "message of " + rawMessage.length + " bytes is over the " + MAX_MESSAGE_BYTES + " byte limit");
         }
         // One jDKIM verifier per message: it keeps its results on the instance.
-        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins));
+        DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins, domain.toLowerCase(Locale.ROOT)));
         try {
             verifier.verify(new ByteArrayInputStream(rawMessage));
         } catch (FailException e) {
@@ -179,10 +179,18 @@ public final class DkimVerifier {
         this.pins = pins;
     }
 
-    /** Refuses, as a permanent failure, a key in testing mode, an RSA key that is too short, or one not pinned. */
+    /**
+     * Refuses, as a permanent failure, a domain other than the expected one, a key in testing mode, an RSA key that is
+     * too short, or one not pinned.
+     */
     private static PublicKeyRecordRetriever checked(
-            PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins) {
+            PublicKeyRecordRetriever keys, int minimumKeyBits, Map<String, Set<String>> pins, String expected) {
         return (method, selector, domain) -> {
+            // jDKIM looks up the d= of every signature the message carries; the sender picks those, so a name that is
+            // not the expected domain is never looked up.
+            if (!domain.toString().toLowerCase(Locale.ROOT).equals(expected)) {
+                throw new PermFailException("d=" + domain + " is not " + expected + ", not looked up");
+            }
             List<String> records = keys.getRecords(method, selector, domain);
             for (String record : records) {
                 PublicKeyRecordImpl parsed;
