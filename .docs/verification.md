@@ -13,23 +13,25 @@ flowchart TB
 
     subgraph lib ["bank-notifications: read(raw)"]
         direction TB
-        read["read"] --> parse{"Air Bank's template,<br/>every field consistent?"}
-        parse -- "no" --> unparsed(["Unparsed"])
-        parse -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
+        read["read"] --> sender{"sender a bank<br/>this release reads?"}
+        sender -- "no" --> other(["Unparsed,<br/>NOT_A_BANK_EMAIL"])
+        sender -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
         dns -- "DNS down" --> temporary(["TemporaryFailure"])
         dns -- "forged or unsigned" --> unverified(["Unverified"])
         dns -- "secure" --> pin{"key pinned<br/>in this release?"}
         pin -- "no" --> unverified
         pin -- "yes" --> sig{"signature valid,<br/>d=airbank.cz,<br/>whole body?"}
         sig -- "no" --> unverified
-        sig -- "yes" --> transaction(["Transaction"])
+        sig -- "yes" --> parse{"Air Bank's template,<br/>every field consistent?"}
+        parse -- "no" --> unparsed(["Unparsed"])
+        parse -- "yes" --> transaction(["Transaction"])
     end
 
     transaction --> you["you: is it my account?<br/>seen this transactionId?"]
 ```
 
-Every arrow out of the box but one ends in an exception. A `Transaction` exists only when all four checks passed, with
-no setting to forget. The two questions at the bottom stay with you, see [usage](usage.md#two-checks-stay-with-you).
+Every arrow out of the box but one ends in an exception. A `Transaction` exists only when every check passed, with no
+setting to forget. The body is read last, so nothing it says can count before the bank's signature does. The two questions at the bottom stay with you, see [usage](usage.md#two-checks-stay-with-you).
 
 ## What counts
 
@@ -37,7 +39,8 @@ A signature counts only when all of these hold, besides [whose key it is](#whose
 
 - it verifies over the **raw bytes**, recomputed here; an `Authentication-Results` header that came with the message
   is never read, because whoever sent the message could have written it;
-- its `d=` is the domain of the bank whose template matched (`airbank.cz` for Air Bank, `fio.cz` for Fio);
+- its `d=` is the domain of the bank the sender names (`airbank.cz` for Air Bank, `fio.cz` for Fio); a signature of any
+  other domain is not even looked up;
 - the headers reading depends on (`Message-ID`, `Subject`, `Content-Type`, `Content-Transfer-Encoding`) come once:
   DKIM signs the last copy of a header and the mail library reads the first, so a copy added above a signed one is
   `Unverified`;
