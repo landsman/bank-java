@@ -67,7 +67,30 @@ class BankNotificationsTest {
 
         byte[] other = "From: someone@example.com\r\n\r\nhi".getBytes(StandardCharsets.UTF_8);
 
-        assertThrows(Unparsed.class, () -> noLookup.read(other));
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(other)).reason());
+    }
+
+    @Test
+    void takesAnUnreadableFromForNoBankRatherThanForTheBankWriting() {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a message that names no bank");
+        });
+        // An unclosed quote: Jakarta Mail refuses the From, so the sender is never known.
+        byte[] broken = String.join(
+                        "\r\n",
+                        "From: \"Air Bank <info@airbank.cz>",
+                        "To: me@example.com",
+                        "Subject: hello",
+                        "",
+                        "Nothing a parser knows.",
+                        "")
+                .getBytes(StandardCharsets.UTF_8);
+
+        assertEquals(
+                Unparsed.Reason.NOT_A_BANK_EMAIL,
+                assertThrows(Unparsed.class, () -> noLookup.read(broken)).reason());
     }
 
     @Test

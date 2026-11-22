@@ -148,21 +148,27 @@ public final class BankNotifications {
         return parse(bankOf(message), message);
     }
 
+    /** Bytes that are no e-mail name no bank either, so there is no key to check them against. */
     private static MimeMessage mime(byte[] rawMessage) {
         try {
             return new MimeMessage(SESSION, new ByteArrayInputStream(rawMessage));
         } catch (MessagingException | RuntimeException e) {
-            throw new BankNotificationException.Unparsed("not a readable e-mail: " + e, e);
+            throw new BankNotificationException.Unparsed(
+                    BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL, "not a readable e-mail: " + e);
         }
     }
 
-    /** The bank the sender domain picks, or {@link BankNotificationException.Unparsed} for a sender with no parser. */
+    /**
+     * The bank the sender domain picks, or {@link BankNotificationException.Unparsed.Reason#NOT_A_BANK_EMAIL} for a
+     * sender with no parser. An unreadable From is one: it names no bank, so it cannot pass for one that wrote.
+     */
     private static Bank bankOf(MimeMessage message) {
         String domain;
         try {
             domain = senderDomain(message);
         } catch (MessagingException | RuntimeException e) {
-            throw new BankNotificationException.Unparsed("not a readable e-mail: " + e, e);
+            throw new BankNotificationException.Unparsed(
+                    BankNotificationException.Unparsed.Reason.NOT_A_BANK_EMAIL, "unreadable From header: " + e);
         }
         return BANKS.stream()
                 .filter(candidate -> candidate.domain().equals(domain))
