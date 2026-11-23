@@ -13,7 +13,7 @@ plugins {
 val testsJdk = providers.gradleProperty("testsJdk")
 
 // A tag vX.Y.Z releases X.Y.Z (-PreleaseVersion); anything else is the next snapshot.
-val releaseVersion = providers.gradleProperty("releaseVersion").orElse("0.1.2-SNAPSHOT")
+val releaseVersion = providers.gradleProperty("releaseVersion").orElse("0.1.3-SNAPSHOT")
 
 allprojects {
     group = "cz.insuit"
