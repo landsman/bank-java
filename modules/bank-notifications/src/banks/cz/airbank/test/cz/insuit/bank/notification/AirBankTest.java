@@ -22,9 +22,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * The fixtures are three real Air Bank e-mails from 2026-11-10, a personal account, with the accounts, names, balance,
- * transaction codes and recipient replaced and the transport headers and DKIM signature removed. Everything else,
- * CRLF line ends and the U+FEFF after the outgoing transaction code included, is byte for byte what the bank sent.
+ * The fixtures are real Air Bank e-mails of a personal account, three payments from 2026-11-10 and a daily balance from
+ * 2026-11-23, with the accounts, names, balance, transaction codes and recipient replaced and the transport headers and
+ * DKIM signature removed. Everything else, CRLF line ends and the U+FEFF after the outgoing transaction code included,
+ * is byte for byte what the bank sent.
  */
 class AirBankTest {
 
@@ -114,6 +115,14 @@ class AirBankTest {
         assertFalse(logged.contains("9876543211"), logged);
         assertFalse(logged.contains("Novák"), logged);
         assertFalse(logged.contains("512.3"), logged);
+    }
+
+    @Test
+    void refusesTheDailyBalanceAsAFormatThatNamesNoPayment() throws IOException {
+        Unparsed refused =
+                assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(fixture("daily-balance.eml")));
+
+        assertEquals(Unparsed.Reason.UNSUPPORTED_FORMAT, refused.reason());
     }
 
     @Test

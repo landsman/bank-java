@@ -24,7 +24,7 @@ Finance) and payment institutions that are not banks (Banking Circle, Comgate, T
 
 | Bank | State | Reads | Leaves out | Details |
 |---|---|---|---|---|
-| Air Bank | verified | transfers in and out, EUR accounts; symbols, message, balance; thousands as public samples write them | a real e-mail of 1 000 or more ([#5](https://github.com/landsman/bank-java/issues/5)), cards, direct debits | [airbank](cz/airbank/README.md) |
+| Air Bank | verified | transfers in and out, EUR accounts; symbols, message, balance; thousands as public samples write them | a real e-mail of 1 000 or more ([#5](https://github.com/landsman/bank-java/issues/5)), cards, direct debits; its daily balance is refused | [airbank](cz/airbank/README.md) |
 | Fio banka | verified | transfers in and out, card payments, direct debits; symbols, message, balance; thousands; English, from public samples ([#11](https://github.com/landsman/bank-java/issues/11)) | other currencies ([#13](https://github.com/landsman/bank-java/issues/13)); its short format is refused | [fio](cz/fio/README.md) |
 | MONETA | samples only | incoming and outgoing; counter-account, symbol from the description | own account (masked), transaction id, balance; payments under 100 Kč are never sent | [moneta](cz/moneta/README.md) |
 | Creditas | samples only | incoming and outgoing; counter-account, symbol, balance | transaction id, name, message; card holds refused | [creditas](cz/creditas/README.md) |

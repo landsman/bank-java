@@ -83,3 +83,21 @@ Kód transakce: <12 digits><U+FEFF>
 
 A business account's template (myinvoice's samples show the same one); 1 000 CZK and more in a real e-mail; an overdraft; a card payment; an instant against an ordinary transfer; anything below
 1 CZK. Each needs one real e-mail.
+
+## The daily balance
+
+A second e-mail, once a day just after midnight, from the same sender and signed with the same key (`d=airbank.cz;
+s=ab; h=Date:To:From:Subject`), seen on 2026-11-23. Subject `Váš dostupný zůstatek na účtu <nickname>`, footer
+`333/22/01`. It names no payment, so `read()` refuses it as `Unparsed` with `reason()` `UNSUPPORTED_FORMAT`; the
+fixture is `daily-balance.eml`.
+
+```text
+Dobrý den,
+
+dostupný zůstatek ke dni 22.11.2026 v 23:59 na účtu s názvem <nickname>, číslo <account>/3030 je <balance> CZK.
+
+Pokud Vás zajímá cokoliv k našim službám, zeptejte se naší virtuální asistentky Anety …
+```
+
+It could check that no payment e-mail went missing: the last payment's balance plus every payment since has to make
+the day's balance. Reading it needs a result other than `Transaction`, so it waits for a caller who wants that.
