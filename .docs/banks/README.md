@@ -1,9 +1,8 @@
 # Banks
 
 Which banks the library reads, and what it reads from each. Every bank has a page of its own with the template, the
-setup and what has not been seen yet, in a folder per country: `cz/<bank>/`, and `sk/<bank>/` once a Slovak bank is
-read; another country is another folder. This page only says where each one stands, and changes with every bank's pull
-request.
+setup and what has not been seen yet, in a folder per country: `cz/<bank>/` and `sk/<bank>/`; another country is
+another folder. This page only says where each one stands, and changes with every bank's pull request.
 
 A bank is in one of three states:
 
@@ -12,6 +11,13 @@ A bank is in one of three states:
   MIT), not a real e-mail, and no key is pinned. `read()` refuses every e-mail from it as `Unverified`, naming the key
   DNS gave, until a real e-mail confirms the template and that key.
 - **Not yet**: no parser.
+
+The tables list every bank in the central bank's register of payment codes: [ČNB](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/)
+and [NBS](https://nbs.sk/en/payments/general-information/directories-and-registers/directory-identification-codes-domestic-payment-system-in-sr/),
+read on 2026-11-24. Left out are those that hold no account a payment arrives on: the central banks, building societies
+(stavební spořitelny), development and export banks (Národní rozvojová banka, Česká exportní banka, SZRB, EXIMBANKA SR),
+ČSOB Hypoteční banka, Štátna pokladnica, Sberbank CZ in liquidation, consumer lenders (COFIDIS, BNP Paribas Personal
+Finance) and payment institutions that are not banks (Banking Circle, Comgate, Trust Pay and the like).
 
 ## Czechia
 
@@ -28,6 +34,26 @@ A bank is in one of three states:
 | Česká spořitelna | not yet | | | [#15](https://github.com/landsman/bank-java/issues/15) |
 | Citfin | not yet | | | [#21](https://github.com/landsman/bank-java/issues/21) |
 | Partners Banka | not yet | | sends no e-mail at all | [#25](https://github.com/landsman/bank-java/issues/25) |
+| mBank | not yet | | | |
+| J&T BANKA | not yet | | | |
+| PPF banka | not yet | | | |
+| TRINITY BANK | not yet | | | |
+| ING Bank | not yet | | | |
+| PKO BP | not yet | | | |
+| Citibank Europe | not yet | | | |
+| Deutsche Bank | not yet | | | |
+| COMMERZBANK | not yet | | | |
+| BNP Paribas | not yet | | | |
+| HSBC Continental Europe | not yet | | | |
+| Všeobecná úverová banka, pobočka Praha | not yet | | | |
+| Oberbank | not yet | | | |
+| Volksbank Raiffeisenbank Nordoberpfalz, pobočka Cheb | not yet | | | |
+| Bank of China (CEE) | not yet | | | |
+| Bank of Communications | not yet | | | |
+| Industrial and Commercial Bank of China | not yet | | | |
+| Multitude Bank | not yet | | | |
+| Artesa, spořitelní družstvo | not yet | | | |
+| Peněžní dům, spořitelní družstvo | not yet | | | |
 
 ## Slovakia
 
@@ -37,7 +63,22 @@ A bank is in one of three states:
 | ČSOB | samples only | incoming SEPA credits; IBANs, name, symbols from the payer's reference, message | outgoing payments, transaction id; the 2019 sample was not DKIM-signed and `csob.sk` has no DNSSEC | [csob](sk/csob/README.md) |
 | Slovenská sporiteľňa | not yet | | | [#23](https://github.com/landsman/bank-java/issues/23) |
 | Tatra banka | samples only | credits and debits; transaction id and direction from the signed subject, IBAN, name, symbols from the payer's reference, balance | counter-account, type; its 2019 key is published but not pinned | [tatra](sk/tatra/README.md) |
+| Všeobecná úverová banka (VÚB) | not yet | | | |
+| 365.bank | not yet | | | |
+| Prima banka | not yet | | | |
+| UniCredit Bank, pobočka | not yet | | | |
+| mBank, pobočka | not yet | | | |
+| J&T BANKA, pobočka | not yet | | | |
+| Komerční banka, pobočka | not yet | | | |
+| Privatbanka | not yet | | | |
+| ING Bank, pobočka | not yet | | | |
+| Citibank Europe, pobočka | not yet | | | |
+| Commerzbank, pobočka | not yet | | | |
+| Oberbank, pobočka | not yet | | | |
+| BKS Bank, pobočka | not yet | | | |
+| PKO BP, pobočka | not yet | | | |
+| KDB Bank Europe, pobočka | not yet | | | |
 
 What a missing transaction id means for deduplication, and a masked account for knowing whose payment it is:
-[using the library](../usage.md#two-checks-stay-with-you). A bank that is not yet read has an issue collecting what is
-known and which samples are needed; an e-mail from it is `Unparsed` with `reason()` `NOT_A_BANK_EMAIL`.
+[using the library](../usage.md#two-checks-stay-with-you). A bank that is not yet read gets an issue collecting what is
+known and which samples are needed once someone asks for it; an e-mail from it is `Unparsed` with `reason()` `NOT_A_BANK_EMAIL`.
