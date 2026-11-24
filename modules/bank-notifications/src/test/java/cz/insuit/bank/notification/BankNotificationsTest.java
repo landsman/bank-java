@@ -1,8 +1,10 @@
 package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import cz.insuit.bank.notification.BankNotificationException.TemporaryFailure;
 import cz.insuit.bank.notification.BankNotificationException.Unparsed;
@@ -33,6 +35,13 @@ class BankNotificationsTest {
         Transaction transaction = notifications().read(signed("incoming.eml"));
 
         assertEquals("100000000001", transaction.transactionId());
+    }
+
+    @Test
+    void pinsOnlyTheBanksReadFromRealEmails() {
+        // An empty set would make the verifier refuse every key of that bank; leaving it out trusts DNSSEC instead.
+        assertTrue(BankNotifications.pinnedKeys().containsKey("airbank.cz"));
+        assertFalse(BankNotifications.pinnedKeys().containsKey("moneta.cz"));
     }
 
     @Test

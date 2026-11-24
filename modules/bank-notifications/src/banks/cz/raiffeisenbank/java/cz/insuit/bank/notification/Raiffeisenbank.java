@@ -20,8 +20,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Read from public samples, not from a real e-mail yet</b>: the template follows the sanitised bodies in
  * <a href="https://github.com/radekhulan/myinvoice">radekhulan/myinvoice</a> (MIT), its Raiffeisenbank parser's test,
- * which are text a mail library made of the HTML. No key is pinned, so {@link BankNotifications#withDns()} refuses
- * every Raiffeisenbank e-mail as unverified until a real one confirms the template, its HTML and the key.
+ * which are text a mail library made of the HTML. No key is pinned: {@link BankNotifications#withDns()} accepts any
+ * key DNSSEC proves {@code rb.cz} published.
  *
  * <p>The direction is stated twice, in the opening sentence and in the amount's sign; both have to agree. No
  * transaction id. An account is followed by its holder's name with nothing between ({@code 123456789/5500Firma}).

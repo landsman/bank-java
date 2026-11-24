@@ -2,8 +2,8 @@
 
 **Not seen as a real e-mail yet (2026-11-10).** The parser follows the sanitised samples in
 [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/MonetaBankEmailNoticeParserTest.php)
-(MIT), whose MONETA parser real users run. No key is pinned, so `withDns()` refuses every MONETA e-mail as `Unverified`,
-with the fingerprint of the key DNS gave in the message. The first real e-mail confirms the template and that key;
+(MIT), whose MONETA parser real users run. No key is pinned: `withDns()` accepts any key DNSSEC proves `moneta.cz`
+published. The first real e-mail confirms the template and pins its key;
 see [#18](https://github.com/landsman/bank-java/issues/18).
 
 ## What it carries, and what it does not

@@ -18,8 +18,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Read from public samples, not from a real e-mail yet</b>: the template follows the sanitised bodies in
  * <a href="https://github.com/radekhulan/myinvoice">radekhulan/myinvoice</a> (MIT), its MONETA parser's test. No
- * key is pinned, so {@link BankNotifications#withDns()} refuses every MONETA e-mail as unverified, naming the key DNS
- * gave, until a real one confirms the template and the key.
+ * key is pinned: {@link BankNotifications#withDns()} accepts any key DNSSEC proves {@code moneta.cz} published.
  *
  * <p>What the e-mail does not carry, and the transaction leaves out: the receiving account, which MONETA masks
  * ({@code 238***891}), so {@link Transaction#account()} is {@code null}; a transaction id, so

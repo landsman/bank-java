@@ -3,8 +3,7 @@
 **Not seen as a real e-mail yet (2026-11-10).** The parser follows the sanitised samples in
 [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/RaiffeisenbankEmailNoticeParserTest.php)
 (MIT). Those are text a mail library made of the HTML, and at least partly typed: their accounts fail the modulo 11
-check. No key is pinned, so `withDns()` refuses every Raiffeisenbank e-mail as `Unverified`, naming the key DNS gave;
-see [#17](https://github.com/landsman/bank-java/issues/17).
+check. No key is pinned: `withDns()` accepts any key DNSSEC proves `rb.cz` published; see [#17](https://github.com/landsman/bank-java/issues/17).
 
 ## What it carries
 

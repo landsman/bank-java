@@ -5,8 +5,7 @@
 [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser/tree/master/tests/fixtures/tatrabanka)'s fixtures
 (2015), both MIT. That e-mail was signed with selector `mta`, and `mta._domainkey.tatrabanka.sk` is still published:
 RSA 2048, DNSSEC-secure, fingerprint `sOUiSq9+xyeXpczY9SzI+HLjzU4jZyfQUXGvxjtXmVc=` (2026-11-10, through 1.1.1.1 and
-8.8.8.8). It is not pinned until a real e-mail confirms the template and that Tatra still signs with it, so `withDns()`
-refuses every Tatra banka e-mail as `Unverified`. See [#24](https://github.com/landsman/bank-java/issues/24).
+8.8.8.8). It is not pinned: `withDns()` accepts any key DNSSEC proves `tatrabanka.sk` published, this one included. See [#24](https://github.com/landsman/bank-java/issues/24).
 
 ## What it carries
 

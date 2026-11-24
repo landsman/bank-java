@@ -21,8 +21,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Read from public samples, not from a real e-mail yet</b>: the template follows the fixtures of
  * <a href="https://github.com/tomaj/bank-mails-parser">tomaj/bank-mails-parser</a> (MIT, 2018 to 2022). ČSOB signed as
- * {@code d=csob.cz} with selector {@code alpha} in 2020, a key it has since replaced, so no key is pinned and
- * {@link BankNotifications#withDns()} refuses every ČSOB e-mail as unverified until a real one shows the current one.
+ * {@code d=csob.cz} with selector {@code alpha} in 2020, a key it has since replaced, so no key is pinned:
+ * {@link BankNotifications#withDns()} accepts any key DNSSEC proves {@code csob.cz} published.
  *
  * <p><b>The balances chain.</b> With several blocks, each balance has to be the one before plus the block's amount, and
  * every block needs its balance: a block forged in a payer's message cannot keep the chain, while without balances it

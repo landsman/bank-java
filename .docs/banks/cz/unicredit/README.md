@@ -2,10 +2,10 @@
 
 **Not seen as a real e-mail yet (2026-11-10).** The parser follows the one sanitised sample in
 [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/UnicreditBankEmailNoticeParserTest.php)
-(MIT), whose accounts fail the modulo 11 check. No key is pinned, so `withDns()` refuses every UniCredit e-mail as
-`Unverified`; see [#19](https://github.com/landsman/bank-java/issues/19).
+(MIT), whose accounts fail the modulo 11 check. No key is pinned: `withDns()` accepts any key DNSSEC proves
+`unicreditgroup.cz` published; see [#19](https://github.com/landsman/bank-java/issues/19).
 
-**Before a key is pinned, a real outgoing e-mail has to show how it writes its direction.** The parser takes the
+**A real outgoing e-mail still has to show how it writes its direction.** The parser takes the
 amount's sign, as myinvoice does: none is money in, a minus is money out. The sample is incoming. If an outgoing
 payment came without a minus, a refund to a customer, with the invoice's amount and symbol, would pay that invoice
 again.
