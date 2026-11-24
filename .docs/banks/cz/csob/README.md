@@ -4,7 +4,7 @@
 [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser/tree/master/tests/fixtures/csob-cz) (MIT, 43 of
 them, 2018 to 2022), whose accounts fail the modulo 11 check. ČSOB signed as `d=csob.cz; s=alpha` in a 2020 e-mail
 ([remp2020's csob.eml](https://github.com/remp2020/crm-payments-module/blob/master/docs/csob.eml)); that key is gone, so
-none is pinned and `withDns()` refuses every ČSOB e-mail as `Unverified`. See
+none is pinned: `withDns()` accepts any key DNSSEC proves `csob.cz` published. See
 [#16](https://github.com/landsman/bank-java/issues/16).
 
 ČSOB's own internet banking sends another template, **"Moje info - Avízo"**, read from

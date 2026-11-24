@@ -19,7 +19,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Read from one public sample, not from a real e-mail yet</b>: the template follows the sanitised body in
  * <a href="https://github.com/radekhulan/myinvoice">radekhulan/myinvoice</a> (MIT), its UniCredit parser's test. No
- * key is pinned, so {@link BankNotifications#withDns()} refuses every UniCredit e-mail as unverified.
+ * key is pinned: {@link BankNotifications#withDns()} accepts any key DNSSEC proves {@code unicreditgroup.cz} published.
  *
  * <p><b>The direction is the amount's sign</b>, as in that parser: none is money in, a minus is money out. The sample
  * is an incoming payment, so whether an outgoing one really carries a minus is not known. A refund to a customer has

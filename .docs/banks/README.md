@@ -8,8 +8,9 @@ A bank is in one of three states:
 
 - **Verified**: read from real e-mails, its DKIM key pinned and checked daily. `read()` returns a `Transaction`.
 - **Samples only**: the template follows public code ([radekhulan/myinvoice](https://github.com/radekhulan/myinvoice),
-  MIT), not a real e-mail, and no key is pinned. `read()` refuses every e-mail from it as `Unverified`, naming the key
-  DNS gave, until a real e-mail confirms the template and that key.
+  [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser), MIT), not a real e-mail, and no key is pinned.
+  `read()` returns a `Transaction` once the signature verifies with any key DNSSEC proves the bank's domain published;
+  ČSOB SK, whose domain has no DNSSEC, stays `Unverified`. A real e-mail moves it to verified and pins its key.
 - **Not yet**: no parser.
 
 The tables list every bank in the central bank's register of payment codes: [ČNB](https://www.cnb.cz/cs/platebni-styk/ucty-kody-bank/)

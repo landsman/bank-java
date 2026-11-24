@@ -21,8 +21,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <p><b>Read from public samples, not from a real e-mail yet</b>: the template follows the sanitised bodies in
  * <a href="https://github.com/radekhulan/myinvoice">radekhulan/myinvoice</a> (MIT), its Creditas parser's test. No
- * key is pinned, so {@link BankNotifications#withDns()} refuses every Creditas e-mail as unverified until a real one
- * confirms the template and the key.
+ * key is pinned: {@link BankNotifications#withDns()} accepts any key DNSSEC proves {@code creditas.cz} published.
  *
  * <p>The sentence and the list state the account and the amount twice; both have to agree. A card hold
  * ({@code Blokace}) is not a booked payment and is refused: read as one, the payment would count twice once booked.

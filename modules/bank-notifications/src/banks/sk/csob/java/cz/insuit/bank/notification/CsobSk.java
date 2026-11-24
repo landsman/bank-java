@@ -20,8 +20,8 @@ import org.jspecify.annotations.Nullable;
  * <a href="https://github.com/tomaj/bank-mails-parser">tomaj/bank-mails-parser</a>'s fixtures and
  * <a href="https://github.com/remp2020/crm-payments-module">remp2020/crm-payments-module</a>'s raw e-mail (both MIT, 2019).
  * That e-mail carries no DKIM signature of the bank, and {@code csob.sk} is not DNSSEC-signed (2026-11-10), so no key is
- * pinned and {@link BankNotifications#withDns()} refuses every ČSOB SK e-mail as unverified; a real one has to show
- * whether ČSOB SK signs at all.
+ * pinned, and {@link BankNotifications#withDns()} still refuses every ČSOB SK e-mail as unverified: without DNSSEC,
+ * nothing proves a key in DNS is the bank's. A real one has to show whether ČSOB SK signs at all.
  *
  * <p>Only incoming payments are read: no outgoing one has been seen, so an amount with a minus is refused. The symbols
  * come from the payer's reference ({@code /VS…/SS…/KS…}), text the payer wrote. The template prints that line every time,

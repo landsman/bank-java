@@ -2,8 +2,8 @@
 
 **Not seen as a real e-mail yet (2026-11-10).** The parser follows the sanitised samples in
 [radekhulan/myinvoice](https://github.com/radekhulan/myinvoice/blob/master/api/tests/Unit/Bank/CreditasBankEmailNoticeParserTest.php)
-(MIT). Those samples were at least partly typed: their counter-account fails the modulo 11 check. No key is pinned, so
-`withDns()` refuses every Creditas e-mail as `Unverified`, naming the key DNS gave; see
+(MIT). Those samples were at least partly typed: their counter-account fails the modulo 11 check. No key is pinned:
+`withDns()` accepts any key DNSSEC proves `creditas.cz` published; see
 [#20](https://github.com/landsman/bank-java/issues/20).
 
 ## What it carries

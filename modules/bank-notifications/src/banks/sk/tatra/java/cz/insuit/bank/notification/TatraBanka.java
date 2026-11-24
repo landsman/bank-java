@@ -23,8 +23,8 @@ import org.jspecify.annotations.Nullable;
  * <a href="https://github.com/tomaj/bank-mails-parser">tomaj/bank-mails-parser</a>'s fixtures (2015), both MIT. That
  * e-mail was signed with selector {@code mta}, and {@code mta._domainkey.tatrabanka.sk} is still published, RSA 2048,
  * DNSSEC-secure, fingerprint {@code sOUiSq9+xyeXpczY9SzI+HLjzU4jZyfQUXGvxjtXmVc=} (2026-11-10, through 1.1.1.1 and
- * 8.8.8.8). It is not pinned until a real e-mail confirms the template and that Tatra still signs with it, so
- * {@link BankNotifications#withDns()} refuses every Tatra banka e-mail as unverified.
+ * 8.8.8.8). It is not pinned: {@link BankNotifications#withDns()} accepts any key DNSSEC proves
+ * {@code tatrabanka.sk} published.
  *
  * <p>The signed subject carries the transaction id and the direction ({@code Kredit} / {@code Debet}); the sentence
  * states the direction again, and the two have to agree. The symbols come from the payer's reference

@@ -51,7 +51,8 @@ public final class BankNotifications {
 
     /**
      * The one to use. Looks each bank's DKIM key up in DNS, accepts it only when the answer is DNSSEC-secure, validated
-     * here from the root's trust anchors, and only when it is one of the keys this release pins for that bank.
+     * here from the root's trust anchors, and, for a bank this release pins keys for, only when it is one of them. A bank
+     * read from public samples pins none, so any key DNSSEC proves its domain published is accepted.
      */
     public static BankNotifications withDns() {
         DkimVerifier dkim = DkimVerifier.withDns();
@@ -63,10 +64,13 @@ public final class BankNotifications {
 
     /**
      * The DKIM keys {@link #withDns()} accepts, per bank domain, as {@link DkimVerifier#fingerprint} gives them: what this
-     * release trusts, for an audit or a log line at start-up.
+     * release trusts, for an audit or a log line at start-up. A bank missing here pins nothing: any DNSSEC-secure key of
+     * its domain is accepted.
      */
     public static Map<String, Set<String>> pinnedKeys() {
-        return BANKS.stream().collect(Collectors.toUnmodifiableMap(Bank::domain, Bank::keyFingerprints));
+        return BANKS.stream()
+                .filter(bank -> !bank.keyFingerprints().isEmpty())
+                .collect(Collectors.toUnmodifiableMap(Bank::domain, Bank::keyFingerprints));
     }
 
     /**
