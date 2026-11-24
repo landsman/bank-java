@@ -61,6 +61,9 @@ final class FioCz implements Bank {
                     "Fio's short notification carries no transaction id: choose \"Fio banka - příjem na účtu\" under"
                             + " Informace v oznámení in the notification's settings");
         }
+        if (NOT_A_PAYMENT_SUBJECTS.contains(subject)) {
+            throw new Unparsed(Unparsed.Reason.NOT_A_PAYMENT, "Fio's notice, not a payment: " + subject);
+        }
         Template template = null;
         Direction stated = null;
         for (Template candidate : List.of(CZECH, ENGLISH)) {
@@ -277,6 +280,9 @@ final class FioCz implements Bank {
             // Month first: "10/25/2026 at 10:37".
             DateTimeFormatter.ofPattern("M/d/uuuu H:mm"));
 
+    // From noreply@fio.cz, signed with the same key: a legal notice of new terms, sent to every client whenever they
+    // change, and not one the account holder can turn off.
+    private static final Set<String> NOT_A_PAYMENT_SUBJECTS = Set.of("Oznámení o vyhlášení nové dokumentace");
     private static final Set<String> SHORT_FORMAT_SUBJECTS =
             Set.of("Fio banka - prijem na konte", "Fio banka - vydaj na konte");
     private static final Pattern COUNTER = Pattern.compile("(\\S+/\\d{4})(?: \\((.*)\\))?");

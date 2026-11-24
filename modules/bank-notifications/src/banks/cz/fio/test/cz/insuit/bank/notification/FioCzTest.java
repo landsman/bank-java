@@ -120,6 +120,13 @@ class FioCzTest {
     }
 
     @Test
+    void refusesANoticeOfNewTermsAsNotAPayment() {
+        Unparsed refused = assertThrows(Unparsed.class, () -> read("documentation-notice.eml"));
+
+        assertEquals(Unparsed.Reason.NOT_A_PAYMENT, refused.reason());
+    }
+
+    @Test
     void refusesASubjectItDoesNotKnowAsNotRead() throws IOException {
         String changed = text("incoming-instant.eml")
                 .replace(
