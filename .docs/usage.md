@@ -128,8 +128,8 @@ amount, a variable symbol and a date.
 
 ## Keys
 
-`withDns()` needs nothing from you: it validates the bank's key through DNSSEC and accepts only the keys this release
-pins, see [whose key it is](verification.md#whose-key-it-is). The machine's resolver only has to pass DNSSEC records
+`withDns()` needs nothing from you: it validates the bank's key through DNSSEC and, for a bank read from real e-mails,
+accepts only the keys this release pins, see [whose key it is](verification.md#whose-key-it-is). The machine's resolver only has to pass DNSSEC records
 through, as nearly every one does; one that strips them makes every e-mail `Unverified` with the message
 `... is not DNSSEC-secure`. `BankNotifications.pinnedKeys()` lists the pinned keys, for an audit or a line at start-up.
 

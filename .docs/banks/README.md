@@ -65,13 +65,12 @@ Finance) and payment institutions that are not banks (Banking Circle, Comgate, T
 | Slovenská sporiteľňa | not yet | | | [#23](https://github.com/landsman/bank-java/issues/23) |
 | Tatra banka | samples only | credits and debits; transaction id and direction from the signed subject, IBAN, name, symbols from the payer's reference, balance | counter-account, type; its 2019 key is published but not pinned | [tatra](sk/tatra/README.md) |
 | Všeobecná úverová banka (VÚB) | not yet | | | |
-| 365.bank | not yet | | | |
 | Prima banka | not yet | | | |
 | UniCredit Bank, pobočka | not yet | | | |
 | mBank, pobočka | not yet | | | |
 | J&T BANKA, pobočka | not yet | | | |
 | Komerční banka, pobočka | not yet | | | |
-| Privatbanka | not yet | | | |
+| Penta Bank | not yet | | | |
 | ING Bank, pobočka | not yet | | | |
 | Citibank Europe, pobočka | not yet | | | |
 | Commerzbank, pobočka | not yet | | | |

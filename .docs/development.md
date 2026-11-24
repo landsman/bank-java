@@ -62,7 +62,9 @@ folder is not a package.
 5. **Pin its key**: the fingerprint `DkimVerifier.fingerprint` gives for the key in DNS, read through two resolvers, in
    the bank's `KEY_FINGERPRINTS` (returned by `keyFingerprints()`, which `pinnedKeys()` lists), and a check in
    `KeyCheckLiveTest`.
-   Its domain has to be DNSSEC-signed, or `withDns()` refuses every e-mail from it.
+   Its domain has to be DNSSEC-signed, or `withDns()` refuses every e-mail from it. A bank written from public samples,
+   with no real e-mail to show its selector, leaves `keyFingerprints()` empty: `withDns()` then accepts any key DNSSEC
+   proves its domain published.
 6. **Document it** in [setup](setup.md), a folder like [banks/cz/airbank](banks/cz/airbank/README.md), and its row in [banks](banks/README.md).
 
 The real e-mail stays out of the repository: an anonymised message no longer matches its signature, so the tests sign

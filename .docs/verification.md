@@ -18,7 +18,8 @@ flowchart TB
         sender -- "yes" --> dns{"bank's key from DNS,<br/>DNSSEC-validated<br/>from the root"}
         dns -- "DNS down" --> temporary(["TemporaryFailure"])
         dns -- "forged or unsigned" --> unverified(["Unverified"])
-        dns -- "secure" --> pin{"key pinned<br/>in this release?"}
+        dns -- "secure" --> pin{"one of the keys<br/>this release pins<br/>for the bank?"}
+        pin -- "pins none" --> sig
         pin -- "no" --> unverified
         pin -- "yes" --> sig{"signature valid,<br/>d=airbank.cz,<br/>whole body?"}
         sig -- "no" --> unverified
@@ -39,8 +40,8 @@ A signature counts only when all of these hold, besides [whose key it is](#whose
 
 - it verifies over the **raw bytes**, recomputed here; an `Authentication-Results` header that came with the message
   is never read, because whoever sent the message could have written it;
-- its `d=` is the domain of the bank the sender names (`airbank.cz` for Air Bank, `fio.cz` for Fio); a signature of any
-  other domain is not even looked up;
+- its `d=` is the domain of the bank the sender names (`airbank.cz` for Air Bank, `fio.cz` for Fio, every bank's in
+  [banks](banks/README.md)); a signature of any other domain is not even looked up;
 - the headers reading depends on (`Message-ID`, `Subject`, `Content-Type`, `Content-Transfer-Encoding`) come once:
   DKIM signs the last copy of a header and the mail library reads the first, so a copy added above a signed one is
   `Unverified`;
@@ -67,7 +68,8 @@ the bank's, and `BankNotifications.withDns()` does both without being asked:
   `BankNotifications.pinnedKeys()` lists them. A bank read from public samples pins nothing, so DNSSEC alone decides:
   any key its domain publishes is accepted, a newsletter sender's included if it signs as the bank.
 
-The price of pinning: **when a bank rotates its key, a release that does not know the new one throws `Unverified` for
+Only Air Bank and Fio pin keys today; the banks read from public samples pin none until a real e-mail shows their
+selector, see [banks](banks/README.md). The price of pinning: **when a bank rotates its key, a release that does not know the new one throws `Unverified` for
 that bank's e-mails** until you upgrade. Nothing is lost, the e-mails are still there to read again; `.github/workflows/keys.yml`
 compares the pins with DNS every day and opens an issue the day a bank publishes another key, so a release follows.
 `make check-keys` runs the same check by hand.
