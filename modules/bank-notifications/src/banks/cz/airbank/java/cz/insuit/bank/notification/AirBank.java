@@ -62,6 +62,12 @@ final class AirBank implements Bank {
         // Past the message only the transaction code follows.
         Map<String, String> fields = lines.labelled(LABELLED, MESSAGES, Set.of(TRANSACTION_ID));
 
+        if (summary == null && lines.single(DAILY_BALANCE, "daily balance") != null) {
+            throw new Unparsed(
+                    Unparsed.Reason.UNSUPPORTED_FORMAT,
+                    "Air Bank's daily balance names no payment: leave only the balance-change e-mails on under"
+                            + " Účty a karty → Možnosti → Info o dění na účtu");
+        }
         if (summary == null) throw new Unparsed("no balance-change sentence");
         if (incoming == null && outgoing == null) throw new Unparsed("no counter-party line");
         if (incoming != null && outgoing != null) throw new Unparsed("two counter-party lines");
@@ -129,6 +135,9 @@ final class AirBank implements Bank {
     // The account nickname is the client's own text and may contain "číslo", hence the greedy ".*" before it.
     private static final Pattern SUMMARY = Pattern.compile(
             "zůstatek na účtu .* číslo (\\S+/3030) se (zvýšil|snížil) o částku (\\d[\\d ]*,\\d{2} [A-Z]{3})\\. .*");
+    // "Váš dostupný zůstatek na účtu <nickname>", sent once a day: a balance, no payment.
+    private static final Pattern DAILY_BALANCE =
+            Pattern.compile("dostupný zůstatek ke dni .* na účtu s názvem .* číslo \\S+/3030 je .*");
     private static final Pattern INCOMING = Pattern.compile("Příchozí úhrada z účtu (.*) číslo (\\S+/\\d{4})");
     // The recipient's name, when the account holder saved one, as in myinvoice's sample; without one, as in a real
     // e-mail.
