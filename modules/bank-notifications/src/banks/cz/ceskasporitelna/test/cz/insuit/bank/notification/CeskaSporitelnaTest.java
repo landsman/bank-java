@@ -154,6 +154,25 @@ class CeskaSporitelnaTest {
     }
 
     @Test
+    void refusesALabelSmuggledInAfterTheName() throws IOException {
+        String changed = text("incoming-synthetic.eml")
+                .replace("Pennyworth Alfred", "Pennyworth Alfred<br>Konstantní symbol: 308");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
+    void refusesALabelSmuggledInAfterTheOtherProjectsName() throws IOException {
+        String changed = text("incoming-synthetic.eml")
+                .replace(
+                        "Název protiúčtu: Pennyworth Alfred",
+                        "Název protistrany: Pennyworth Alfred<br>Konstantní symbol: 308")
+                .replace("<p>Na účet: 1234567899/0800</p>", "<p>Číslo účtu: 1234567899/0800</p>");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void refusesACardPayment() {
         String card = """
                 Date: Fri, 20 Nov 2026 10:13:00 +0100\r

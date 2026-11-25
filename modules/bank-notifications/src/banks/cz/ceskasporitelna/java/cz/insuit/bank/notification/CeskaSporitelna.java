@@ -55,6 +55,11 @@ final class CeskaSporitelna implements Bank {
             throw new Unparsed("'" + sentence.group(1) + "' with '" + sentence.group(3) + "'");
         }
 
+        // The name is the payer's and comes before the symbols, so it cannot join the free text: the line after it is
+        // pinned instead, and a line break smuggled into it cannot add a label. The other project's order is not
+        // known; its pin mirrors Joey7500's and refuses rather than misreads if it is wrong.
+        lines.requireNext(NAME_LINE, TO + ":");
+        lines.requireNext(OTHER_NAME_LINE, ACCOUNT + ":");
         Map<String, String> fields = lines.labelled(LABELLED, Set.of(MESSAGE), Set.of());
         String stated = fields.get(DIRECTION);
         if (stated == null) throw new Unparsed("no Směr platby");
@@ -142,6 +147,8 @@ final class CeskaSporitelna implements Bank {
     private static final String COUNTER_ACCOUNT = "Číslo účtu protistrany";
     private static final String NAME = "Název protiúčtu";
     private static final String OTHER_NAME = "Název protistrany";
+    private static final Pattern NAME_LINE = Pattern.compile(NAME + ":.*", Pattern.DOTALL);
+    private static final Pattern OTHER_NAME_LINE = Pattern.compile(OTHER_NAME + ":.*", Pattern.DOTALL);
     private static final String AMOUNT = "Částka v měně účtu";
     private static final String VARIABLE_SYMBOL = "Variabilní symbol";
     private static final String CONSTANT_SYMBOL = "Konstantní symbol";
