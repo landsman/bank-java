@@ -75,6 +75,16 @@ class CeskaSporitelnaTest {
     }
 
     @Test
+    void readsANoBreakSpaceBeforeTheCurrency() throws IOException {
+        String changed = text("outgoing-synthetic.eml").replace(" Kč", "&nbsp;Kč");
+
+        Transaction read = BankNotifications.parseUnverified(bytes(changed));
+
+        assertEquals(czk("-1400.00"), read.amount());
+        assertEquals(czk("19880.40"), Objects.requireNonNull(read.balance()).available());
+    }
+
+    @Test
     void refusesASentenceSmerPlatbyDisagreesWith() throws IOException {
         String changed = text("incoming-synthetic.eml").replace("Směr platby: příchozí", "Směr platby: odchozí");
 

@@ -32,7 +32,7 @@ Zpráva pro příjemce: padel 3. 12.
   sentence's `na účet` / `z účtu` has to fit its verb.
 - **The account and the amount are stated twice too**: the sentence's against `Na účet` (incoming) or `Z účtu`
   (outgoing), and against `Částka v měně účtu`, when those lines are there.
-- **A space between thousands**, a no-break space in the HTML (`1&nbsp;400,00 Kč`).
+- **A space between thousands**, a no-break space in the HTML (`1&nbsp;400,00 Kč`); before `Kč` either is read.
 - **The balance** is read from `Na účtu zůstává k dispozici`, seen only on outgoing payments; it includes an overdraft,
   as the bank says. Worded otherwise, it is left out.
 - **No transaction id**: deduplicate on a signed `messageId()`.

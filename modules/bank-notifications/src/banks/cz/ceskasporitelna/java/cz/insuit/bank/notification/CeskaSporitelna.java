@@ -131,12 +131,12 @@ final class CeskaSporitelna implements Bank {
     // what a line break in the HTML leaves.
     private static final Pattern SENTENCE =
             Pattern.compile("(na účet|z účtu) ((?:\\d{1,6}-)?\\d{2,10}/\\d{4}) (?:právě )?(přišla|dorazila|odešla)"
-                    + " platba ve výši (\\S.*? Kč) ?\\.");
+                    + " platba ve výši (\\S.*?[ \\u00A0]Kč) ?\\.");
     private static final String BALANCE_START = "Na účtu zůstává k dispozici";
-    private static final Pattern BALANCE =
-            Pattern.compile(BALANCE_START + " (\\S.*? Kč)(?: \\(včetně kontokorentu \\S.*? Kč\\))?\\.");
-    // A space or, from the HTML, a no-break space between thousands: "6 500,00 Kč".
-    private static final Pattern MONEY = Pattern.compile("(\\d{1,3}(?:[ \\u00A0]\\d{3})*),(\\d{2}) Kč");
+    private static final Pattern BALANCE = Pattern.compile(
+            BALANCE_START + " (\\S.*?[ \\u00A0]Kč)(?: \\(včetně kontokorentu \\S.*?[ \\u00A0]Kč\\))?\\.");
+    // A space or, from the HTML, a no-break space between thousands and before the currency: "6 500,00 Kč".
+    private static final Pattern MONEY = Pattern.compile("(\\d{1,3}(?:[ \\u00A0]\\d{3})*),(\\d{2})[ \\u00A0]Kč");
     private static final Currency CZK = Currency.getInstance("CZK");
     private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("d. M. uuuu HH:mm");
     private static final ZoneId PRAGUE = ZoneId.of("Europe/Prague");
