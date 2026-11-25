@@ -2,7 +2,7 @@
 
 **Know the moment a customer pays you, without a bank API.**
 
-Czech banks can send an e-mail for every payment that moves on an account. This library turns that e-mail into a
+Czech and Slovak banks can send an e-mail for every payment that moves on an account. This library turns that e-mail into a
 payment your application can act on: who paid, how much, with which variable symbol. Match it to an invoice or an
 order and mark it paid, automatically, about a minute after the money lands.
 
@@ -11,7 +11,8 @@ order and mark it paid, automatically, about a minute after the money lands.
 - **A forged e-mail is never taken for a payment.** Only an e-mail the bank itself signed gets through; anything else
   is refused, with no setting to forget. See [how verification works](.docs/verification.md).
 - **Money in and money out.** Incoming payments to match, outgoing ones to see the account move.
-- **Air Bank and Fio banka in Czechia**, more banks to follow; [Fio in Slovakia](https://github.com/landsman/bank-java/issues/10) is next.
+- **Air Bank and Fio banka in Czechia** from real e-mails, six more Czech and Slovak banks from public samples; see
+  [which banks](#which-banks).
 
 ```mermaid
 flowchart TB

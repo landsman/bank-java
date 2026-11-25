@@ -1,8 +1,9 @@
 # bank-java
 
-> Java 21+ and Kotlin library that reads a Czech bank's payment notification e-mail into a `Transaction`, and hands
-> it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC and pinned in the
-> release. Air Bank and Fio banka in Czechia so far. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
+> Java 21+ and Kotlin library that reads a Czech or Slovak bank's payment notification e-mail into a `Transaction`,
+> and hands it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC. Air Bank
+> and Fio banka pin their key and are read from real e-mails; MONETA, Creditas, Raiffeisenbank, UniCredit, ČSOB and
+> Tatra banka are read from public samples, with any DNSSEC-secure key of their domain. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
 > GitHub Packages (group `cz.insuit`), not Maven Central. Pre-1.0: read records by accessor, never by record pattern.
 
 Setting it up in a project:
@@ -20,7 +21,8 @@ Mistakes to avoid:
   no longer matches its signature and is `Unverified` every time.
 - Store the raw bytes before reading them: `Unparsed` and `TemporaryFailure` can be read again later.
 - Branch on `Unparsed.reason()`, never on the message text: `UNSUPPORTED_FORMAT` is the one to show the account holder,
-  with `getMessage()` saying what to change in their banking.
+  with `getMessage()` saying what to change in their banking; `NOT_A_PAYMENT` (a bank's notice about no payment) is
+  dropped; keep a `default` branch, constants may be added.
 - Never act on `Unverified`: anyone can send an e-mail that looks like the bank's.
 - A valid signature does not prove the e-mail is about your account: compare `account()` with the one you expect.
 - Use `readAll()` where one e-mail may report several transactions (ČSOB); `read()` refuses such an e-mail.
