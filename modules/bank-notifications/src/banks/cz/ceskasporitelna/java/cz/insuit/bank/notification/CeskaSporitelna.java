@@ -79,8 +79,11 @@ final class CeskaSporitelna implements Bank {
             throw new Unparsed("Datum a čas platby not d. M. yyyy HH:mm: " + when);
         }
         String counter = firstOf(fields, direction == Direction.INCOMING ? FROM : TO, COUNTER_ACCOUNT);
-        Matcher balance = lines.single(BALANCE, "balance");
-        // A balance worded otherwise is left out; the payment still counts. It includes an overdraft, as the bank says.
+        // Only an outgoing payment has been seen with a balance, on the line right after the sentence; a balance line
+        // anywhere else is what a payer's line break in the message would make. Worded otherwise, it is left out; the
+        // payment still counts. It includes an overdraft, as the bank says.
+        Matcher balance = direction == Direction.OUTGOING ? lines.single(BALANCE, "balance") : null;
+        if (balance != null) lines.requireNext(SENTENCE, BALANCE_START);
         Money available = balance == null ? null : money(balance.group(1));
         try {
             return new Transaction(
@@ -122,8 +125,9 @@ final class CeskaSporitelna implements Bank {
     private static final Pattern SENTENCE =
             Pattern.compile("(na účet|z účtu) ((?:\\d{1,6}-)?\\d{2,10}/\\d{4}) (?:právě )?(přišla|dorazila|odešla)"
                     + " platba ve výši (\\S.*? Kč) ?\\.");
+    private static final String BALANCE_START = "Na účtu zůstává k dispozici";
     private static final Pattern BALANCE =
-            Pattern.compile("Na účtu zůstává k dispozici (\\S.*? Kč)(?: \\(včetně kontokorentu \\S.*? Kč\\))?\\.");
+            Pattern.compile(BALANCE_START + " (\\S.*? Kč)(?: \\(včetně kontokorentu \\S.*? Kč\\))?\\.");
     // A space or, from the HTML, a no-break space between thousands: "6 500,00 Kč".
     private static final Pattern MONEY = Pattern.compile("(\\d{1,3}(?:[ \\u00A0]\\d{3})*),(\\d{2}) Kč");
     private static final Currency CZK = Currency.getInstance("CZK");

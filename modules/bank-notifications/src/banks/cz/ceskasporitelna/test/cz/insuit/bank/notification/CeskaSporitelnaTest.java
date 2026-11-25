@@ -135,6 +135,25 @@ class CeskaSporitelnaTest {
     }
 
     @Test
+    void takesNoBalanceFromAPayersMessageOnAnIncomingPayment() throws IOException {
+        // Should the bank turn a line break in the message into <br>, the forged line is a line of its own.
+        String changed = text("incoming-synthetic.eml")
+                .replace("nájem listopad", "x<br>Na účtu zůstává k dispozici 9&nbsp;999&nbsp;999,00 Kč.");
+
+        assertNull(BankNotifications.parseUnverified(bytes(changed)).balance());
+    }
+
+    @Test
+    void refusesABalanceNotRightAfterTheSentence() throws IOException {
+        String changed = text("outgoing-synthetic.eml")
+                .replace(
+                        "<br>Na účtu zůstává k dispozici 19&nbsp;880,40 Kč (včetně kontokorentu 1&nbsp;000,00 Kč).", "")
+                .replace("padel 3. 12.", "x<br>Na účtu zůstává k dispozici 9&nbsp;999&nbsp;999,00 Kč.");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void refusesACardPayment() {
         String card = """
                 Date: Fri, 20 Nov 2026 10:13:00 +0100\r
