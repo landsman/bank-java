@@ -7,11 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.james.jdkim.DKIMSigner;
 import org.apache.james.jdkim.exceptions.FailException;
@@ -67,6 +71,20 @@ class DkimVerifierTest {
 
         assertInstanceOf(DkimResult.Failed.class, result);
         assertTrue(((DkimResult.Failed) result).reason().contains("first 10"), result.toString());
+    }
+
+    /**
+     * jDKIM 0.5 refuses a signature without {@code from} in {@code h=} ("From field not signed", in
+     * SignatureRecordImpl.validate), and its signer refuses to make one, so the test signs by hand. It pins the
+     * refusal against a jDKIM upgrade.
+     */
+    @Test
+    void failsWhenFromIsNotSigned() throws Exception {
+        KeyPair key = rsa(1024);
+
+        DkimResult result = verifierFor(key).verify(signedWithoutFrom(MESSAGE, key), "airbank.cz");
+
+        assertInstanceOf(DkimResult.Failed.class, result);
     }
 
     @Test
@@ -172,6 +190,36 @@ class DkimVerifierTest {
                 + extraTags + " bh=; b=;";
         String header = new DKIMSigner(template, key.getPrivate()).sign(new ByteArrayInputStream(bytes(message)));
         return bytes(header + "\r\n" + message);
+    }
+
+    /** A relaxed/relaxed rsa-sha256 signature over Date:To:Subject, written out by hand as RFC 6376 section 3.7 says. */
+    private static byte[] signedWithoutFrom(String message, KeyPair key) throws GeneralSecurityException {
+        String body = message.substring(message.indexOf("\r\n\r\n") + 4);
+        String relaxedBody =
+                body.replaceAll("[ \t]+\r\n", "\r\n").replaceAll("[ \t]+", " ").replaceAll("(\r\n)+$", "");
+        String bodyHash = Base64.getEncoder()
+                .encodeToString(MessageDigest.getInstance("SHA-256").digest(bytes(relaxedBody + "\r\n")));
+        String unsigned =
+                "v=1; a=rsa-sha256; c=relaxed/relaxed; d=airbank.cz; s=ab; h=Date:To:Subject; bh=" + bodyHash + "; b=";
+        StringBuilder data = new StringBuilder();
+        for (String name : List.of("Date", "To", "Subject")) {
+            String line = message.lines()
+                    .filter(l -> l.regionMatches(true, 0, name + ":", 0, name.length() + 1))
+                    .findFirst()
+                    .orElseThrow();
+            data.append(name.toLowerCase(Locale.ROOT))
+                    .append(':')
+                    .append(line.substring(name.length() + 1)
+                            .replaceAll("[ \t]+", " ")
+                            .strip())
+                    .append("\r\n");
+        }
+        data.append("dkim-signature:").append(unsigned);
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(key.getPrivate());
+        signature.update(bytes(data.toString()));
+        String b = Base64.getEncoder().encodeToString(signature.sign());
+        return bytes("DKIM-Signature: " + unsigned + b + "\r\n" + message);
     }
 
     private static String record(KeyPair key) {
