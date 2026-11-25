@@ -63,7 +63,8 @@ See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not ve
 
 ## UniCredit Bank
 
-See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: no real UniCredit e-mail has been read.
+See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Read since 0.1.3, from public samples: no real UniCredit e-mail has confirmed the template
+yet, so one that comes back `Unparsed` is worth a bug report with an anonymised copy.
 
 ## ČSOB
 
