@@ -20,6 +20,8 @@ import java.util.Set;
 import org.apache.james.jdkim.DKIMSigner;
 import org.apache.james.jdkim.exceptions.FailException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Signs an anonymised Air Bank notification with a key made for the test, so the verifier is exercised end to end
@@ -159,6 +161,45 @@ class DkimVerifierTest {
         byte[] huge = new byte[DkimVerifier.MAX_MESSAGE_BYTES + 1];
 
         assertInstanceOf(DkimResult.Failed.class, verifierFor(key).verify(huge, "airbank.cz"));
+    }
+
+    @Test
+    void verifiesABodyUpToTheSizeLimit() throws Exception {
+        KeyPair key = rsa(1024);
+        String line = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\r\n";
+        String body = line.repeat((DkimVerifier.MAX_MESSAGE_BYTES - 2048) / line.length());
+        byte[] message = signed(MESSAGE + body, key, "");
+
+        assertTrue(message.length > DkimVerifier.MAX_MESSAGE_BYTES - 2048, String.valueOf(message.length));
+        assertInstanceOf(DkimResult.Verified.class, verifierFor(key).verify(message, "airbank.cz"));
+    }
+
+    /** jDKIM's work grows with the header, so its cap stays below the message's. */
+    @Test
+    void refusesAHeaderOverItsLimit() throws Exception {
+        KeyPair key = rsa(1024);
+        String padding = "X-Padding: " + "x".repeat(70) + "\r\n";
+        String header = padding.repeat(DkimVerifier.MAX_HEADER_BYTES / padding.length() + 1);
+        byte[] message = signed(header + MESSAGE, key, "");
+
+        DkimResult result = verifierFor(key).verify(message, "airbank.cz");
+
+        assertInstanceOf(DkimResult.Failed.class, result);
+        assertTrue(((DkimResult.Failed) result).reason().contains("header over"), result.toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\r\n", "\n", "\r"})
+    void measuresTheHeaderToTheFirstEmptyLineWhateverTheLineEnd(String end) {
+        byte[] message = bytes("From: a" + end + "To: b" + end + end + "body" + end);
+
+        assertEquals(("From: a" + end + "To: b" + end).length(), DkimVerifier.headerLength(message));
+    }
+
+    @Test
+    void takesAMessageWithoutAnEmptyLineForAllHeader() {
+        assertEquals(DkimVerifier.MAX_HEADER_BYTES + 1, DkimVerifier.headerLength(new byte[200_000]));
+        assertEquals(10, DkimVerifier.headerLength(bytes("From: a\r\nx")));
     }
 
     private static final String MESSAGE = String.join(

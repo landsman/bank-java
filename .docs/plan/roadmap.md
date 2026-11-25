@@ -27,7 +27,8 @@ A working document: what is still unknown and what this library does next.
 
 ## Next
 
-- **A jDKIM release with the parsing fixes**: Dependabot proposes it; then raise the 64 KiB limit.
+- **The next jDKIM release**: Dependabot proposes it; measure it as [verification](../verification.md#the-size-limit)
+  does, then decide on the 256 KiB and 64 KiB header limits.
 - **More Air Bank samples**, one issue each: [a business account](https://github.com/landsman/bank-java/issues/2),
   [1 000 CZK and more](https://github.com/landsman/bank-java/issues/5),
   [a card payment](https://github.com/landsman/bank-java/issues/6),

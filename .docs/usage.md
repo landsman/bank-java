@@ -34,8 +34,9 @@ send HTML only. That HTML becomes lines at every `<br>`, table cell, row and blo
 Store those bytes before reading them. A template the library does not know yet is `Unparsed`, and a later
 release can read the stored message again.
 
-Messages over 64 KiB are never verified: from a bank's sender they are `Unverified`, from anyone else
-`NOT_A_BANK_EMAIL`. A bank's notification is around 5 KiB. See [verification](verification.md#the-size-limit).
+Messages over 256 KiB, or with a header over 64 KiB, are never verified: from a bank's sender they are `Unverified`,
+from anyone else `NOT_A_BANK_EMAIL`. A bank's notification is 5 to 90 KB. See
+[verification](verification.md#the-size-limit).
 
 ## When there is no transaction
 

@@ -116,6 +116,9 @@ public final class DkimVerifier {
             return new DkimResult.Failed(
                     "message of " + rawMessage.length + " bytes is over the " + MAX_MESSAGE_BYTES + " byte limit");
         }
+        if (headerLength(rawMessage) > MAX_HEADER_BYTES) {
+            return new DkimResult.Failed("header over the " + MAX_HEADER_BYTES + " byte limit");
+        }
         // One jDKIM verifier per message: it keeps its results on the instance.
         DKIMVerifier verifier = new DKIMVerifier(checked(keys, minimumKeyBits, pins, domain.toLowerCase(Locale.ROOT)));
         try {
@@ -158,11 +161,15 @@ public final class DkimVerifier {
         return new DkimResult.Failed(reasons.isEmpty() ? "no DKIM-Signature" : String.join("; ", reasons));
     }
 
-    // ponytail: jDKIM 0.5 has parsing that is not linear in the input, fixed upstream on 2026-11-05 and not released
-    // yet. Anyone can mail the address these come to, so the size is capped before jDKIM sees the message. A bank
-    // notification is around 5 KiB; raise the cap once a jDKIM release carries those fixes.
+    // ponytail: anyone can mail the address these come to, so jDKIM 0.5 never sees an unbounded message. Its work grows
+    // with the header (fields, signatures, a key lookup for each), so the header keeps the tight cap; the body is only
+    // hashed, which is linear. Komerční banka's HTML notification is about 90 KB. Measured in .docs/verification.md;
+    // raise the caps once a jDKIM release has been measured the same way.
     /** The largest message read, in bytes; see the comment above. */
-    public static final int MAX_MESSAGE_BYTES = 64 * 1024;
+    public static final int MAX_MESSAGE_BYTES = 256 * 1024;
+
+    /** The largest header block read, everything before the first empty line, in bytes. */
+    public static final int MAX_HEADER_BYTES = 64 * 1024;
 
     private static final int DEFAULT_MINIMUM_KEY_BITS = 1024;
 
@@ -177,6 +184,21 @@ public final class DkimVerifier {
         this.keys = keys;
         this.minimumKeyBits = minimumKeyBits;
         this.pins = pins;
+    }
+
+    /**
+     * The bytes before the first empty line, read no further than one past {@link #MAX_HEADER_BYTES}. A line ends at
+     * CR, LF or CRLF, as jDKIM reads all three. A message without an empty line is all header.
+     */
+    static int headerLength(byte[] raw) {
+        int end = Math.min(raw.length, MAX_HEADER_BYTES + 1);
+        boolean lineStart = true;
+        for (int i = 0; i < end; i++) {
+            byte b = raw[i];
+            if (lineStart && (b == '\r' || b == '\n')) return i;
+            lineStart = b == '\n' || (b == '\r' && (i + 1 == raw.length || raw[i + 1] != '\n'));
+        }
+        return end;
     }
 
     /**

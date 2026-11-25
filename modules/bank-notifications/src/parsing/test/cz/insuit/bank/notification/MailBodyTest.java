@@ -57,9 +57,9 @@ class MailBodyTest {
 
     @Test
     void survivesNestingAsDeepAsTheSizeLimitAllows() {
-        // 64 KiB of "<div>" is about 13 000 levels; a recursive walk would overflow the stack, which is an Error that
+        // 256 KiB of "<div>" is about 52 000 levels; a recursive walk would overflow the stack, which is an Error that
         // no catch of RuntimeException turns into Unparsed.
-        String html = "<div>".repeat(13_000) + "VS: 1" + "</div>".repeat(13_000);
+        String html = "<div>".repeat(52_000) + "VS: 1" + "</div>".repeat(52_000);
 
         assertEquals("VS: 1\n", MailBody.lines(html));
     }
