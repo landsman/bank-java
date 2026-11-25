@@ -41,7 +41,9 @@ package `cz.insuit.bank.notification`, like the rest, so the parser stays packag
 folder is not a package.
 
 1. **Get a real e-mail**: the raw `.eml`, exported as "show original" or "raw source", never forwarded, which rewrites
-   the headers. An incoming payment with a variable symbol and a message is the most useful first one.
+   the headers. An incoming payment with a variable symbol and a message is the most useful first one. Seznam.cz
+   webmail: the e-mail's detail, at the very bottom, **Další** → **Uložit celý e-mail**. Gmail: ⋮ → **Show
+   original** → **Download original**. Apple Mail: **File** → **Save As…** → **Raw Message Source**.
 2. **Verify its signature** against the bank's key in DNS before anything else, e.g.
    `uvx --from dkimpy==1.1.8 --with dnspython dkimverify < message.eml`. Note the `d=`, the selector, the key size,
    and that there is no `l=`.

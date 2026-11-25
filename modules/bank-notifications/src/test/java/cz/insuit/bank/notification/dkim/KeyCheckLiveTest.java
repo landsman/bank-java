@@ -38,6 +38,11 @@ class KeyCheckLiveTest {
         assertPublishesOnlyPinnedKeys("20160512", "fio.cz");
     }
 
+    @Test
+    void komercniBankaPublishesOnlyPinnedKeys() throws Exception {
+        assertPublishesOnlyPinnedKeys("scph0521", "kbinfo.cz");
+    }
+
     private void assertPublishesOnlyPinnedKeys(String selector, String domain) throws Exception {
         Set<String> pinned =
                 Objects.requireNonNull(BankNotifications.pinnedKeys().get(domain), domain);

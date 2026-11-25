@@ -5,7 +5,8 @@ their own internet banking, and point it at an address your application receives
 the developer: no API key, no contract with the bank, no PSD2 licence.
 
 **Send it straight to your address, not through a mailbox forward.** The bank's DKIM signature is what makes the
-e-mail trustworthy, and a forward can break it. Every bank below lets the notification go to any address.
+e-mail trustworthy, and a forward can break it. Every bank below lets the notification go to any address, except
+Komerční banka, whose e-mail needs a mailbox filter that forwards it unchanged.
 
 ## Air Bank
 
@@ -47,6 +48,24 @@ English); its fields, as both interfaces showed them on 2026-11-10:
    night is announced in the morning.
 
 Check that `read` returns a `Transaction` for a small payment.
+
+## Komerční banka
+
+KB+ sends an e-mail for incoming payments only, and only to the account holder's main contact e-mail, not to an address
+of your choice. So the holder's own mailbox forwards it, by an automatic filter. Verified on 2026-11-25: a real KB+
+e-mail forwarded by a Gmail (Google Workspace) filter to a Seznam.cz mailbox still verified (`d=kbinfo.cz`, DKIM
+pass), as Gmail only adds headers above the signed ones.
+
+1. KB+ → **Nastavení** → **Oznámení** → **Příchozí platby** → **e-mail**. It goes to the main contact e-mail.
+2. In that mailbox, an automatic filter: from `servis@kbinfo.cz`, forward to your address. In Gmail: Settings →
+   **Forwarding and POP/IMAP** → **Add a forwarding address**, enter your address and confirm the code Gmail sends
+   to it; then a filter with **From** `servis@kbinfo.cz` and **Forward it to** that address.
+3. Never forward by hand (**Forward** in the mail client): that writes a new e-mail, which the bank did not sign, and
+   `read` throws `Unverified`.
+
+Microsoft 365 blocks automatic forwarding to outside addresses by default (bounce `5.7.520`); an administrator has
+to allow it. Other mail providers are not verified yet. A business account in KB+ gets no payment notifications at
+all. Check that `read` returns a `Transaction` for a small payment. More in [kb](banks/cz/kb/README.md).
 
 ## MONETA
 

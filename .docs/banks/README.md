@@ -26,13 +26,13 @@ Finance) and payment institutions that are not banks (Banking Circle, Comgate, T
 |---|---|---|---|---|
 | Air Bank | verified | transfers in and out, EUR accounts; symbols, message, balance; thousands as public samples write them | a real e-mail of 1 000 or more ([#5](https://github.com/landsman/bank-java/issues/5)), cards, direct debits; its daily balance is refused | [airbank](cz/airbank/README.md) |
 | Fio banka | verified | transfers in and out, card payments, direct debits; symbols, message, balance; thousands; English, from public samples ([#11](https://github.com/landsman/bank-java/issues/11)) | other currencies ([#13](https://github.com/landsman/bank-java/issues/13)); its short format is refused | [fio](cz/fio/README.md) |
+| Komerční banka | verified | KB+ incoming payments, from HTML; both accounts, symbols, message, the Czech and English blocks required to agree | transaction id, balance, counter-party name; outgoing and card payments (KB+ does not send them); MojeBanka (`kb.cz`) | [kb](cz/kb/README.md) |
 | MONETA | samples only | incoming and outgoing; counter-account, symbol from the description | own account (masked), transaction id, balance; payments under 100 Kč are never sent | [moneta](cz/moneta/README.md) |
 | Creditas | samples only | incoming and outgoing; counter-account, symbol, balance | transaction id, name, message; card holds refused | [creditas](cz/creditas/README.md) |
 | Raiffeisenbank | samples only | transfers and card payments, from HTML; names, symbols, message, balance | transaction id | [raiffeisenbank](cz/raiffeisenbank/README.md) |
 | Česká spořitelna | samples only | transfers in and out, from HTML; counter-account and name, symbols, message, balance on outgoing | transaction id; card payments and the daily balance are refused | [ceskasporitelna](cz/ceskasporitelna/README.md) |
 | UniCredit Bank | samples only | incoming, from HTML; counter-account and name, symbols, message | transaction id, balance, type; how an outgoing payment writes its direction | [unicredit](cz/unicredit/README.md) |
 | ČSOB | samples only | CEB: incoming transfers and card payments, several in one e-mail (`readAll`); own banking's "Moje info - Avízo", in and out; names, symbols, message | transaction id, balance time; SEPA, foreign and cash payments | [csob](cz/csob/README.md) |
-| Komerční banka | not yet | | | [#14](https://github.com/landsman/bank-java/issues/14) |
 | Citfin | not yet | | | [#21](https://github.com/landsman/bank-java/issues/21) |
 | Partners Banka | not yet | | sends no e-mail at all | [#25](https://github.com/landsman/bank-java/issues/25) |
 | mBank | not yet | | | |
