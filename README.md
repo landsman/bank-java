@@ -11,7 +11,7 @@ order and mark it paid, automatically, about a minute after the money lands.
 - **A forged e-mail is never taken for a payment.** Only an e-mail the bank itself signed gets through; anything else
   is refused, with no setting to forget. See [how verification works](.docs/verification.md).
 - **Money in and money out.** Incoming payments to match, outgoing ones to see the account move.
-- **Air Bank and Fio banka in Czechia** from real e-mails, six more Czech and Slovak banks from public samples; see
+- **Air Bank, Fio banka and Komerční banka in Czechia** from real e-mails, eight more Czech and Slovak banks from public samples; see
   [which banks](#which-banks).
 
 ```mermaid
@@ -25,7 +25,7 @@ For Java 21+ and Kotlin, one jar, no framework required.
 
 ## Which banks
 
-Air Bank and Fio banka CZ from real e-mails; MONETA, Creditas, Raiffeisenbank, Česká spořitelna, UniCredit and ČSOB, and ČSOB Slovakia and Tatra banka, from public samples, trusting
+Air Bank, Fio banka CZ and Komerční banka (KB+) from real e-mails; MONETA, Creditas, Raiffeisenbank, Česká spořitelna, UniCredit and ČSOB, and ČSOB Slovakia and Tatra banka, from public samples, trusting
 any key DNSSEC proves the bank published until a real e-mail lets it pin one. Each bank, and what it reads: [banks](.docs/banks/README.md).
 
 ## Docs

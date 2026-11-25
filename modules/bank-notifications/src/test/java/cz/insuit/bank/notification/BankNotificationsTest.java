@@ -47,6 +47,21 @@ class BankNotificationsTest {
     }
 
     @Test
+    void readsKomercniBankasHtmlEmailOverTheOldSizeLimit() throws Exception {
+        // About 86 KB, one HTML part; KB signs its Message-ID, and with no transaction id that is what deduplicates.
+        byte[] message = fixture("/kb-cz/incoming.eml");
+        String record = "v=DKIM1; k=rsa; p="
+                + Base64.getEncoder().encodeToString(key.getPublic().getEncoded());
+        BankNotifications kb = BankNotifications.trustingKeysFrom((selector, domain) ->
+                selector.equals("ab") && domain.equals("kbinfo.cz") ? List.of(record) : List.of());
+
+        Transaction transaction = kb.read(signed(message, "kbinfo.cz", "Content-Type:To:Message-ID:Date:Subject:From"));
+
+        assertTrue(message.length > 64 * 1024, String.valueOf(message.length));
+        assertEquals("<00.00.00000.00000000@i-00000000000000000.mta3vrest.sd.prd.sparkpost>", transaction.messageId());
+    }
+
+    @Test
     void refusesAKeyThatABankWhichPinsDoesNotName() throws Exception {
         Unverified refused =
                 assertThrows(Unverified.class, () -> pinned("airbank.cz").read(signed("incoming.eml")));

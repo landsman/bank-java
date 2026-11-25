@@ -46,6 +46,7 @@ public final class BankNotifications {
             new Raiffeisenbank(),
             new CeskaSporitelna(),
             new Unicredit(),
+            new KomercniBanka(),
             new Csob(),
             new CsobSk(),
             new TatraBanka());
