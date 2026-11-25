@@ -115,8 +115,7 @@ public final class BankNotifications {
     public List<Transaction> readAll(byte[] rawMessage) {
         // The signature first, against the key of the bank the sender domain picks: an unsigned e-mail that claims a
         // bank must end as Unverified whatever its body says, not as Unparsed, which an app reads as "the bank wrote".
-        // Over DkimVerifier.MAX_MESSAGE_BYTES, the verifier fails it before jDKIM sees the bytes: Unverified from a
-        // bank's
+        // A message over DkimVerifier's size limits fails there before jDKIM sees the bytes: Unverified from a bank's
         // sender, NOT_A_BANK_EMAIL from anyone else.
         MimeMessage message = mime(rawMessage);
         Bank bank = bankOf(message);

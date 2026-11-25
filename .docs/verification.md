@@ -96,7 +96,28 @@ the wrapper makes one per message; `BankNotifications` and `DkimVerifier` are th
 
 ## The size limit
 
-jDKIM's maintainers fixed parsing that was not linear in its input on 2026-11-05 (the `g=` check and the space after a
-header name), after 0.5. Those fixes are not released yet. Since anyone can send mail to the address these e-mails come
-to, the library refuses to verify messages over 64 KiB, so it never parses them. The limit goes up once a jDKIM release carries the
-fixes.
+Anyone can send mail to the address these e-mails come to, so the library refuses to verify a message over 256 KiB, or
+one whose header (everything before the first empty line) is over 64 KiB. jDKIM never parses either.
+
+The header has the tighter cap because jDKIM's work grows with it: each `DKIM-Signature` of the bank's domain costs a
+key lookup and a header hash, and a long `h=` list costs a field lookup per name. The body is only hashed, once per
+valid signature. Komerční banka's HTML notification is about 90 KB, which the earlier 64 KiB cap on the whole message
+refused.
+
+Measured on jDKIM 0.5 (2026-11-25, Apple M5 Pro, JDK 24, median of five runs after three warm-ups, a test key
+lookup with no network):
+
+| Message | Verify |
+|---|---|
+| normal header, 64 / 128 / 256 KiB body | 2.0 / 1.8 / 2.3 ms |
+| one body line of 250 KB, plain or of whitespace runs | 1.7 / 2.8 ms |
+| a signature whose `h=` names 7 / 14 / 28 KB of fields | 18 / 25 / 50 ms |
+| 60 KiB of bad signatures of the bank's domain | 16 ms, 768 key lookups |
+| 60 KiB of signatures of another domain | 3 ms, no lookup |
+| `read` of a 250 KB HTML body: a table, 23 000 nested `<div>`, QP-encoded | 14 / 16 / 6 ms |
+
+Every shape grows linearly. jDKIM 0.5 also caps one header line at 10 000 bytes, one field at 30 000 and the header at
+1 000 fields, so the longest `h=` costs about 50 ms. The fixes jDKIM made after 0.5 (on 2026-11-04, the `g=` check
+and the space after a header name) are about code 0.5 does not have yet, or about the key record in DNS, which the
+bank's domain publishes, not the sender. A key lookup is not cached between the signatures of one message: with
+`withDns()`, 768 signatures are 768 DNS queries.

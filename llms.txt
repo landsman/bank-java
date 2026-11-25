@@ -32,7 +32,8 @@ Mistakes to avoid:
 - `counterAccount()` is `null` for a card payment; `account()` and `transactionId()` are `null` for MONETA, which
   masks the account and prints no id: tell the merchant by the inbound address, deduplicate on a signed `messageId()`.
 - `amount()` is signed: negative is money out. `Transaction.Type` may gain constants: keep a `default` branch.
-- Messages over 64 KiB are `Unparsed`; a notification is around 5 KiB.
+- Messages over 256 KiB, or with a header over 64 KiB, are never verified: `Unverified` from a bank's sender,
+  `NOT_A_BANK_EMAIL` from anyone else; a notification is 5 to 90 KB.
 - Do not use `trustingKeysFrom` in production: it skips DNSSEC and pinning. It is for tests.
 - Do not return a `Transaction` from a controller as JSON: it carries the payer's name, account and message.
 - `message()` and `counterName()` are untrusted text the payer typed, handed out unescaped: bind them as SQL
