@@ -47,7 +47,7 @@ class ReadsOnSpringBootTest {
     static final String MESSAGE = String.join(
             "\r\n",
             "Date: Tue, 10 Nov 2026 14:40:05 +0100",
-            "To: bruce.wayne@gothba.org",
+            "To: bruce.wayne@gotham.org",
             "From: Air Bank<info@airbank.cz>",
             "Subject: =?utf-8?Q?Zv=C3=BD=C5=A1en=C3=AD_z=C5=AFstatku_na_=C3=BA=C4=8Dtu_Hlavni?=",
             "MIME-Version: 1.0",
