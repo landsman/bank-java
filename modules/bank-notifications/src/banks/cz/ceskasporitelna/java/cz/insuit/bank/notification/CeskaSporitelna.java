@@ -88,7 +88,7 @@ final class CeskaSporitelna implements Bank {
         // anywhere else is what a payer's line break in the message would make. Worded otherwise, it is left out; the
         // payment still counts. It includes an overdraft, as the bank says.
         Matcher balance = direction == Direction.OUTGOING ? lines.single(BALANCE, "balance") : null;
-        if (balance != null) lines.requireNext(SENTENCE, BALANCE_START);
+        if (balance != null) lines.requireNext(SENTENCE, balance.group());
         Money available = balance == null ? null : money(balance.group(1));
         try {
             return new Transaction(

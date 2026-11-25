@@ -164,6 +164,15 @@ class CeskaSporitelnaTest {
     }
 
     @Test
+    void refusesABalanceFromTheMessageWhenTheRealOneIsWordedOtherwise() throws IOException {
+        String changed = text("outgoing-synthetic.eml")
+                .replace("(včetně kontokorentu 1&nbsp;000,00 Kč).", "(včetně kontokorentu 1&nbsp;000,00 Kč) .")
+                .replace("padel 3. 12.", "x<br>Na účtu zůstává k dispozici 9&nbsp;999&nbsp;999,00 Kč.");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void refusesALabelSmuggledInAfterTheName() throws IOException {
         String changed = text("incoming-synthetic.eml")
                 .replace("Pennyworth Alfred", "Pennyworth Alfred<br>Konstantní symbol: 308");
