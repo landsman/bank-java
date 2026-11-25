@@ -8,7 +8,7 @@ A bank is in one of three states:
 
 - **Verified**: read from real e-mails, its DKIM key pinned and checked daily. `read()` returns a `Transaction`.
 - **Samples only**: the template follows public code ([radekhulan/myinvoice](https://github.com/radekhulan/myinvoice),
-  [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser), MIT), not a real e-mail, and no key is pinned.
+  [tomaj/bank-mails-parser](https://github.com/tomaj/bank-mails-parser), MIT; [Joey7500/Mobile-Finance-App](https://github.com/Joey7500/Mobile-Finance-App), Apache-2.0), not a real e-mail, and no key is pinned.
   `read()` returns a `Transaction` once the signature verifies with any key DNSSEC proves the bank's domain published;
   ČSOB SK, whose domain has no DNSSEC, stays `Unverified`. A real e-mail moves it to verified and pins its key.
 - **Not yet**: no parser.
@@ -29,10 +29,10 @@ Finance) and payment institutions that are not banks (Banking Circle, Comgate, T
 | MONETA | samples only | incoming and outgoing; counter-account, symbol from the description | own account (masked), transaction id, balance; payments under 100 Kč are never sent | [moneta](cz/moneta/README.md) |
 | Creditas | samples only | incoming and outgoing; counter-account, symbol, balance | transaction id, name, message; card holds refused | [creditas](cz/creditas/README.md) |
 | Raiffeisenbank | samples only | transfers and card payments, from HTML; names, symbols, message, balance | transaction id | [raiffeisenbank](cz/raiffeisenbank/README.md) |
+| Česká spořitelna | samples only | transfers in and out, from HTML; counter-account and name, symbols, message, balance on outgoing | transaction id; card payments and the daily balance are refused | [ceskasporitelna](cz/ceskasporitelna/README.md) |
 | UniCredit Bank | samples only | incoming, from HTML; counter-account and name, symbols, message | transaction id, balance, type; how an outgoing payment writes its direction | [unicredit](cz/unicredit/README.md) |
 | ČSOB | samples only | CEB: incoming transfers and card payments, several in one e-mail (`readAll`); own banking's "Moje info - Avízo", in and out; names, symbols, message | transaction id, balance time; SEPA, foreign and cash payments | [csob](cz/csob/README.md) |
 | Komerční banka | not yet | | | [#14](https://github.com/landsman/bank-java/issues/14) |
-| Česká spořitelna | not yet | | | [#15](https://github.com/landsman/bank-java/issues/15) |
 | Citfin | not yet | | | [#21](https://github.com/landsman/bank-java/issues/21) |
 | Partners Banka | not yet | | sends no e-mail at all | [#25](https://github.com/landsman/bank-java/issues/25) |
 | mBank | not yet | | | |

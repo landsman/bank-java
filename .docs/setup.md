@@ -61,6 +61,10 @@ See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Not verified yet: 
 
 See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not verified yet: no real Raiffeisenbank e-mail has been read.
 
+## Česká spořitelna
+
+See [ceskasporitelna](banks/cz/ceskasporitelna/README.md#setting-it-up). Not verified yet: no real Česká spořitelna e-mail has been read.
+
 ## UniCredit Bank
 
 See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: no real UniCredit e-mail has been read.
