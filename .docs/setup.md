@@ -55,7 +55,8 @@ from 100 Kč. Not verified yet: no real MONETA e-mail has been read.
 
 ## Creditas
 
-See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Not verified yet: no real Creditas e-mail has been read.
+See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Read since 0.1.3, from public samples: no real Creditas e-mail has confirmed the template
+yet, so one that comes back `Unparsed` is worth a bug report with an anonymised copy.
 
 ## Raiffeisenbank
 
