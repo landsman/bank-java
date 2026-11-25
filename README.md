@@ -37,6 +37,7 @@ any key DNSSEC proves the bank published until a real e-mail lets it pin one. Ea
 | [Installing](.docs/install.md) | adding the library to a Gradle or Maven project |
 | [Using the library](.docs/usage.md) | reading an e-mail, the failures, a payment's fields, the two checks left to you |
 | [How verification works](.docs/verification.md) | why a forged e-mail cannot pass |
+| [Payment QR codes](.docs/payment-qr.md) | which QR to print so the reference arrives intact: SPAYD, PAY by square, EPC, and how fast the money lands |
 | [Roadmap](.docs/plan/roadmap.md) | what is next |
 | [Development](.docs/development.md) | building it, adding a bank |
 | [llms.txt](llms.txt) | for a coding assistant adding the library to a project |
