@@ -64,7 +64,7 @@ Finance) and payment institutions that are not banks (Banking Circle, Comgate, T
 | ČSOB | samples only | incoming SEPA credits; IBANs, name, symbols from the payer's reference, message | outgoing payments, transaction id; the 2019 sample was not DKIM-signed and `csob.sk` has no DNSSEC | [csob](sk/csob/README.md) |
 | Slovenská sporiteľňa | not yet | | | [#23](https://github.com/landsman/bank-java/issues/23) |
 | Tatra banka | samples only | credits and debits; transaction id and direction from the signed subject, IBAN, name, symbols from the payer's reference, balance | counter-account, type; its 2019 key is published but not pinned | [tatra](sk/tatra/README.md) |
-| Všeobecná úverová banka (VÚB) | not yet | | | |
+| Všeobecná úverová banka (VÚB) | not yet | | only the old internet banking e-mails a movement ("Upozornenie o zrealizovanej transakcii"), the new one does not ([Redbit](https://podpora.redbit.cz/navod/parovani-plateb-vub/), 2026-11-25); the public samples are its e-shop payment confirmation, not an account notice | |
 | Prima banka | not yet | | | |
 | UniCredit Bank, pobočka | not yet | | | |
 | mBank, pobočka | not yet | | | |
