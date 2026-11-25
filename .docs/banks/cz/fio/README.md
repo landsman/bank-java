@@ -186,3 +186,16 @@ the balance rising above an amount. Each in the same three formats as a movement
 | one sentence | `Účet 2800201001 přesáhl hlídanou částku. Aktuální zůstatek 1 000 000 CZK.` | 👁 |
 
 The previews show the rise above an amount only; the wording of the other two is not known.
+
+**Notice of new terms**, subject `Oznámení o vyhlášení nové dokumentace`, from `noreply@fio.cz`, signed `d=fio.cz;
+s=20160512` like a movement (seen 2026-11-14). Sent to every client whenever the contract terms change, and the
+account holder cannot turn it off. `read` refuses it as `Unparsed` with `reason()` `NOT_A_PAYMENT`; the fixture is
+`documentation-notice.eml`.
+
+```text
+Vážený kliente,
+
+dovolujeme si Vám oznámit, že jsme vyhlásili nové znění smluvní dokumentace. Odkaz na novou dokumentaci a přehledný
+popis změn naleznete ve zprávě, kterou jsme Vám zaslali prostřednictvím internetového bankovnictví.
+…
+```

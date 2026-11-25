@@ -88,6 +88,11 @@ public abstract sealed class BankNotificationException extends RuntimeException 
              */
             UNSUPPORTED_FORMAT,
             /**
+             * A bank's own e-mail that is about no payment, such as a notice of new terms. Signed by the bank, nothing to
+             * fix and nothing to read: drop it.
+             */
+            NOT_A_PAYMENT,
+            /**
              * Anything else in a message the bank's signature verified: a template that changed, a misread value. Like
              * {@link #UNSUPPORTED_FORMAT}, only ever given after the signature holds, so it is the bank writing.
              */
