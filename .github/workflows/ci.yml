@@ -1,15 +1,25 @@
 name: ci
 
-# A change to docs alone builds nothing: Markdown, llms.txt and the licence are read by no check, and main requires
-# none, so a skipped run blocks no merge. A commit that touches anything else as well runs in full.
+# Only a change to what the jobs read starts a run; docs or another workflow build nothing, and main requires no
+# check, so a skipped run blocks no merge. A file the build starts reading outside this list goes in it, or its
+# change is merged untested.
 on:
   push:
     branches: [main]
-    paths-ignore: ['**.md', 'llms.txt', 'LICENSE']
+    paths: &reads
+      - 'modules/**'
+      - 'testing/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradlew'
+      - 'Makefile'
+      - 'bin/**'
+      - 'mise.toml'
+      - '.github/workflows/ci.yml'
   # A draft runs nothing; marking it ready for review starts the run.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore: ['**.md', 'llms.txt', 'LICENSE']
+    paths: *reads
 
 # A new push to a pull request cancels that PR's run still going: only the newest commit's result counts.
 # A push to main or a scheduled scan is never cancelled, so every merged commit and every Monday get a result.
