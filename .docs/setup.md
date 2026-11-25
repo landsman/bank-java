@@ -69,6 +69,12 @@ See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: n
 
 See [csob](banks/cz/csob/README.md#setting-it-up). Not verified yet: no real ČSOB e-mail has been read.
 
+## Tatra banka
+
+See [tatra](banks/sk/tatra/README.md#setting-it-up): B-mail, with Vklad and Výber ticked. Read since 0.1.3, from public
+samples: no real Tatra banka e-mail has confirmed the template yet, so one that comes back `Unparsed` is worth a bug
+report with an anonymised copy.
+
 ## Another bank
 
 Not supported yet; see [banks](banks/README.md). Adding one starts from one of its real e-mails,
