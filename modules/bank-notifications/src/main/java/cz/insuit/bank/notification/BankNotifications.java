@@ -129,6 +129,10 @@ public final class BankNotifications {
         }
         return switch (dkim) {
             case DkimResult.Verified verified -> {
+                // The subject picks the template and the direction; an unsigned one is the sender's to change.
+                if (!verified.signedHeaders().contains("subject")) {
+                    throw new BankNotificationException.Unverified("the signature does not cover Subject");
+                }
                 List<Transaction> transactions = parse(bank, message);
                 // Kept only when the signature covers it; anything unsigned in the headers is the sender's to change.
                 yield verified.signedHeaders().contains("message-id")

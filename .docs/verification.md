@@ -44,6 +44,8 @@ A signature counts only when all of these hold, besides [whose key it is](#whose
   [banks](banks/README.md)); a signature of any other domain is not even looked up;
 - it signs the `From` header (RFC 6376 §5.4, refused by jDKIM itself), so the sender the bank was picked from is the one
   the bank vouched for;
+- it signs the `Subject` header, which picks the template and, for some banks, the direction; Air Bank, Fio and KB sign it
+  (2026-11-25), and a signature without it is `Unverified`;
 - the headers reading depends on (`Message-ID`, `Subject`, `Content-Type`, `Content-Transfer-Encoding`) come once:
   DKIM signs the last copy of a header and the mail library reads the first, so a copy added above a signed one is
   `Unverified`;
