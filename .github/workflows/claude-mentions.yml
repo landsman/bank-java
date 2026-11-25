@@ -1,0 +1,29 @@
+name: claude mentions
+
+# @claude on an issue or a pull request, through the reusable workflow in landsman/config, whose header says why
+# each line below is here. Needs the CLAUDE_CODE_OAUTH_TOKEN secret and the Claude GitHub App on this repo.
+#
+# issue_comment covers a pull request's conversation too; pull_request_review_comment is a comment on a line of
+# the diff.
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude:
+    # The action itself refuses anyone without write access. The login narrows it to the one whose subscription
+    # pays; the phrase keeps an ordinary comment from starting a runner at all.
+    if: >-
+      github.event.comment.user.login == 'landsman' &&
+      contains(github.event.comment.body, '@claude')
+    uses: landsman/config/.github/workflows/claude.yml@main
+    # The ceiling; the called workflow narrows it to what it uses.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
