@@ -2,11 +2,12 @@
 
 A working document: what is still unknown and what this library does next.
 
-## Current state (2026-11-22)
+## Current state (2026-11-25)
 
-- **Released `0.1.2`** on 2026-11-22 to GitHub Packages
-  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.2)), the signature checked before the body is read,
-  the jar naming its version in its manifest; CI builds on Java 21 and 25, and a tag
+- **Released `0.1.3`** on 2026-11-25 to GitHub Packages
+  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.3)): the banks known from public samples read
+  through any DNSSEC-secure key of their domain, Air Bank's daily balance and Fio's notice of new terms told apart
+  from a changed template; CI builds on Java 21 and 25, and a tag CI builds on Java 21 and 25, and a tag
   `vX.Y.Z` publishes the next one through `release.yml`.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
