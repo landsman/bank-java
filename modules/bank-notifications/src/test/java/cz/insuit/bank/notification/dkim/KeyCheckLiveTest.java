@@ -59,6 +59,12 @@ class KeyCheckLiveTest {
     }
 
     @Test
+    void stillRefusesCsobSlovakia() {
+        // ČSOB SK pins no key, so DNSSEC alone would decide; csob.sk is not signed, so its e-mails stay Unverified.
+        assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "x", "csob.sk"));
+    }
+
+    @Test
     void refusesAnUnsignedZone() {
         // google.com is not DNSSEC-signed; its DKIM key would come back, unproven.
         assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "20230601", "google.com"));

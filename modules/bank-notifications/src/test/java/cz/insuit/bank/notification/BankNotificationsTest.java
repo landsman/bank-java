@@ -1,7 +1,6 @@
 package cz.insuit.bank.notification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,15 +37,26 @@ class BankNotificationsTest {
     }
 
     @Test
-    void pinsOnlyTheBanksReadFromRealEmails() {
-        // An empty set would make the verifier refuse every key of that bank; leaving it out trusts DNSSEC instead.
-        assertTrue(BankNotifications.pinnedKeys().containsKey("airbank.cz"));
-        assertFalse(BankNotifications.pinnedKeys().containsKey("moneta.cz"));
+    void readsABankThatPinsNoKeyWithAnyKeyItsDomainPublishes() throws Exception {
+        // MONETA is read from public samples and pins nothing, so withDns() takes whatever key DNSSEC proves it
+        // published.
+        Transaction transaction =
+                pinned("moneta.cz").read(signed(fixture("/moneta/incoming-synthetic.eml"), "moneta.cz"));
+
+        assertEquals("moneta.cz", transaction.signedBy());
+    }
+
+    @Test
+    void refusesAKeyThatABankWhichPinsDoesNotName() throws Exception {
+        Unverified refused =
+                assertThrows(Unverified.class, () -> pinned("airbank.cz").read(signed("incoming.eml")));
+
+        assertTrue(String.valueOf(refused.getMessage()).contains("not one of the keys pinned"), refused.getMessage());
     }
 
     @Test
     void doesNotTrustAnUnsignedOne() throws Exception {
-        assertThrows(Unverified.class, () -> notifications().read(fixture("incoming.eml")));
+        assertThrows(Unverified.class, () -> notifications().read(fixture("/airbank/incoming.eml")));
     }
 
     @Test
@@ -171,7 +181,7 @@ class BankNotificationsTest {
             throw new IOException("resolver timed out");
         });
 
-        byte[] foreign = signed(fixture("incoming.eml"), "attacker.example");
+        byte[] foreign = signed(fixture("/airbank/incoming.eml"), "attacker.example");
 
         assertThrows(Unverified.class, () -> lookingUp.read(foreign));
         assertEquals(List.of(), looked);
@@ -204,12 +214,20 @@ class BankNotificationsTest {
                         .messageId());
     }
 
+    /** As {@link BankNotifications#withDns()}, pins included, but with the test's key published for {@code domain}. */
+    private static BankNotifications pinned(String domain) {
+        String record = "v=DKIM1; k=rsa; p="
+                + Base64.getEncoder().encodeToString(key.getPublic().getEncoded());
+        return BankNotifications.pinning(DkimVerifier.with(
+                (selector, name) -> selector.equals("ab") && name.equals(domain) ? List.of(record) : List.of()));
+    }
+
     private static byte[] signed(String name) throws Exception {
         return signed(name, "Date:To:From:Subject");
     }
 
     private static byte[] signed(String name, String headers) throws Exception {
-        return signed(fixture(name), "airbank.cz", headers);
+        return signed(fixture("/airbank/" + name), "airbank.cz", headers);
     }
 
     private static byte[] signed(byte[] message, String domain) throws Exception {
@@ -235,7 +253,7 @@ class BankNotificationsTest {
     }
 
     private static byte[] fixture(String name) throws IOException {
-        try (InputStream in = BankNotificationsTest.class.getResourceAsStream("/airbank/" + name)) {
+        try (InputStream in = BankNotificationsTest.class.getResourceAsStream(name)) {
             return Objects.requireNonNull(in, name).readAllBytes();
         }
     }

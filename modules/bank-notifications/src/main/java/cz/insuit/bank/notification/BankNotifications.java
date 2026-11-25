@@ -55,7 +55,11 @@ public final class BankNotifications {
      * read from public samples pins none, so any key DNSSEC proves its domain published is accepted.
      */
     public static BankNotifications withDns() {
-        DkimVerifier dkim = DkimVerifier.withDns();
+        return pinning(DkimVerifier.withDns());
+    }
+
+    /** {@link #withDns()}'s pins over any verifier, so a test can sign with its own key and still meet them. */
+    static BankNotifications pinning(DkimVerifier dkim) {
         for (Map.Entry<String, Set<String>> bank : pinnedKeys().entrySet()) {
             dkim = dkim.pinnedKeys(bank.getKey(), bank.getValue());
         }
