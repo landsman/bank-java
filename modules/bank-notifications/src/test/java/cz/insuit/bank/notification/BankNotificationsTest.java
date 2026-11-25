@@ -127,11 +127,14 @@ class BankNotificationsTest {
 
     @Test
     void doesNotTrustAHeaderTooLargeToVerify() throws Exception {
+        BankNotifications noLookup = BankNotifications.trustingKeysFrom((selector, domain) -> {
+            throw new AssertionError("looked up a key for a header too large to verify");
+        });
         String padding = "X-Padding: " + "x".repeat(70) + "\r\n";
         byte[] padded = prepended(
                 padding.repeat(DkimVerifier.MAX_HEADER_BYTES / padding.length()).strip(), signed("incoming.eml"));
 
-        assertThrows(Unverified.class, () -> notifications().read(padded));
+        assertThrows(Unverified.class, () -> noLookup.read(padded));
     }
 
     @Test
