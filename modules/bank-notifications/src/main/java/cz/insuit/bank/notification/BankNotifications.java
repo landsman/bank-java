@@ -44,6 +44,7 @@ public final class BankNotifications {
             new Moneta(),
             new Creditas(),
             new Raiffeisenbank(),
+            new CeskaSporitelna(),
             new Unicredit(),
             new Csob(),
             new CsobSk(),

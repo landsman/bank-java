@@ -2,7 +2,7 @@
 
 > Java 21+ and Kotlin library that reads a Czech or Slovak bank's payment notification e-mail into a `Transaction`,
 > and hands it out only once the bank's DKIM signature verified, with the bank's key validated through DNSSEC. Air Bank
-> and Fio banka pin their key and are read from real e-mails; MONETA, Creditas, Raiffeisenbank, UniCredit, ČSOB and
+> and Fio banka pin their key and are read from real e-mails; MONETA, Creditas, Raiffeisenbank, Česká spořitelna, UniCredit, ČSOB and
 > Tatra banka are read from public samples, with any DNSSEC-secure key of their domain. One artifact, `cz.insuit:bank-notifications`, no framework required. Published on
 > GitHub Packages (group `cz.insuit`), not Maven Central. Pre-1.0: read records by accessor, never by record pattern.
 

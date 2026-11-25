@@ -57,7 +57,7 @@ class KotlinCallerTest {
         val MESSAGE =
             listOf(
                 "Date: Tue, 10 Nov 2026 14:40:05 +0100",
-                "To: bruce.wayne@gothba.org",
+                "To: bruce.wayne@gotham.org",
                 "From: Air Bank<info@airbank.cz>",
                 "MIME-Version: 1.0",
                 "Content-Transfer-Encoding: 8bit",

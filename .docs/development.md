@@ -48,7 +48,7 @@ folder is not a package.
 3. **Anonymise it into a fixture** under `src/banks/<country>/<bank>/fixtures/<bank>-<country>/` (or the name the bank's
    existing fixtures use): keep the headers from
    `Date:` on, drop the transport headers and the signature, replace accounts, names, balance, transaction codes and
-   the recipient (`bruce.wayne@gothba.org`), and keep everything else byte for byte, line ends and invisible characters
+   the recipient (`bruce.wayne@gotham.org`), and keep everything else byte for byte, line ends and invisible characters
    included. `.gitattributes` keeps git from touching `*.eml`.
 4. **Write the parser** in `src/banks/<country>/<bank>/java/`, with its test in `src/banks/<country>/<bank>/test/`, as `AirBank` and `FioCz` are:
    a class implementing `Bank`, listed in `BankNotifications.BANKS`, reading the body through `NotificationLines`
