@@ -173,6 +173,16 @@ class CeskaSporitelnaTest {
     }
 
     @Test
+    void refusesBothWordingsOfOneLine() throws IOException {
+        String changed = text("incoming-synthetic.eml")
+                .replace(
+                        "<p>Na účet: 1234567899/0800</p>",
+                        "<p>Na účet: 1234567899/0800</p><p>Číslo účtu: 9876543211/0100</p>");
+
+        assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+    }
+
+    @Test
     void refusesACardPayment() {
         String card = """
                 Date: Fri, 20 Nov 2026 10:13:00 +0100\r

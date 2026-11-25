@@ -113,10 +113,12 @@ final class CeskaSporitelna implements Bank {
         }
     }
 
-    /** The value of the first label present: the two public sources name some lines differently. */
+    /** The value under either label: the two public sources name some lines differently, and a mix is refused. */
     private static @Nullable String firstOf(Map<String, String> fields, String label, String otherLabel) {
         String value = fields.get(label);
-        return value != null ? value : fields.get(otherLabel);
+        String other = fields.get(otherLabel);
+        if (value != null && other != null) throw new Unparsed("both '" + label + "' and '" + otherLabel + "'");
+        return value != null ? value : other;
     }
 
     private static @Nullable Money money(String text) {
