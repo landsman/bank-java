@@ -69,6 +69,12 @@ See [unicredit](banks/cz/unicredit/README.md#setting-it-up). Not verified yet: n
 
 See [csob](banks/cz/csob/README.md#setting-it-up). Not verified yet: no real ČSOB e-mail has been read.
 
+## ČSOB SK
+
+Not read yet: `csob.sk` is not DNSSEC-signed, so `withDns()` refuses every ČSOB SK e-mail as `Unverified`, however it
+is set up. No public guide to its e-mail notification was found (ČSOB SK's own documents only name ČSOB Info 24 →
+account movements); see [csob sk](banks/sk/csob/README.md) and [#22](https://github.com/landsman/bank-java/issues/22).
+
 ## Another bank
 
 Not supported yet; see [banks](banks/README.md). Adding one starts from one of its real e-mails,
