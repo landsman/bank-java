@@ -59,7 +59,8 @@ See [creditas.md](banks/cz/creditas/README.md#setting-it-up). Not verified yet: 
 
 ## Raiffeisenbank
 
-See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Not verified yet: no real Raiffeisenbank e-mail has been read.
+See [raiffeisenbank.md](banks/cz/raiffeisenbank/README.md#setting-it-up). Read since 0.1.3, from public samples: no real Raiffeisenbank e-mail has confirmed the template
+yet, so one that comes back `Unparsed` is worth a bug report with an anonymised copy.
 
 ## UniCredit Bank
 
