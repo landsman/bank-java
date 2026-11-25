@@ -46,7 +46,7 @@ final class KomercniBanka implements Bank {
 
     @Override
     public Transaction parse(@Nullable String subject, String body) {
-        if (NOT_A_PAYMENT_SUBJECTS.contains(subject)) {
+        if (subject != null && NOT_A_PAYMENT_SUBJECTS.contains(subject)) {
             throw new Unparsed(Unparsed.Reason.NOT_A_PAYMENT, "Komerční banka's notice, not a payment: " + subject);
         }
         if (!INCOMING_SUBJECT.equals(subject)) {

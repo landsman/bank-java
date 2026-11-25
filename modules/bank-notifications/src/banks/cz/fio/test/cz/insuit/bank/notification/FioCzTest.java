@@ -139,6 +139,17 @@ class FioCzTest {
     }
 
     @Test
+    void refusesAMissingSubjectAsATemplateItDoesNotKnow() throws IOException {
+        String changed = text("incoming-instant.eml")
+                .replace("Subject: =?UTF-8?Q?Fio_banka_-_p=C5=99=C3=ADjem_na_=C3=BA=C4=8Dtu?=\r\n", "");
+
+        Unparsed refused = assertThrows(Unparsed.class, () -> BankNotifications.parseUnverified(bytes(changed)));
+
+        assertEquals(Unparsed.Reason.NOT_READ, refused.reason());
+        assertFalse(String.valueOf(refused.getMessage()).contains("NullPointerException"), refused.getMessage());
+    }
+
+    @Test
     void refusesADirectionTheSubjectDisagreesWith() throws IOException {
         String changed = text("incoming-instant.eml").replace("zv=C3=BD=C5=\r\n=A1il", "sn=C3=AD=C5=BEil");
 

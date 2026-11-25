@@ -138,6 +138,15 @@ class KomercniBankaTest {
     }
 
     @Test
+    void refusesAMissingSubjectAsATemplateItDoesNotKnow() throws Exception {
+        String body = MailBody.lines(html("incoming.eml"));
+
+        Unparsed refused = assertThrows(Unparsed.class, () -> new KomercniBanka().parse(null, body));
+
+        assertEquals("not a template this library knows, subject: null", refused.getMessage());
+    }
+
+    @Test
     void dropsTheNoticeAboutDepositProtection() throws Exception {
         Unparsed refused = assertThrows(
                 Unparsed.class, () -> BankNotifications.parseUnverified(fixture("deposit-protection-notice.eml")));

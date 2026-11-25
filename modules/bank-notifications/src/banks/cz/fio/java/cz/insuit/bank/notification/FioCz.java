@@ -55,19 +55,19 @@ final class FioCz implements Bank {
 
     @Override
     public Transaction parse(@Nullable String subject, String body) {
-        if (SHORT_FORMAT_SUBJECTS.contains(subject)) {
+        if (subject != null && SHORT_FORMAT_SUBJECTS.contains(subject)) {
             throw new Unparsed(
                     Unparsed.Reason.UNSUPPORTED_FORMAT,
                     "Fio's short notification carries no transaction id: choose \"Fio banka - příjem na účtu\" under"
                             + " Informace v oznámení in the notification's settings");
         }
-        if (NOT_A_PAYMENT_SUBJECTS.contains(subject)) {
+        if (subject != null && NOT_A_PAYMENT_SUBJECTS.contains(subject)) {
             throw new Unparsed(Unparsed.Reason.NOT_A_PAYMENT, "Fio's notice, not a payment: " + subject);
         }
         Template template = null;
         Direction stated = null;
         for (Template candidate : List.of(CZECH, ENGLISH)) {
-            if (candidate.subjects().containsKey(subject)) {
+            if (subject != null && candidate.subjects().containsKey(subject)) {
                 template = candidate;
                 stated = candidate.subjects().get(subject);
             }
