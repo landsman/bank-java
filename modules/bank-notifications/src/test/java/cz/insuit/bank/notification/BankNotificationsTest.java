@@ -241,6 +241,15 @@ class BankNotificationsTest {
                         .messageId());
     }
 
+    @Test
+    void doesNotTrustASubjectTheSignatureLeavesOut() {
+        // Refused for Air Bank too, which reads only the body: for Fio, KB, ČSOB, MONETA and Tatra the subject picks
+        // the template.
+        assertThrows(
+                BankNotificationException.Unverified.class,
+                () -> notifications().read(signed("incoming.eml", "Date:To:From")));
+    }
+
     /** As {@link BankNotifications#withDns()}, pins included, but with the test's key published for {@code domain}. */
     private static BankNotifications pinned(String domain) {
         String record = "v=DKIM1; k=rsa; p="
