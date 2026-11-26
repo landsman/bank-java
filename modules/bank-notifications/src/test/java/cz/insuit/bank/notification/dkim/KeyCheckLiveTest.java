@@ -57,22 +57,35 @@ class KeyCheckLiveTest {
         }
     }
 
+    // Each refusal is pinned to its kind and carries the validator's reason. A broken resolver fails every validation,
+    // so the two unsigned zones then go red here instead of passing for the wrong reason.
     @Test
     void refusesABogusAnswer() {
         // A zone kept deliberately broken for testing validators.
-        assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "x", "dnssec-failed.org"));
+        PermFailException refused =
+                assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "x", "dnssec-failed.org"));
+        assertRefusedAs("DNSSEC validation of x._domainkey.dnssec-failed.org failed: ", refused);
     }
 
     @Test
     void stillRefusesCsobSlovakia() {
         // ČSOB SK pins no key, so DNSSEC alone would decide; csob.sk is not signed, so its e-mails stay Unverified.
-        assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "x", "csob.sk"));
+        PermFailException refused =
+                assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "x", "csob.sk"));
+        assertRefusedAs("the answer for x._domainkey.csob.sk is not DNSSEC-secure: ", refused);
     }
 
     @Test
     void refusesAnUnsignedZone() {
         // google.com is not DNSSEC-signed; its DKIM key would come back, unproven.
-        assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "20230601", "google.com"));
+        PermFailException refused =
+                assertThrows(PermFailException.class, () -> dns.getRecords("dns/txt", "20230601", "google.com"));
+        assertRefusedAs("the answer for 20230601._domainkey.google.com is not DNSSEC-secure: ", refused);
+    }
+
+    private static void assertRefusedAs(String prefix, PermFailException refused) {
+        String message = Objects.requireNonNull(refused.getMessage());
+        assertTrue(message.startsWith(prefix) && message.length() > prefix.length(), message);
     }
 
     private static PublicKey publicKey(String record) throws Exception {

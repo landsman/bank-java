@@ -55,11 +55,11 @@ final class DnssecKeyLookup implements PublicKeyRecordRetriever {
         int rcode = response.getRcode();
         if (rcode == Rcode.SERVFAIL) {
             // ValidatingResolver answers SERVFAIL for a bogus answer as well as for a broken upstream; neither is a
-            // key.
-            throw new PermFailException("DNSSEC validation of " + name + " failed");
+            // key. Its reason tells the two apart.
+            throw new PermFailException("DNSSEC validation of " + name + " failed" + reason(response));
         }
         if (!response.getHeader().getFlag(Flags.AD)) {
-            throw new PermFailException("the answer for " + name + " is not DNSSEC-secure");
+            throw new PermFailException("the answer for " + name + " is not DNSSEC-secure" + reason(response));
         }
         if (rcode != Rcode.NOERROR) {
             throw new PermFailException("no key at " + name + ": " + Rcode.string(rcode));
@@ -71,6 +71,16 @@ final class DnssecKeyLookup implements PublicKeyRecordRetriever {
             }
         }
         return records;
+    }
+
+    /** ValidatingResolver's own explanation, a TXT record of a private class in the additional section, or nothing. */
+    private static String reason(Message response) {
+        for (Record record : response.getSection(Section.ADDITIONAL)) {
+            if (record.getDClass() == ValidatingResolver.VALIDATION_REASON_QCLASS && record instanceof TXTRecord txt) {
+                return ": " + String.join("", txt.getStrings());
+            }
+        }
+        return "";
     }
 
     /** Sends the queries through the machine's own resolvers and validates every answer here. */
