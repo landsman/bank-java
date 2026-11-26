@@ -58,7 +58,8 @@ class KeyCheckLiveTest {
     }
 
     // Each refusal is pinned to its kind and carries the validator's reason. A broken resolver fails every validation,
-    // so the two unsigned zones then go red here instead of passing for the wrong reason.
+    // so the two unsigned zones then go red here instead of passing for the wrong reason. The reason is a record that
+    // dnsjava's ValidatingResolver adds to its answer, so a dnsjava upgrade that stops adding it turns these red too.
     @Test
     void refusesABogusAnswer() {
         // A zone kept deliberately broken for testing validators.
