@@ -23,9 +23,12 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
-      # Temporary: which resolver the runner hands the lookup.
-      - run: cat /etc/resolv.conf; resolvectl status || true; dig +dnssec +cd TXT 20160512._domainkey.fio.cz || true
       - run: make check-keys
+      # Temporary: what systemd-resolved did during the check, then what each resolver hands back, warm.
+      - if: always()
+        run: sudo journalctl -u systemd-resolved --no-pager | tail -60; resolvectl status | head -12; resolvectl statistics
+      - if: always()
+        run: KEYS_DIAG=1 ./gradlew :modules:bank-notifications:checkKeys --tests '*KeyCheckDiagnosticsLiveTest'
       # One open issue at a time, however many days it keeps failing.
       - if: failure()
         env:

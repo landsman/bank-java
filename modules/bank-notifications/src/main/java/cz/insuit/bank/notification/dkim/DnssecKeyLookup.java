@@ -56,10 +56,11 @@ final class DnssecKeyLookup implements PublicKeyRecordRetriever {
         if (rcode == Rcode.SERVFAIL) {
             // ValidatingResolver answers SERVFAIL for a bogus answer as well as for a broken upstream; neither is a
             // key.
-            throw new PermFailException("DNSSEC validation of " + name + " failed");
+            throw new PermFailException("DNSSEC validation of " + name + " failed; DIAG additional="
+                    + response.getSection(Section.ADDITIONAL));
         }
         if (!response.getHeader().getFlag(Flags.AD)) {
-            throw new PermFailException("the answer for " + name + " is not DNSSEC-secure");
+            throw new PermFailException("the answer for " + name + " is not DNSSEC-secure; DIAG response=" + response);
         }
         if (rcode != Rcode.NOERROR) {
             throw new PermFailException("no key at " + name + ": " + Rcode.string(rcode));

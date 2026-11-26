@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.ExtendedResolver;
@@ -26,6 +27,7 @@ import org.xbill.DNS.dnssec.ValidatingResolver;
 
 /** Temporary: prints what the runner's resolvers hand back, to find why the key check fails there. */
 @Tag("live")
+@EnabledIfEnvironmentVariable(named = "KEYS_DIAG", matches = "1")
 class KeyCheckDiagnosticsLiveTest {
 
     private static final String[][] QUERIES = {
