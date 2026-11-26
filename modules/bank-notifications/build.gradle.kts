@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     `java-library`
 }
@@ -93,11 +95,6 @@ val checkKeys =
         classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform { includeTags("live") }
         outputs.upToDateWhen { false }
-        testLogging {
-            events("failed", "passed")
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-            showCauses = true
-            showStackTraces = true
-            showStandardStreams = true
-        }
+        // The message says why a key was refused; the default format prints only the exception's class.
+        testLogging { exceptionFormat = TestExceptionFormat.FULL }
     }
