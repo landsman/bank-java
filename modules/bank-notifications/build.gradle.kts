@@ -93,4 +93,11 @@ val checkKeys =
         classpath = sourceSets.test.get().runtimeClasspath
         useJUnitPlatform { includeTags("live") }
         outputs.upToDateWhen { false }
+        testLogging {
+            events("failed", "passed")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showCauses = true
+            showStackTraces = true
+            showStandardStreams = true
+        }
     }

@@ -23,6 +23,8 @@ jobs:
           distribution: temurin
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
+      # Temporary: which resolver the runner hands the lookup.
+      - run: cat /etc/resolv.conf; resolvectl status || true; dig +dnssec +cd TXT 20160512._domainkey.fio.cz || true
       - run: make check-keys
       # One open issue at a time, however many days it keeps failing.
       - if: failure()
