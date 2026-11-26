@@ -2,13 +2,12 @@
 
 A working document: what is still unknown and what this library does next.
 
-## Current state (2026-11-25)
+## Current state (2026-11-26)
 
-- **Released `0.1.3`** on 2026-11-25 to GitHub Packages
-  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.3)): the banks known from public samples read
-  through any DNSSEC-secure key of their domain, Air Bank's daily balance and Fio's notice of new terms told apart
-  from a changed template; CI builds on Java 21 and 25, and a tag CI builds on Java 21 and 25, and a tag
-  `vX.Y.Z` publishes the next one through `release.yml`.
+- **Released `0.1.4`** on 2026-11-26 to GitHub Packages
+  ([release](https://github.com/landsman/bank-java/releases/tag/v0.1.4)): Komerční banka's KB+ incoming payment read, Česká
+  spořitelna's HTML e-mail read from public samples, a signature that leaves `Subject` out refused, and a message up
+  to 256 KiB verified; CI builds on Java 21 and 25, and a tag `vX.Y.Z` publishes the next one through `release.yml`.
 - **Reads Air Bank**: incoming and outgoing transfers with their symbols, message and the balance after them, from
   three real e-mails of a personal account
   ([air-bank.md](../banks/cz/airbank/README.md)).
